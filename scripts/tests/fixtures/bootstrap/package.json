@@ -1,0 +1,8 @@
+{
+  "name": "governance-bootstrap-fixture",
+  "private": true,
+  "dependencies": {
+    "react": "latest",
+    "vite": "latest"
+  }
+}

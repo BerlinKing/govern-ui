@@ -1,0 +1,11 @@
+:root {
+  --color-primary: #176d5a;
+  --color-surface: #ffffff;
+  --color-text: #20211f;
+  --space-control: 8px;
+}
+
+.dark {
+  --color-surface: #252825;
+  --color-text: #f1f0ea;
+}

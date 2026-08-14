@@ -1,0 +1,10 @@
+.page {
+  color: #242824;
+  background: #f7f6f1;
+  padding: 24px;
+}
+
+.page button {
+  border-radius: 8px;
+  transition: transform 180ms ease-out;
+}

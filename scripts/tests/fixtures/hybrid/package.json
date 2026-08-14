@@ -1,0 +1,8 @@
+{
+  "name": "governance-hybrid-fixture",
+  "private": true,
+  "dependencies": {
+    "react": "latest",
+    "tailwindcss": "latest"
+  }
+}

@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Check syntax
+        run: |
+          for file in scripts/*.mjs scripts/lib/*.mjs scripts/tests/*.mjs; do
+            node --check "$file"
+          done
+      - name: Run fixture suite
+        run: node scripts/tests/run-tests.mjs

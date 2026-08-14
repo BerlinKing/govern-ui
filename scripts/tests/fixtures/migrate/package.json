@@ -1,0 +1,8 @@
+{
+  "name": "governance-migrate-fixture",
+  "private": true,
+  "dependencies": {
+    "react": "latest",
+    "tailwindcss": "latest"
+  }
+}
