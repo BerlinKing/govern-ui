@@ -14,6 +14,7 @@ const fixtures = path.join(here, "fixtures");
 const bootstrapPath = path.join(fixtures, "bootstrap");
 const migratePath = path.join(fixtures, "migrate");
 const hybridPath = path.join(fixtures, "hybrid");
+const precisionPath = path.join(fixtures, "precision");
 
 async function fileSnapshot(root) {
   const output = [];
@@ -34,16 +35,27 @@ const before = await fileSnapshot(fixtures);
 const bootstrap = await auditRepository(bootstrapPath);
 const migrate = await auditRepository(migratePath);
 const hybrid = await auditRepository(hybridPath);
+const precision = await auditRepository(precisionPath);
 const after = await fileSnapshot(fixtures);
 
 assert.deepEqual(after, before, "audit must not modify target repositories");
 assert.equal(bootstrap.recommendedLane, "Bootstrap");
 assert.equal(migrate.recommendedLane, "Migrate");
 assert.equal(hybrid.recommendedLane, "Hybrid");
+assert.equal(precision.recommendedLane, "Hybrid");
 assert.ok(migrate.conflicts.some((item) => item.type === "semantic-conflict"));
 assert.ok(migrate.conflicts.some((item) => item.type === "owner-conflict"));
 assert.ok(hybrid.relationships.some((item) => item.type === "adapter"));
 assert.ok(!hybrid.conflicts.some((item) => item.type === "owner-conflict"));
+assert.ok(precision.scan.excludedScopeEntries.some((item) => item === "docs"));
+assert.ok(precision.scan.excludedScopeEntries.some((item) => item === "tests"));
+assert.ok(!precision.tokenDefinitions.some((item) => item.normalizedName === "method"));
+assert.ok(!precision.conflicts.some((item) => /(?:from|to)/i.test(item.title)));
+assert.ok(precision.tokenOwners.some((item) => item.file === "apps/canvas/src/index.css" && item.substantial));
+assert.ok(precision.tokenDefinitions.filter((item) => item.file === "apps/canvas/src/index.css").every((item) => item.selector === ":root"));
+assert.ok(!precision.componentCandidates.some((item) => item.file.endsWith("RenameProjectDialog.tsx")));
+assert.equal(precision.componentCandidates.find((item) => item.file === "apps/canvas/src/components/ui/Dialog.tsx")?.role, "adapter");
+assert.deepEqual(precision.duplicatedPrimitives.map((item) => item.primitive), ["toast"]);
 
 const migrateRepeat = await auditRepository(migratePath);
 assert.equal(migrate.reportId, migrateRepeat.reportId, "same source must produce the same report ID");
@@ -70,6 +82,13 @@ try {
   const html = await readFile(files.html, "utf8");
   assert.ok(html.includes("Export decision draft"));
   assert.ok(html.includes("token-decisions.json"));
+  assert.ok(html.includes("UI library blueprint"));
+  assert.ok(html.includes("Dynamic contracts"));
+  assert.ok(html.includes("conflict-search"));
+  assert.ok(html.includes("conflict-progress-text"));
+  assert.ok(html.includes("not-conflict"));
+  assert.ok(html.includes("unreviewed groups were omitted"));
+  assert.ok(!html.includes('decision: selected ? selected.value : "defer"'));
   assert.ok(html.includes("@media (max-width: 720px)"));
   assert.ok(!html.includes("{{REPORT_JSON}}"));
   assert.ok(!/<script\s+[^>]*src=/i.test(html), "HTML report must not use remote scripts");
@@ -82,3 +101,4 @@ process.stdout.write(`Passed GovernUI Lite tests\n`);
 process.stdout.write(`Bootstrap findings: ${bootstrap.findings.length}\n`);
 process.stdout.write(`Migrate findings: ${migrate.findings.length}\n`);
 process.stdout.write(`Hybrid findings: ${hybrid.findings.length}\n`);
+process.stdout.write(`Precision findings: ${precision.findings.length}\n`);

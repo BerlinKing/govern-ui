@@ -1,0 +1,8 @@
+@layer base {
+  :root {
+    --color-primary: #176d5a;
+    --color-surface: #ffffff;
+    --color-text: #20211f;
+    --space-control: 8px;
+  }
+}

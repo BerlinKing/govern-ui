@@ -54,6 +54,7 @@
     }
     button:hover { background: var(--accent-strong); }
     button:active { transform: scale(0.98); }
+    button:disabled { cursor: not-allowed; opacity: 0.48; transform: none; }
     button.secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
     button.secondary:hover { background: var(--surface-muted); }
     input[type="search"], input[type="text"], select, textarea {
@@ -135,6 +136,26 @@
     .decision-fields { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 10px; }
 
     .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 10px; margin-bottom: 12px; }
+    .review-toolbar { grid-template-columns: minmax(220px, 1fr) 190px 190px; }
+    .review-meta { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 10px 0 12px; }
+    .pagination { display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 12px; }
+    .pagination button { min-width: 96px; }
+    .progress { height: 8px; overflow: hidden; border-radius: 999px; background: var(--surface-muted); }
+    .progress > span { display: block; width: 0; height: 100%; background: var(--accent); transition: width 160ms ease-out; }
+
+    .blueprint-stack { display: grid; gap: 12px; }
+    .blueprint-layer { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: start; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .blueprint-layer h3 { margin-bottom: 6px; }
+    .blueprint-items { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .blueprint-item { min-width: 0; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--page); }
+    .blueprint-item strong { display: block; overflow-wrap: anywhere; }
+    .blueprint-item code { display: block; margin-top: 6px; color: var(--accent-strong); font-size: 12px; }
+    .blueprint-item.is-missing { border-style: dashed; color: var(--text-muted); }
+    .contract-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .contract { padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+    .contract dl { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px 12px; margin: 14px 0 0; }
+    .contract dt { color: var(--text-muted); font-size: 13px; }
+    .contract dd { margin: 0; overflow-wrap: anywhere; }
     .findings { display: grid; gap: 8px; }
     .finding { display: grid; grid-template-columns: 90px minmax(170px, 0.7fr) minmax(0, 1.6fr); gap: 12px; align-items: start; padding: 12px; box-shadow: none; }
     .finding.hidden { display: none; }
@@ -155,11 +176,14 @@
     @media (max-width: 720px) {
       .shell { padding: 18px 14px; }
       .hero { grid-template-columns: 1fr; align-items: start; }
-      .stats, .grid, .choice-grid, .decision-fields, .toolbar { grid-template-columns: 1fr; }
+      .stats, .grid, .choice-grid, .decision-fields, .toolbar, .blueprint-layer, .blueprint-items, .contract-grid { grid-template-columns: 1fr; }
       .token-row { grid-template-columns: 38px minmax(0, 1fr); }
       .token-row > :nth-child(n + 3) { grid-column: 2; }
       .finding { grid-template-columns: 1fr; }
       .conflict-head, .section-heading { display: grid; }
+      .review-meta { align-items: stretch; display: grid; }
+      .pagination { justify-content: stretch; }
+      .pagination button { flex: 1; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
@@ -213,6 +237,7 @@
       <nav aria-label="Report sections">
         <a href="#overview">Overview</a>
         <a href="#owners">Owners</a>
+        <a href="#blueprint">UI blueprint</a>
         <a href="#conflicts">Token decisions</a>
         <a href="#findings">Findings</a>
         <a href="#coverage">Coverage</a>
@@ -235,12 +260,39 @@
           <div class="grid" id="owner-grid"></div>
         </section>
 
+        <section id="blueprint">
+          <div class="section-heading">
+            <div><div class="eyebrow">Draft architecture</div><h2>UI library blueprint</h2></div>
+            <p id="blueprint-disclaimer"></p>
+          </div>
+          <div class="panel">
+            <h3>Static system</h3>
+            <p class="muted">Foundation → atoms → molecules → product components. Detected source candidates are shown; dashed items remain missing or unconfirmed.</p>
+            <div class="blueprint-stack" id="blueprint-static"></div>
+          </div>
+          <div class="panel">
+            <h3>Dynamic contracts</h3>
+            <p class="muted">Behavior is defined separately from static appearance. Every line below remains unverified until runtime inspection.</p>
+            <div class="contract-grid" id="blueprint-dynamic"></div>
+          </div>
+        </section>
+
         <section id="conflicts">
           <div class="section-heading">
             <div><div class="eyebrow">Human review required</div><h2>Token decisions</h2></div>
             <p>Compare values, ownership and scope before choosing. Equal values do not prove equal semantics.</p>
           </div>
+          <div class="toolbar review-toolbar">
+            <label>Search decisions<input id="conflict-search" type="search" placeholder="Token, owner, scope, or reason"></label>
+            <label>Relationship<select id="conflict-type"><option value="all">All relationships</option></select></label>
+            <label>Review status<select id="conflict-status"><option value="all">All</option><option value="unreviewed">Unreviewed</option><option value="reviewed">Reviewed</option></select></label>
+          </div>
+          <div class="review-meta">
+            <div><p id="conflict-progress-text" aria-live="polite"></p><div class="progress" aria-hidden="true"><span id="conflict-progress-bar"></span></div></div>
+            <p class="muted" id="conflict-page-status"></p>
+          </div>
           <div class="conflicts" id="conflict-list"></div>
+          <div class="pagination"><button id="previous-conflicts" class="secondary" type="button">Previous</button><button id="next-conflicts" class="secondary" type="button">Next</button></div>
         </section>
 
         <section id="findings">
@@ -263,6 +315,7 @@
           </div>
           <div class="grid">
             <div class="panel"><h3>Unassessed</h3><ul class="list" id="unassessed"></ul></div>
+            <div class="panel"><h3>Excluded by default</h3><p class="muted" id="excluded-summary"></p><ul class="list" id="excluded-scopes"></ul></div>
             <div class="panel"><h3>Next actions</h3><ul class="list" id="next-actions"></ul></div>
           </div>
         </section>
@@ -285,26 +338,28 @@
         ["alias", "Create alias"],
         ["migrate", "Migrate"],
         ["exception", "Register exception"],
+        ["not-conflict", "Not a conflict"],
         ["defer", "Defer"],
       ];
-      const storageKey = `design-governance:${report.repoId}:${report.reportId}`;
+      const storageKey = `govern-ui:${report.repoId}:${report.reportId}`;
 
       const e = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
       const setHtml = (id, html) => { document.getElementById(id).innerHTML = html; };
       const count = (items, selector, value) => items.filter((item) => selector(item) === value).length;
       const safeHex = (value) => /^#[0-9a-f]{3,8}$/i.test(String(value).trim()) ? String(value).trim() : null;
-      const persisted = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch { return {}; } })();
+      let decisionState = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch { return {}; } })();
+      const conflictById = new Map(report.conflicts.map((item) => [item.id, item]));
 
-      document.getElementById("summary").textContent = `${report.scan.scannedFiles} files scanned. ${report.conflicts.length} Token groups need review. Runtime behavior remains unverified.`;
+      document.getElementById("summary").textContent = `${report.scan.scannedFiles} files scanned inside the default product-source scope. ${report.conflicts.length} Token groups need review. Runtime behavior remains unverified.`;
       document.getElementById("lane").textContent = report.recommendedLane;
-      document.getElementById("lane-confidence").textContent = `${Math.round(report.maturity.confidence * 100)}% confidence · ${report.styleSystems.join(" · ") || "No style system detected"}`;
+      document.getElementById("lane-confidence").textContent = `${Math.round(report.maturity.confidence * 100)}% heuristic evidence score · ${report.styleSystems.join(" · ") || "No style system detected"}`;
       setHtml("lane-evidence", report.maturity.evidence.map((item) => `<li>${e(item)}</li>`).join(""));
 
       const stats = [
         [report.scan.scannedFiles, "Files scanned"],
         [report.tokenDefinitions.length, "Token definitions"],
         [report.tokenOwners.length, "Token owners"],
-        [report.componentCandidates.length, "Component candidates"],
+        [report.componentOwners.reduce((sum, owner) => sum + owner.componentCount, 0) + report.componentAdapters.length, "Component candidates"],
         [report.conflicts.length, "Decision groups"],
         [count(report.findings, (item) => item.severity, "high"), "High findings"],
       ];
@@ -314,15 +369,48 @@
         <article class="owner">
           <span class="pill">Token owner candidate</span>
           <code>${e(owner.file)}</code>
-          <div class="meta"><span class="pill">${e(owner.definitionCount)} definitions</span><span class="pill">${e(owner.sourceTypes.join(", "))}</span></div>
+          <div class="meta"><span class="pill">${e(owner.definitionCount)} definitions</span><span class="pill">${e(owner.sourceTypes.join(", "))}</span><span class="pill">${e(owner.scope)}</span></div>
         </article>`);
       const componentOwnerCards = report.componentOwners.map((owner) => `
         <article class="owner">
           <span class="pill">Component owner candidate</span>
           <code>${e(owner.directory)}</code>
-          <div class="meta"><span class="pill">${e(owner.componentCount)} components</span><span class="pill">${e(owner.primitives.join(", "))}</span></div>
+          <div class="meta"><span class="pill">${e(owner.componentCount)} components</span><span class="pill">${e(owner.primitives.join(", "))}</span><span class="pill">${e(owner.scope)}</span></div>
         </article>`);
-      setHtml("owner-grid", [...tokenOwnerCards, ...componentOwnerCards].join("") || '<div class="empty">No shared owner candidate was detected.</div>');
+      const componentAdapterCards = report.componentAdapters.map((item) => `
+        <article class="owner">
+          <span class="pill low">Component adapter</span>
+          <code>${e(item.file)}</code>
+          <div class="meta"><span class="pill">${e(item.primitive)}</span><span class="pill">${e(item.roleReason)}</span></div>
+        </article>`);
+      setHtml("owner-grid", [...tokenOwnerCards, ...componentOwnerCards, ...componentAdapterCards].join("") || '<div class="empty">No source owner candidate was detected.</div>');
+
+      document.getElementById("blueprint-disclaimer").textContent = report.componentBlueprint.disclaimer;
+      setHtml("blueprint-static", report.componentBlueprint.staticLayers.map((layer) => `
+        <article class="blueprint-layer">
+          <div><h3>${e(layer.label)}</h3><p class="muted">${e(layer.purpose)}</p></div>
+          <div class="blueprint-items">${layer.items.map((item) => {
+            const detected = item.status !== "not-detected";
+            const files = [...(item.owners || []), ...(item.adapters || [])];
+            const countLabel = Number.isFinite(item.count) ? `${item.count} definitions` : item.status;
+            return `<div class="blueprint-item ${detected ? "" : "is-missing"}"><strong>${e(item.primitive)}</strong><span class="pill ${detected ? "low" : ""}">${e(countLabel)}</span>${files.slice(0, 2).map((file) => `<code>${e(file)}</code>`).join("")}</div>`;
+          }).join("")}</div>
+        </article>`).join(""));
+      setHtml("blueprint-dynamic", report.componentBlueprint.dynamicContracts.map((contract) => `
+        <article class="contract">
+          <div class="conflict-head"><h3>${e(contract.surface)}</h3><span class="pill medium">runtime unverified</span></div>
+          <p class="muted">${e(contract.appliesTo.join(" · "))}</p>
+          <dl>
+            <dt>States</dt><dd>${e(contract.states.join(" → "))}</dd>
+            <dt>Portal</dt><dd>${e(contract.portal)}</dd>
+            <dt>Layer</dt><dd>${e(contract.layer)}</dd>
+            <dt>Keyboard</dt><dd>${e(contract.keyboard)}</dd>
+            <dt>Focus</dt><dd>${e(contract.focus)}</dd>
+            <dt>Dismissal</dt><dd>${e(contract.dismissal)}</dd>
+            <dt>Scroll</dt><dd>${e(contract.scroll)}</dd>
+            <dt>Motion</dt><dd>${e(contract.motion)}</dd>
+          </dl>
+        </article>`).join(""));
 
       function tokenRow(definition) {
         const hex = safeHex(definition.value);
@@ -337,7 +425,7 @@
 
       function decisionCard(conflict) {
         const conflictDefinitions = conflict.definitionIds.map((id) => definitions.get(id)).filter(Boolean);
-        const state = persisted[conflict.id] || {};
+        const state = decisionState[conflict.id] || {};
         const ownerOptions = conflict.ownerIds.map((id) => owners.get(id)).filter(Boolean);
         return `<article class="conflict" data-conflict-id="${e(conflict.id)}">
           <div class="conflict-head">
@@ -356,7 +444,44 @@
           </fieldset>
         </article>`;
       }
-      setHtml("conflict-list", report.conflicts.map(decisionCard).join("") || '<div class="empty">No review-required Token conflict was detected. Confirm source coverage before treating this as proof of consistency.</div>');
+
+      const conflictPriority = { "owner-conflict": 0, "semantic-conflict": 1, duplicate: 2 };
+      const orderedConflicts = [...report.conflicts].sort((left, right) => (conflictPriority[left.type] ?? 9) - (conflictPriority[right.type] ?? 9) || right.confidence - left.confidence || (left.title || "").localeCompare(right.title || ""));
+      const conflictPageSize = matchMedia("(max-width: 720px)").matches ? 12 : 24;
+      let conflictPage = 0;
+      const conflictTypes = [...new Set(orderedConflicts.map((item) => item.type))].sort((left, right) => (conflictPriority[left] ?? 9) - (conflictPriority[right] ?? 9) || left.localeCompare(right));
+      document.getElementById("conflict-type").insertAdjacentHTML("beforeend", conflictTypes.map((type) => `<option value="${e(type)}">${e(type)}</option>`).join(""));
+
+      function filteredConflicts() {
+        const search = document.getElementById("conflict-search").value.trim().toLowerCase();
+        const type = document.getElementById("conflict-type").value;
+        const status = document.getElementById("conflict-status").value;
+        return orderedConflicts.filter((conflict) => {
+          const conflictDefinitions = conflict.definitionIds.map((id) => definitions.get(id)).filter(Boolean);
+          const searchable = `${conflict.type} ${conflict.title} ${conflict.reason} ${conflictDefinitions.map((item) => `${item.name} ${item.value} ${item.file} ${item.selector}`).join(" ")}`.toLowerCase();
+          const reviewed = Boolean(decisionState[conflict.id]?.decision);
+          return (!search || searchable.includes(search)) && (type === "all" || conflict.type === type) && (status === "all" || (status === "reviewed" ? reviewed : !reviewed));
+        });
+      }
+
+      function updateConflictProgress() {
+        const reviewedCount = report.conflicts.filter((item) => decisionState[item.id]?.decision).length;
+        const percent = report.conflicts.length ? Math.round((reviewedCount / report.conflicts.length) * 100) : 100;
+        document.getElementById("conflict-progress-text").textContent = `${reviewedCount} of ${report.conflicts.length} groups explicitly reviewed · ${percent}%`;
+        document.getElementById("conflict-progress-bar").style.width = `${percent}%`;
+      }
+
+      function renderConflicts() {
+        const filtered = filteredConflicts();
+        const pageCount = Math.max(1, Math.ceil(filtered.length / conflictPageSize));
+        conflictPage = Math.min(conflictPage, pageCount - 1);
+        const shown = filtered.slice(conflictPage * conflictPageSize, (conflictPage + 1) * conflictPageSize);
+        setHtml("conflict-list", shown.map(decisionCard).join("") || '<div class="empty">No decision group matches the current filters. An empty list is not proof that the repository is conflict-free.</div>');
+        document.getElementById("conflict-page-status").textContent = filtered.length ? `Page ${conflictPage + 1} of ${pageCount} · ${filtered.length} matching groups` : "0 matching groups";
+        document.getElementById("previous-conflicts").disabled = conflictPage === 0;
+        document.getElementById("next-conflicts").disabled = conflictPage >= pageCount - 1 || filtered.length === 0;
+        updateConflictProgress();
+      }
 
       function findingRow(finding) {
         const searchable = `${finding.severity} ${finding.ruleId} ${finding.file} ${finding.evidence}`.toLowerCase();
@@ -371,43 +496,57 @@
       const findingPageSize = matchMedia("(max-width: 720px)").matches ? 80 : 200;
       let findingLimit = findingPageSize;
       document.getElementById("load-more-findings").textContent = `Load ${findingPageSize} more findings`;
-      if (report.findings.length > visibleFindings.length) {
+      if (report.scan.totalFindings > visibleFindings.length) {
         document.getElementById("finding-list").insertAdjacentHTML("beforebegin", `<div class="notice" role="note">Showing the 2,500 highest-priority findings in HTML. The complete evidence set remains in audit.json.</div>`);
       }
       setHtml("unassessed", report.scan.unassessedAreas.map((item) => `<li>${e(item)}</li>`).join(""));
+      const excludedCount = report.scan.skippedByReason?.["scope-excluded"] || 0;
+      document.getElementById("excluded-summary").textContent = `${excludedCount} source entries were excluded to protect precision. The list is capped in HTML; audit.json contains the recorded scope entries.`;
+      setHtml("excluded-scopes", report.scan.excludedScopeEntries.slice(0, 30).map((item) => `<li><code>${e(item)}</code></li>`).join("") || "<li>No default scope exclusion was recorded.</li>");
       setHtml("next-actions", report.nextActions.map((item) => `<li>${e(item)}</li>`).join(""));
       document.getElementById("footer").textContent = `Report ${report.reportId} · Ruleset ${report.rulesetVersion} · Generated ${report.generatedAt}`;
 
       function collectDecisions() {
-        const decisions = [];
-        document.querySelectorAll("[data-conflict-id]").forEach((card) => {
-          const conflictId = card.dataset.conflictId;
-          const selected = card.querySelector('input[type="radio"]:checked');
-          decisions.push({
-            conflictId,
-            decision: selected ? selected.value : "defer",
-            canonicalOwnerId: card.querySelector('[data-field="canonicalOwnerId"]').value || null,
-            note: card.querySelector('[data-field="note"]').value.trim(),
-          });
-        });
-        return decisions;
+        return Object.values(decisionState)
+          .filter((item) => item?.decision && conflictById.has(item.conflictId))
+          .sort((left, right) => left.conflictId.localeCompare(right.conflictId))
+          .map((item) => ({ conflictId: item.conflictId, decision: item.decision, canonicalOwnerId: item.canonicalOwnerId || null, note: item.note || "" }));
       }
 
-      function saveDraft() {
-        const keyed = Object.fromEntries(collectDecisions().map((item) => [item.conflictId, item]));
-        localStorage.setItem(storageKey, JSON.stringify(keyed));
+      function captureCard(card) {
+        const conflictId = card.dataset.conflictId;
+        const selected = card.querySelector('input[type="radio"]:checked');
+        decisionState[conflictId] = {
+          conflictId,
+          decision: selected ? selected.value : null,
+          canonicalOwnerId: card.querySelector('[data-field="canonicalOwnerId"]').value || null,
+          note: card.querySelector('[data-field="note"]').value.trim(),
+        };
+        localStorage.setItem(storageKey, JSON.stringify(decisionState));
       }
-      document.getElementById("conflict-list").addEventListener("input", saveDraft);
+      document.getElementById("conflict-list").addEventListener("input", (event) => {
+        const card = event.target.closest("[data-conflict-id]");
+        if (!card) return;
+        captureCard(card);
+        updateConflictProgress();
+      });
+
+      ["conflict-search", "conflict-type", "conflict-status"].forEach((id) => {
+        document.getElementById(id).addEventListener(id === "conflict-search" ? "input" : "change", () => { conflictPage = 0; renderConflicts(); });
+      });
+      document.getElementById("previous-conflicts").addEventListener("click", () => { conflictPage = Math.max(0, conflictPage - 1); renderConflicts(); document.getElementById("conflicts").scrollIntoView(); });
+      document.getElementById("next-conflicts").addEventListener("click", () => { conflictPage += 1; renderConflicts(); document.getElementById("conflicts").scrollIntoView(); });
+      renderConflicts();
 
       document.getElementById("export-decisions").addEventListener("click", () => {
-        saveDraft();
+        const decisions = collectDecisions();
         const value = {
           schemaVersion: 1,
           reportId: report.reportId,
           repoId: report.repoId,
           status: "draft",
           createdAt: new Date().toISOString(),
-          decisions: collectDecisions(),
+          decisions,
         };
         const blob = new Blob([`${JSON.stringify(value, null, 2)}\n`], { type: "application/json" });
         const link = document.createElement("a");
@@ -416,7 +555,7 @@
         document.body.append(link);
         link.click();
         link.remove();
-        document.getElementById("export-status").textContent = "Decision draft prepared as token-decisions.json";
+        document.getElementById("export-status").textContent = `${decisions.length} explicit decisions exported; unreviewed groups were omitted`;
         setTimeout(() => URL.revokeObjectURL(link.href), 1000);
       });
 
@@ -428,7 +567,7 @@
         try {
           const value = JSON.parse(await file.text());
           if (value.schemaVersion !== 1 || value.reportId !== report.reportId || value.repoId !== report.repoId || !Array.isArray(value.decisions)) throw new Error("This draft does not match the current report");
-          const keyed = Object.fromEntries(value.decisions.map((item) => [item.conflictId, item]));
+          const keyed = Object.fromEntries(value.decisions.filter((item) => item.decision && conflictById.has(item.conflictId)).map((item) => [item.conflictId, item]));
           localStorage.setItem(storageKey, JSON.stringify(keyed));
           location.reload();
         } catch (error) {

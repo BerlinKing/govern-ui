@@ -11,7 +11,7 @@ import {
 
 const STYLE_EXTENSIONS = new Set([".css", ".scss", ".sass", ".less", ".pcss"]);
 const SCRIPT_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".vue", ".svelte", ".astro"]);
-const TOKEN_PATH = /(?:^|\/)(?:tokens?|theme|themes|design-system|styles?)(?:[./_-]|\/)|(?:tokens?|theme)\.(?:css|scss|sass|less|pcss|js|jsx|ts|tsx|mjs|cjs|json)$/i;
+const TOKEN_PATH = /(?:^|\/)(?:(?:design-)?tokens?|themes?)(?:\/|(?=\.(?:css|scss|sass|less|pcss|js|jsx|ts|tsx|mjs|cjs|json)$))/i;
 const TAILWIND_PATH = /(?:^|\/)tailwind\.config\.(?:js|ts|mjs|cjs)$/i;
 const PRIMITIVES = ["button", "iconbutton", "input", "textarea", "select", "checkbox", "radio", "switch", "dialog", "sheet", "popover", "dropdown", "toast", "tooltip", "formfield"];
 const OVERLAYS = new Set(["dialog", "sheet", "popover", "dropdown", "toast", "tooltip"]);
@@ -20,10 +20,11 @@ function approximateSelector(content, index) {
   const open = content.lastIndexOf("{", index);
   if (open < 0) return "unknown";
   const previousClose = content.lastIndexOf("}", open);
-  return normalizeEvidence(content.slice(previousClose + 1, open)).slice(-160) || "unknown";
+  const candidate = content.slice(previousClose + 1, open).split("{").at(-1);
+  return normalizeEvidence(candidate).slice(-160) || "unknown";
 }
 
-function makeDefinition({ name, value, sourceType, file, line, selector = "unknown" }) {
+function makeDefinition({ name, value, sourceType, file, line, selector = "unknown", role = "canonical" }) {
   const normalizedName = normalizedTokenName(name);
   const normalizedValue = normalizedTokenValue(value);
   return {
@@ -34,6 +35,7 @@ function makeDefinition({ name, value, sourceType, file, line, selector = "unkno
     normalizedValue,
     kind: inferTokenKind(normalizedName, normalizedValue),
     sourceType,
+    role,
     file,
     line,
     selector,
@@ -115,12 +117,17 @@ function scanScriptDefinitions(content, file, isTailwind) {
     const rawValue = match[3].trim();
     if (!/(?:["'`].*["'`]|^-?\d+(?:\.\d+)?$|var\(|#(?:[0-9a-f]{3,8})\b|rgba?\(|hsla?\(|oklch\()/i.test(rawValue)) continue;
     if (/^(?:name|version|private|scripts|dependencies|devDependencies|peerDependencies)$/.test(match[2])) continue;
+    const visualName = /(?:color|background|foreground|surface|text|border|fill|stroke|accent|brand|primary|secondary|font|type|lineheight|letter|radius|rounded|shadow|elevation|duration|easing|motion|transition|spring|layer|zindex|space|spacing|gap|margin|padding|inset|width|height|size)/i.test(match[2]);
+    const visualValue = /(?:var\(|#(?:[0-9a-f]{3,8})\b|rgba?\(|hsla?\(|oklch\(|-?\d*\.?\d+(?:px|rem|em|vw|vh|%|ms|s)\b)/i.test(rawValue);
+    if (!isTailwind && !visualName && !visualValue) continue;
+    const role = isTailwind ? (/var\(/i.test(rawValue) ? "adapter" : "local") : "canonical";
     definitions.push(makeDefinition({
       name: match[2],
       value: rawValue.replace(/^["'`]|["'`]$/g, ""),
       sourceType: isTailwind ? "tailwind-config" : "js-theme",
       file,
       line: lineNumberAt(content, match.index),
+      role,
     }));
   }
   return definitions;
@@ -134,7 +141,8 @@ function scanRawValues(content, file, extension, definitionSource) {
       const lineStart = content.lastIndexOf("\n", match.index) + 1;
       const lineEnd = content.indexOf("\n", match.index);
       const lineText = content.slice(lineStart, lineEnd < 0 ? content.length : lineEnd);
-      if (definitionSource && /--[\w-]+\s*:/.test(lineText)) continue;
+      if (/--[\w-]+\s*:/.test(lineText)) continue;
+      if (definitionSource && !STYLE_EXTENSIONS.has(extension)) continue;
       rawValues.push({
         id: `raw-${sha(`${file}:${match.index}:${kind}:${match[0]}`)}`,
         kind,
@@ -161,13 +169,15 @@ function scanRawValues(content, file, extension, definitionSource) {
   return rawValues;
 }
 
-function componentCandidate(relative) {
+function componentCandidate(relative, content) {
   const base = path.basename(relative).replace(/\.(?:[cm]?[jt]sx?|vue|svelte|astro)$/i, "");
   const normalized = base.replace(/[-_.]/g, "").toLowerCase();
-  const primitive = PRIMITIVES.find((value) => normalized === value || normalized.endsWith(value));
+  const primitive = PRIMITIVES.find((value) => normalized === value);
   if (!primitive) return null;
   const directory = path.posix.dirname(relative);
   const shared = /(?:^|\/)(?:components|ui|shared|packages)(?:\/|$)/i.test(relative);
+  const importsSharedPrimitive = new RegExp(`\\b${primitive}\\b[\\s\\S]{0,240}from\\s*["'][^"']*(?:components|/ui)(?:[^"']*)["']`, "i").test(content)
+    || new RegExp(`from\\s*["'][^"']*(?:components|/ui)(?:[^"']*)["'][\\s\\S]{0,240}\\b${primitive}\\b`, "i").test(content);
   return {
     id: `component-${sha(relative)}`,
     name: base,
@@ -176,6 +186,8 @@ function componentCandidate(relative) {
     directory,
     shared,
     overlay: OVERLAYS.has(primitive),
+    role: importsSharedPrimitive ? "adapter" : "owner",
+    roleReason: importsSharedPrimitive ? "Imports a same-named primitive from a shared component package" : "Exact primitive filename",
   };
 }
 
@@ -220,7 +232,7 @@ export async function scanSources(collected) {
     rawValues.push(...scanRawValues(content, file.relative, file.extension, definitionSource));
 
     if (SCRIPT_EXTENSIONS.has(file.extension)) {
-      const candidate = componentCandidate(file.relative);
+      const candidate = componentCandidate(file.relative, content);
       if (candidate) componentCandidates.push(candidate);
       const nativePattern = /<(button|input|textarea|select)\b/g;
       let nativeMatch;

@@ -1,6 +1,6 @@
 import { normalizeEvidence, sha, stableSort } from "./utils.mjs";
 
-export const RULESET_VERSION = "lite-0.1.0";
+export const RULESET_VERSION = "lite-0.2.0";
 export const POLICY_HASH = sha(`govern-ui:${RULESET_VERSION}`, 24);
 
 function findingFactory() {
@@ -30,7 +30,7 @@ export function evaluateRules(scan, classification) {
   const make = findingFactory();
   const findings = [];
   const hasTokenOwner = classification.tokenOwners.length > 0;
-  const sharedPrimitives = new Set(scan.componentCandidates.filter((item) => item.shared).map((item) => item.primitive));
+  const sharedPrimitives = new Set(scan.componentCandidates.filter((item) => item.shared && item.role === "owner").map((item) => item.primitive));
 
   if (!hasTokenOwner) {
     findings.push(make({

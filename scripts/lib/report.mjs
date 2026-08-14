@@ -29,8 +29,9 @@ export function markdownReport(report) {
   const lines = [
     `# GovernUI: ${report.repoProfile.rootName}`,
     "",
-    `- Recommended lane: **${report.recommendedLane}** (${Math.round(report.maturity.confidence * 100)}% confidence)`,
+    `- Recommended lane: **${report.recommendedLane}** (${Math.round(report.maturity.confidence * 100)}% heuristic evidence score)`,
     `- Scanned files: ${report.scan.scannedFiles}`,
+    `- Excluded scope entries: ${report.scan.skippedByReason?.["scope-excluded"] ?? 0}`,
     `- Token definitions: ${report.tokenDefinitions.length}`,
     `- Token owner candidates: ${report.tokenOwners.length}`,
     `- Component owner candidates: ${report.componentOwners.length}`,
@@ -45,10 +46,17 @@ export function markdownReport(report) {
     "",
     ...report.tokenOwners.map((item) => `- Token: \`${item.file}\` — ${item.definitionCount} definitions (${item.sourceTypes.join(", ")})`),
     ...report.componentOwners.map((item) => `- Components: \`${item.directory}\` — ${item.componentCount} candidates (${item.primitives.join(", ")})`),
+    ...report.componentAdapters.map((item) => `- Component adapter: \`${item.file}\` → ${item.primitive}`),
     "",
     "## Review-required Token groups",
     "",
     ...(report.conflicts.length ? report.conflicts.map((item) => `- **${item.type}** \`${item.id}\`: ${item.reason}`) : ["- None detected by the Lite scanner."]),
+    "",
+    "## UI library blueprint",
+    "",
+    `- Status: **${report.componentBlueprint.status}**`,
+    ...report.componentBlueprint.staticLayers.map((layer) => `- ${layer.label}: ${layer.items.filter((item) => item.status !== "not-detected").map((item) => item.primitive).join(", ") || "no source candidate detected"}`),
+    `- Dynamic contracts: ${report.componentBlueprint.dynamicContracts.map((item) => item.surface).join(", ")}`,
     "",
     "## Top hotspots",
     "",
@@ -72,8 +80,8 @@ export function terminalSummary(report) {
   const severity = countBy(report.findings, (item) => item.severity);
   return [
     `GovernUI — ${report.repoProfile.rootName}`,
-    `Lane: ${report.recommendedLane} (${Math.round(report.maturity.confidence * 100)}% confidence)`,
-    `Scanned: ${report.scan.scannedFiles} files; ${report.scan.skippedFiles} skipped`,
+    `Lane: ${report.recommendedLane} (${Math.round(report.maturity.confidence * 100)}% heuristic evidence score)`,
+    `Scanned: ${report.scan.scannedFiles} files; ${report.scan.skippedFiles} source entries skipped`,
     `Tokens: ${report.tokenDefinitions.length} definitions / ${report.tokenOwners.length} owner candidates`,
     `Components: ${report.componentCandidates.length} candidates / ${report.componentOwners.length} owner candidates`,
     `Review groups: ${report.conflicts.length}`,
@@ -82,14 +90,43 @@ export function terminalSummary(report) {
   ].join("\n");
 }
 
+function htmlPresentationReport(report) {
+  const severityOrder = { high: 0, medium: 1, low: 2 };
+  const findings = [...report.findings]
+    .sort((left, right) => (severityOrder[left.severity] - severityOrder[right.severity]) || (right.confidence - left.confidence) || left.file.localeCompare(right.file))
+    .slice(0, 2500);
+  return {
+    schemaVersion: report.schemaVersion,
+    rulesetVersion: report.rulesetVersion,
+    policyHash: report.policyHash,
+    reportId: report.reportId,
+    repoId: report.repoId,
+    generatedAt: report.generatedAt,
+    repoProfile: report.repoProfile,
+    scan: { ...report.scan, totalFindings: report.findings.length },
+    styleSystems: report.styleSystems,
+    tokenDefinitions: report.tokenDefinitions,
+    tokenOwners: report.tokenOwners,
+    componentOwners: report.componentOwners,
+    componentAdapters: report.componentAdapters,
+    conflicts: report.conflicts,
+    componentBlueprint: report.componentBlueprint,
+    findings,
+    maturity: report.maturity,
+    recommendedLane: report.recommendedLane,
+    nextActions: report.nextActions,
+  };
+}
+
 export async function writeReportArtifacts(report, outputDirectory) {
   const output = path.resolve(outputDirectory);
   await mkdir(output, { recursive: true });
   const templatePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../assets/report-template.html");
   const template = await readFile(templatePath, "utf8");
+  const presentationReport = htmlPresentationReport(report);
   const html = template
     .replaceAll("{{REPORT_TITLE}}", escapeHtml(`GovernUI — ${report.repoProfile.rootName}`))
-    .replace("{{REPORT_JSON}}", safeScriptJson(report));
+    .replace("{{REPORT_JSON}}", safeScriptJson(presentationReport));
   const files = {
     json: path.join(output, "audit.json"),
     markdown: path.join(output, "audit.md"),

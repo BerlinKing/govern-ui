@@ -20,9 +20,11 @@ Choose a Bootstrap, Migrate, or Hybrid path. Freeze today's debt as a baseline. 
 - Establishes a historical baseline and gates only new high-confidence design debt.
 - Recommends a `Bootstrap`, `Migrate`, or `Hybrid` governance path.
 
-## v0.1: Lite mode
+## v0.2: Precision review
 
-GovernUI v0.1 is deliberately read-only by default. It discovers, explains, and records decisions without rewriting application code.
+GovernUI v0.2 is deliberately read-only by default. It narrows the scan to product source, separates canonical Tokens from adapters, compares owners inside application scope, and turns explicit human review into a paginated offline decision room.
+
+The report also draws a source-derived UI-library blueprint: static Foundation → Atoms → Molecules → Components, followed by separate dynamic contracts for state, Portal, layer, keyboard, focus, dismissal, scroll, and motion. Missing items stay visibly unconfirmed.
 
 Static analysis cannot prove runtime behavior, accessibility, responsive rendering, or visual parity. GovernUI reports those surfaces as unassessed unless they were separately run and inspected.
 
@@ -90,7 +92,7 @@ Run the fixture suite:
 node scripts/tests/run-tests.mjs
 ```
 
-The suite covers all three recommendation lanes, stable fingerprints, baseline behavior, offline report generation, and a new-debt gate.
+The suite covers all three recommendation lanes, scope-noise regression, canonical/adapter precision, exact primitive ownership, stable fingerprints, baseline behavior, offline report generation, and a new-debt gate.
 
 ## License
 

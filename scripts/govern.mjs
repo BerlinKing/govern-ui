@@ -7,7 +7,7 @@ import { compareBaseline, createBaseline } from "./lib/baseline.mjs";
 import { terminalSummary, writeReportArtifacts } from "./lib/report.mjs";
 import { readJson } from "./lib/utils.mjs";
 
-const DECISIONS = new Set(["canonical", "keep-separate", "alias", "migrate", "exception", "defer"]);
+const DECISIONS = new Set(["canonical", "keep-separate", "alias", "migrate", "exception", "not-conflict", "defer"]);
 
 function usage() {
   return `Usage:

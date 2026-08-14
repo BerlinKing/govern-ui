@@ -11,7 +11,7 @@
 
 ## Scope and confidence
 
-The Lite scanner performs conservative source analysis. It does not execute repository code, resolve build-time plugins, inspect Figma, or infer runtime CSS cascade with browser fidelity.
+The Lite scanner performs conservative source analysis. It excludes documentation, tests, fixtures, public/static assets, generated output, and tool metadata by default. It does not execute repository code, resolve build-time plugins, inspect Figma, or infer runtime CSS cascade with browser fidelity.
 
 - High: deterministic syntax or an explicit contract violation.
 - Medium: strong structural evidence that still needs semantic review.
@@ -31,7 +31,11 @@ Classify as `scope-override` only with source evidence such as `.dark`, `[data-t
 
 ### Duplicate
 
-Use `duplicate` for repeated same-name/same-value definitions across owners or same-value/different-name candidates. Same-value/different-name candidates remain review-required because equal values do not prove equal semantics.
+Use `duplicate` for repeated same-name/same-value canonical definitions across owners. These remain review-required because copying may create separate responsibility.
+
+### Value collision
+
+Use `value-collision` when different canonical names share one rendered value. It is a non-blocking observation and never becomes a decision group by itself; equal values do not prove equal semantics.
 
 ### Semantic conflict
 
@@ -39,7 +43,7 @@ Use `semantic-conflict` for the same normalized name with different literal valu
 
 ### Owner conflict
 
-Use `owner-conflict` when multiple substantial Token sources are not connected by aliases or adapters. Owner selection requires human confirmation.
+Use `owner-conflict` when multiple substantial canonical Token sources inside the same application or package scope are not connected by aliases or adapters. Separate application roots do not compete by default. Owner selection requires human confirmation.
 
 ### Bypass
 
@@ -72,7 +76,7 @@ Raw length, typography, and motion findings are Medium or Low by default because
 
 ## Components and overlays
 
-Identify owner candidates from shared/public directories, package exports, barrel files, and repeated imports. File names alone are evidence, not proof.
+Identify Lite owner candidates from exact primitive filenames. A same-named wrapper importing a shared primitive is an adapter. Feature names merely ending in `Dialog`, `Button`, `Input`, or a similar primitive name are not owner candidates. File names remain evidence, not proof.
 
 Overlay findings require special care. Dialog, Sheet, Popover, Dropdown, and Toast ownership includes focus, Escape, Portal, scroll-lock, and semantic layer responsibilities; matching appearance does not prove compatible behavior.
 
@@ -96,7 +100,7 @@ An accepted exception should record reason, owner, scope, and review condition. 
 Recommend:
 
 - `Bootstrap`: no meaningful Token/component foundation and limited existing UI surface.
-- `Migrate`: substantial UI surface plus competing owners, duplicated primitives, or high raw-value density.
+- `Migrate`: a credible foundation exists, but same-scope canonical owners compete, several semantic conflicts remain, or multiple exact primitive owners are duplicated.
 - `Hybrid`: a credible foundation exists, but adoption or ownership remains partial.
 
-Always include evidence and confidence. Repository age is not a classification input.
+Always label the percentage as a heuristic evidence score, not calibrated statistical confidence. Repository age and repository size are not classification inputs.
