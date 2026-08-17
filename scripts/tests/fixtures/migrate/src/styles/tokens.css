@@ -2,7 +2,24 @@
   --color-primary: #176d5a;
   --color-surface: #ffffff;
   --color-text: #20211f;
-  --space-control: 8px;
+  --font-family-ui: Inter, sans-serif;
+  --font-size-display: 32px;
+  --font-size-body: 16px;
+  --font-size-label: 12px;
+  --line-height-body: 1.5;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-component-inset: 12px;
+  --space-component-gap: 8px;
+  --space-layout: 24px;
+  --size-control: 40px;
+  --radius-control: 6px;
+  --border-width: 1px;
+  --divider-width: 1px;
+  --focus-ring-width: 2px;
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.14);
+  --opacity-scrim: 0.48;
+  --z-index-floating: 100;
 }
 
 .dark {

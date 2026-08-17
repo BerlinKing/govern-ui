@@ -4,19 +4,21 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { auditRepository } from "./lib/audit.mjs";
 import { compareBaseline, createBaseline } from "./lib/baseline.mjs";
+import { validateReviewBrief } from "./lib/brief.mjs";
 import { terminalSummary, writeReportArtifacts } from "./lib/report.mjs";
 import { readJson } from "./lib/utils.mjs";
 
-const DECISIONS = new Set(["canonical", "keep-separate", "alias", "migrate", "exception", "defer"]);
+const DECISIONS = new Set(["canonical", "keep-separate", "alias", "migrate", "exception", "not-conflict", "defer"]);
 
 function usage() {
   return `Usage:
   govern.mjs audit <repo> [--json]
-  govern.mjs report <repo> --out <directory>
+  govern.mjs report <repo> --out <directory> [--brief <review-brief.json>]
   govern.mjs baseline accept <repo> --out <baseline.json>
   govern.mjs baseline status <repo> --baseline <baseline.json> [--json]
   govern.mjs check <repo> --baseline <baseline.json> [--json]
-  govern.mjs decisions validate <token-decisions.json>`;
+  govern.mjs brief validate <review-brief.json>
+  govern.mjs decisions validate <govern-ui-decisions.json>`;
 }
 
 function option(args, name) {
@@ -67,7 +69,9 @@ async function main() {
     const output = option(args, "--out");
     if (!output) throw new Error("report requires --out <directory>");
     const report = await auditRepository(subcommand);
-    const files = await writeReportArtifacts(report, output);
+    const briefPath = option(args, "--brief");
+    const reviewBrief = briefPath ? await readJson(path.resolve(briefPath)) : null;
+    const files = await writeReportArtifacts(report, output, { reviewBrief });
     process.stdout.write(`${terminalSummary(report)}\n`);
     printJson(files);
     return;
@@ -111,6 +115,15 @@ async function main() {
     const file = args[2];
     if (!file) throw new Error("decisions validate requires a JSON file");
     const result = validateDecisions(await readJson(path.resolve(file)));
+    printJson(result);
+    if (!result.valid) process.exitCode = 2;
+    return;
+  }
+
+  if (command === "brief" && subcommand === "validate") {
+    const file = args[2];
+    if (!file) throw new Error("brief validate requires a JSON file");
+    const result = validateReviewBrief(await readJson(path.resolve(file)));
     printJson(result);
     if (!result.valid) process.exitCode = 2;
     return;

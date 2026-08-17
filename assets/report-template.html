@@ -3,27 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="light">
   <title>{{REPORT_TITLE}}</title>
   <style>
     :root {
       color-scheme: light;
-      --page: #f4f3ef;
-      --surface: #ffffff;
-      --surface-muted: #ebe9e3;
-      --text: #20211f;
-      --text-muted: #5c5f59;
-      --border: #cbc9c1;
-      --accent: #176d5a;
-      --accent-strong: #0f5445;
-      --accent-soft: #dcece6;
-      --danger: #a5362e;
-      --danger-soft: #f7e3e0;
-      --warning: #805b16;
-      --warning-soft: #f5e9c9;
-      --focus: #1266a0;
-      --radius: 10px;
-      --shadow: 0 8px 24px rgba(31, 33, 31, 0.08);
+      --page: #ffffff;
+      --ink: #101010;
+      --muted: #61615c;
+      --line: #d9d9d2;
+      --soft: #f4f4f0;
+      --current: #fff6dc;
+      --current-line: #a66c00;
+      --target: #eaf4ec;
+      --target-line: #356947;
+      --danger: #982b26;
+      --focus: #155f9a;
+      --radius: 5px;
     }
 
     * { box-sizing: border-box; }
@@ -32,429 +28,1338 @@
       margin: 0;
       min-width: 0;
       background: var(--page);
-      color: var(--text);
-      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      font-family: Arial, Helvetica, "PingFang SC", "Microsoft YaHei", sans-serif;
       font-size: 16px;
-      line-height: 1.55;
+      line-height: 1.62;
     }
     button, input, select, textarea { font: inherit; }
-    button, select, input[type="search"], input[type="text"], textarea { min-height: 44px; }
-    button, select, input, textarea { border-radius: 8px; }
-    button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible {
+    button, input, select, textarea, a { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, summary:focus-visible {
       outline: 3px solid var(--focus);
       outline-offset: 2px;
     }
     button {
-      border: 1px solid var(--accent-strong);
-      background: var(--accent);
+      min-height: 44px;
+      border: 1px solid var(--ink);
+      border-radius: 3px;
+      padding: 9px 15px;
+      background: var(--ink);
       color: #ffffff;
-      padding: 10px 16px;
+      font-weight: 700;
       cursor: pointer;
-      font-weight: 650;
     }
-    button:hover { background: var(--accent-strong); }
-    button:active { transform: scale(0.98); }
-    button.secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
-    button.secondary:hover { background: var(--surface-muted); }
-    input[type="search"], input[type="text"], select, textarea {
+    button:hover { background: #2d2d2d; }
+    button:active { transform: translateY(1px); }
+    button.secondary { background: #ffffff; color: var(--ink); }
+    button.secondary:hover { background: var(--soft); }
+    button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+    input[type="search"], textarea {
       width: 100%;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      padding: 9px 11px;
+      min-height: 44px;
+      border: 1px solid #bdbdb6;
+      border-radius: 3px;
+      padding: 10px 12px;
+      background: #ffffff;
+      color: var(--ink);
     }
-    textarea { min-height: 88px; resize: vertical; }
-    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+    textarea { min-height: 84px; resize: vertical; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    code { overflow-wrap: anywhere; }
+    h1, h2, h3, h4 { margin: 0; line-height: 1.16; letter-spacing: -.025em; }
+    h1 { margin-top: 12px; font-size: clamp(38px, 5vw, 66px); }
+    h2 { font-size: clamp(26px, 3vw, 38px); }
+    h3 { font-size: 20px; }
+    h4 { font-size: 15px; letter-spacing: 0; }
+    p { margin: 0; }
+    ul { margin: 0; padding-left: 20px; }
 
-    .shell { width: min(1440px, 100%); margin: 0 auto; padding: 28px; }
+    .shell { width: min(1360px, 100%); margin: 0 auto; padding: 36px 32px 80px; }
     .hero {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 24px;
-      align-items: end;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
+      gap: 36px;
+      align-items: start;
+      padding: 18px 0 36px;
+      border-top: 6px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
     }
-    .eyebrow { color: var(--accent-strong); font-size: 13px; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; }
-    h1, h2, h3 { margin: 0; line-height: 1.18; letter-spacing: -0.02em; }
-    h1 { margin-top: 8px; font-size: clamp(30px, 4vw, 50px); }
-    h2 { font-size: clamp(22px, 2.4vw, 30px); }
-    h3 { font-size: 18px; }
-    p { margin: 0; }
-    .lede { max-width: 72ch; margin-top: 12px; color: var(--text-muted); }
-    .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .notice { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--warning); background: var(--warning-soft); border-radius: var(--radius); }
+    .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .lede { max-width: 72ch; margin-top: 18px; color: var(--muted); font-size: 18px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .language-switch { display: inline-flex; min-height: 44px; padding: 2px; border: 1px solid var(--ink); border-radius: 3px; }
+    .language-switch button { min-height: 38px; border: 0; padding: 6px 11px; background: #ffffff; color: var(--ink); }
+    .language-switch button[aria-pressed="true"] { background: var(--ink); color: #ffffff; }
 
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 12px;
-      margin: 24px 0;
+    .layout { display: grid; grid-template-columns: 184px minmax(0, 1fr); gap: 64px; align-items: start; margin-top: 56px; }
+    nav { position: sticky; top: 20px; border-top: 2px solid var(--ink); }
+    nav a { display: block; min-height: 44px; padding: 11px 2px; border-bottom: 1px solid var(--line); color: var(--muted); text-decoration: none; }
+    nav a:hover { padding-left: 8px; color: var(--ink); }
+    main { min-width: 0; display: grid; gap: 80px; }
+    section { min-width: 0; scroll-margin-top: 24px; }
+    .section-heading { display: flex; justify-content: space-between; gap: 28px; align-items: end; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--ink); }
+    .section-heading p { max-width: 62ch; color: var(--muted); }
+
+    .summary-box { border: 2px solid var(--ink); }
+    .summary-lead { padding: 28px; background: var(--ink); color: #ffffff; }
+    .summary-lead h3 { max-width: 26ch; font-size: clamp(25px, 3vw, 38px); }
+    .summary-lead p { max-width: 72ch; margin-top: 12px; color: #ddddda; }
+    .summary-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .summary-column { padding: 22px; border-right: 1px solid var(--line); }
+    .summary-column:last-child { border-right: 0; }
+    .summary-column h4 { margin-bottom: 10px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+    .summary-column li + li { margin-top: 7px; }
+    .summary-action { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 18px 22px; border-top: 1px solid var(--line); background: var(--soft); }
+    .summary-action a { display: inline-flex; min-height: 44px; align-items: center; border: 1px solid var(--ink); border-radius: 3px; padding: 9px 15px; background: var(--ink); color: #ffffff; font-weight: 700; text-decoration: none; }
+
+    .blueprint { border-top: 1px solid var(--line); }
+    .blueprint-layer { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+    .blueprint-layer p { margin-top: 7px; color: var(--muted); font-size: 14px; }
+    .blueprint-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .blueprint-item { min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--soft); }
+    .blueprint-item strong { display: block; overflow-wrap: anywhere; }
+    .status { display: inline-flex; margin-top: 8px; border-radius: 2px; padding: 2px 6px; background: #ffffff; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .status.missing { border: 1px dashed #aaa; background: transparent; }
+    .status.fragmented { background: #f8dfdc; color: #792a25; }
+    .status.partial { background: #fff0c9; color: #744f00; }
+    .status.detected { background: #e6f1e8; color: #28593a; }
+    .status.unverified, .status.not-detected { border: 1px dashed #999; background: transparent; }
+    details.system-category { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); background: #ffffff; }
+    details.system-category[open] { grid-column: 1 / -1; }
+    details.system-category > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; min-height: 72px; padding: 14px; cursor: pointer; list-style: none; }
+    details.system-category > summary::-webkit-details-marker { display: none; }
+    details.system-category > summary::after { content: "+"; align-self: center; font-size: 22px; font-weight: 400; }
+    details.system-category[open] > summary::after { content: "−"; }
+    details.system-category[open] > summary { border-bottom: 1px solid var(--line); }
+    .category-title p { margin-top: 4px; color: var(--muted); font-size: 13px; }
+    .category-body { padding: 16px; }
+    .category-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .category-panel { min-width: 0; padding: 14px; border: 1px solid var(--line); background: var(--soft); }
+    .category-panel h4 { margin-bottom: 8px; }
+    .category-panel p { color: var(--muted); font-size: 14px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    .metric { min-width: 0; padding: 9px; border: 1px solid var(--line); background: #ffffff; }
+    .metric strong { display: block; font-size: 20px; line-height: 1.1; }
+    .metric span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .subcategories { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .subcategory { border: 1px solid var(--line); padding: 4px 7px; background: #ffffff; font-size: 12px; }
+    .subcategory.detected { border-color: var(--target-line); }
+    .category-specimens { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+    .category-swatch { min-width: 0; }
+    .category-swatch span { display: block; height: 42px; border: 1px solid var(--line); }
+    .category-swatch small { display: block; margin-top: 4px; overflow-wrap: anywhere; color: var(--muted); font-size: 10px; }
+    .color-workbench { display: grid; gap: 34px; }
+    .color-verdict { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); gap: 24px; padding: 24px; border: 2px solid var(--ink); background: #ffffff; }
+    .color-verdict h4 { margin-bottom: 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .color-verdict h3 { max-width: 30ch; font-size: clamp(22px, 3vw, 34px); }
+    .color-verdict p { margin-top: 10px; color: var(--muted); }
+    .color-architecture { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .color-health { min-width: 0; padding: 12px; border: 1px solid var(--line); background: var(--soft); }
+    .color-health strong, .color-health span { display: block; }
+    .color-health strong { margin-top: 6px; font-size: 13px; }
+    .color-health span { color: var(--muted); font-size: 12px; }
+    .color-section { min-width: 0; padding-top: 26px; border-top: 1px solid var(--ink); }
+    .color-section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 16px; }
+    .color-section-head p { max-width: 68ch; color: var(--muted); font-size: 14px; }
+    .implementation-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+    .implementation-pill { padding: 6px 9px; border: 1px solid var(--line); background: var(--soft); font-size: 12px; }
+    .palette-lanes { display: grid; gap: 12px; }
+    .palette-lane { border: 1px solid var(--line); background: #ffffff; }
+    .palette-lane.candidate { border: 2px solid var(--ink); }
+    .palette-lane-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: start; padding: 16px; border-bottom: 1px solid var(--line); }
+    .palette-lane-head code { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .palette-lane-badges { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+    .color-badge { display: inline-flex; padding: 3px 6px; border: 1px solid var(--line); background: var(--soft); font-size: 11px; font-weight: 700; }
+    .color-badge.recommended { border-color: var(--target-line); background: var(--target); color: var(--target-line); }
+    .palette-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(138px, 1fr)); gap: 1px; background: var(--line); }
+    .palette-token { min-width: 0; padding: 10px; background: #ffffff; }
+    .palette-color { height: 58px; border: 1px solid rgba(0,0,0,.16); background: repeating-linear-gradient(45deg,#ddd 0 6px,#fff 6px 12px); }
+    .palette-token strong, .palette-token small { display: block; overflow-wrap: anywhere; }
+    .palette-token strong { margin-top: 8px; font-size: 12px; }
+    .palette-token small { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .color-table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+    .color-table { width: 100%; min-width: 760px; border-collapse: collapse; background: #ffffff; font-size: 12px; }
+    .color-table th, .color-table td { min-width: 145px; padding: 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .color-table th:first-child, .color-table td:first-child { min-width: 132px; }
+    .color-table th:last-child, .color-table td:last-child { border-right: 0; }
+    .color-table tbody tr:last-child td { border-bottom: 0; }
+    .color-table th { background: var(--soft); }
+    .role-token { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 7px; align-items: start; }
+    .role-token + .role-token { margin-top: 7px; }
+    .role-swatch { width: 20px; height: 20px; border: 1px solid rgba(0,0,0,.18); background: repeating-linear-gradient(45deg,#ddd 0 4px,#fff 4px 8px); }
+    .role-token strong, .role-token small { display: block; overflow-wrap: anywhere; }
+    .role-token strong { font-size: 11px; }
+    .role-token small { color: var(--muted); font-size: 10px; }
+    .missing-role { color: var(--muted); font-style: italic; }
+    .hardcode-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+    .hardcode-card { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; padding: 12px; border: 1px solid var(--line); }
+    .hardcode-swatch { width: 54px; min-height: 70px; border: 1px solid rgba(0,0,0,.18); background: repeating-linear-gradient(45deg,#ddd 0 5px,#fff 5px 10px); }
+    .hardcode-card strong, .hardcode-card small { display: block; }
+    .hardcode-card small { margin-top: 4px; color: var(--muted); }
+    .convergence-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+    .convergence-panel { padding: 16px; border: 1px solid var(--line); background: var(--soft); }
+    .convergence-row { padding: 11px 0; border-bottom: 1px solid var(--line); }
+    .convergence-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .convergence-row:first-of-type { padding-top: 4px; }
+    .convergence-row code, .convergence-row span { display: block; overflow-wrap: anywhere; }
+    .convergence-row span { margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .target-system { padding: 20px; border: 2px solid var(--target-line); background: var(--target); }
+    .target-pipeline { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+    .target-stage { min-width: 0; padding: 14px; border: 1px solid rgba(53,105,71,.35); background: rgba(255,255,255,.7); }
+    .target-stage > p { margin-top: 6px; color: var(--muted); font-size: 12px; }
+    .target-token-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .target-token-list span { padding: 3px 6px; border: 1px solid rgba(53,105,71,.35); background: #ffffff; font-size: 10px; }
+    .color-ui-preview { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; margin-top: 14px; padding: 18px; border: 1px solid rgba(53,105,71,.35); background: #ffffff; }
+    .color-ui-preview button { pointer-events: none; }
+    .color-next { display: flex; justify-content: space-between; gap: 18px; align-items: center; padding: 16px; border: 1px solid var(--ink); }
+    .color-next p { color: var(--muted); font-size: 13px; }
+    .color-next a { flex: none; display: inline-flex; min-height: 42px; align-items: center; padding: 8px 12px; background: var(--ink); color: #ffffff; font-weight: 700; text-decoration: none; }
+    .foundation-workbench { display: grid; gap: 30px; }
+    .foundation-verdict { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr); gap: 24px; padding: 24px; border: 2px solid var(--ink); background: #ffffff; }
+    .foundation-verdict h4 { margin-bottom: 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .foundation-verdict h3 { max-width: 34ch; font-size: clamp(22px, 3vw, 32px); }
+    .foundation-verdict p { margin-top: 10px; color: var(--muted); }
+    .foundation-health { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .foundation-health article { min-width: 0; padding: 12px; border: 1px solid var(--line); background: var(--soft); }
+    .foundation-health strong, .foundation-health span { display: block; }
+    .foundation-health strong { margin-top: 5px; font-size: 18px; }
+    .foundation-health span { color: var(--muted); font-size: 12px; }
+    .foundation-section { min-width: 0; padding-top: 24px; border-top: 1px solid var(--ink); }
+    .foundation-section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 16px; }
+    .foundation-section-head p { max-width: 68ch; color: var(--muted); font-size: 14px; }
+    .foundation-sources { display: grid; gap: 10px; }
+    .foundation-source { overflow: hidden; border: 1px solid var(--line); background: #ffffff; }
+    .foundation-source.candidate { border: 2px solid var(--ink); }
+    .foundation-source-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+    .foundation-source-head code { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .foundation-token-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr)); gap: 1px; background: var(--line); }
+    .foundation-token { min-width: 0; min-height: 126px; padding: 12px; background: #ffffff; }
+    .foundation-token strong, .foundation-token small { display: block; overflow-wrap: anywhere; }
+    .foundation-token strong { margin-top: 10px; font-size: 12px; }
+    .foundation-token small { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .token-specimen { display: flex; min-height: 48px; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--line); background: var(--soft); }
+    .token-specimen.type { justify-content: flex-start; padding: 4px 10px; white-space: nowrap; }
+    .token-specimen.space span { display: block; height: 18px; max-width: 100%; background: #111111; }
+    .token-specimen.shape span { width: 54px; height: 38px; border: 2px solid #111111; background: #ffffff; }
+    .token-specimen.depth span { width: 64px; height: 34px; border: 1px solid var(--line); background: #ffffff; }
+    .foundation-table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+    .foundation-table { width: 100%; min-width: 720px; border-collapse: collapse; background: #ffffff; font-size: 12px; }
+    .foundation-table th, .foundation-table td { min-width: 160px; padding: 11px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .foundation-table th { background: var(--soft); }
+    .foundation-table th:last-child, .foundation-table td:last-child { border-right: 0; }
+    .foundation-table tbody tr:last-child td { border-bottom: 0; }
+    .foundation-table code, .foundation-table small { display: block; overflow-wrap: anywhere; }
+    .foundation-table small { color: var(--muted); }
+    .foundation-table .more { margin-top: 6px; color: var(--muted); font-style: italic; }
+    .bypass-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+    .bypass-card { min-width: 0; padding: 14px; border: 1px solid var(--line); background: #ffffff; }
+    .bypass-card code, .bypass-card strong, .bypass-card small { display: block; overflow-wrap: anywhere; }
+    .bypass-card code { color: var(--muted); font-size: 11px; }
+    .bypass-card strong { margin-top: 6px; font-size: 14px; }
+    .bypass-card small { margin-top: 4px; color: var(--muted); }
+    .foundation-target { padding: 20px; border: 2px solid var(--target-line); background: var(--target); }
+    .foundation-target-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .55fr); gap: 18px; margin-top: 16px; }
+    .foundation-target-board { padding: 16px; border: 1px solid rgba(53,105,71,.35); background: rgba(255,255,255,.72); }
+    .foundation-target-board h4 + p { margin-top: 7px; color: var(--muted); }
+    .icon-source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; }
+    .icon-source { min-width: 0; padding: 16px; border: 1px solid var(--line); background: #ffffff; }
+    .icon-source.candidate { border: 2px solid var(--ink); }
+    .icon-demo { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+    .icon-demo span { display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid var(--line); border-radius: 50%; font-size: 20px; }
+    .icon-source code, .icon-source small { display: block; overflow-wrap: anywhere; }
+    .icon-source small { margin-top: 5px; color: var(--muted); }
+    .contract-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .contract-chips span { padding: 4px 7px; border: 1px solid var(--line); background: #ffffff; font-size: 11px; }
+    .target-flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+    .target-flow span { border: 1px solid var(--ink); padding: 5px 8px; background: #ffffff; font-size: 12px; }
+    .system-path { margin-bottom: 10px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+    .standard-contract { margin-top: 16px; padding: 14px 16px; border-left: 4px solid var(--ink); background: var(--soft); }
+    .standard-contract p { margin-top: 6px; color: var(--muted); }
+    .dynamic-intro { margin-top: 32px; }
+    .dynamic-intro p { margin-top: 8px; color: var(--muted); }
+    .dynamic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+    .dynamic-card { padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); }
+    .dynamic-card p { margin-top: 8px; color: var(--muted); }
+    .dynamic-card ul { margin-top: 12px; }
+
+    .review-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: end; margin-bottom: 20px; padding: 16px; border: 1px solid var(--line); background: var(--soft); }
+    .review-toolbar label span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .progress-copy { min-width: 180px; text-align: right; }
+    .progress { width: 180px; height: 5px; margin-top: 8px; background: #deded8; }
+    .progress span { display: block; width: 0; height: 100%; background: var(--ink); }
+    .decision-list { display: grid; gap: 44px; }
+    .decision-card { min-width: 0; padding-top: 24px; border-top: 3px solid var(--ink); }
+    .decision-head { display: flex; justify-content: space-between; gap: 18px; align-items: start; }
+    .decision-number { display: inline-flex; margin-bottom: 8px; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .decision-head p { max-width: 70ch; margin-top: 9px; color: var(--muted); }
+    .category { display: inline-flex; flex: none; border: 1px solid var(--ink); border-radius: 2px; padding: 3px 7px; font-size: 12px; font-weight: 700; }
+    .comparison { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
+    .state-card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); }
+    .state-card.current { border-color: var(--current-line); background: var(--current); }
+    .state-card.target { border-color: var(--target-line); background: var(--target); }
+    .state-label { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-bottom: 12px; font-size: 12px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    .state-card > p { color: #474741; }
+    .state-card.recommendation { border-color: var(--ink); }
+    .recommendation-mark { display: inline-flex; border-radius: 2px; padding: 2px 6px; background: var(--ink); color: #ffffff; font-size: 11px; letter-spacing: 0; text-transform: none; }
+    .reason-list { margin-top: 12px; }
+    .limitation { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .specimens { display: grid; gap: 8px; margin-top: 14px; }
+    .specimen { min-width: 0; padding: 11px; border: 1px solid rgba(16,16,16,.18); border-radius: 3px; background: rgba(255,255,255,.72); }
+    .specimen strong { display: block; overflow-wrap: anywhere; font-size: 13px; }
+    .specimen small { display: block; margin-top: 5px; color: var(--muted); }
+    .specimen-value { margin-top: 9px; overflow-wrap: anywhere; font-weight: 700; }
+    .color-sample { height: 56px; margin-top: 9px; border: 1px solid rgba(0,0,0,.22); border-radius: 2px; background: repeating-linear-gradient(45deg,#ddd 0 6px,#fff 6px 12px); }
+    .spacing-track { height: 16px; margin-top: 12px; background: #e4e4df; }
+    .spacing-bar { width: 40px; height: 100%; background: var(--ink); }
+    .radius-sample { width: 72px; height: 48px; margin-top: 10px; border: 2px solid var(--ink); background: #ffffff; }
+    .type-sample { margin-top: 10px; font-size: 24px; line-height: 1.25; }
+    .owner-flow { display: flex; gap: 7px; align-items: center; margin-top: 10px; }
+    .owner-node { min-width: 0; border: 1px solid var(--ink); padding: 5px 7px; background: #ffffff; font-size: 12px; overflow-wrap: anywhere; }
+    .behavior-states { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+    .behavior-states span { border: 1px solid var(--line); padding: 3px 6px; background: #ffffff; font-size: 12px; }
+    .component-preview { margin-top: 10px; padding: 14px; border: 1px solid var(--line); background: #ffffff; }
+    .component-preview button { pointer-events: none; }
+    .component-preview input { width: 100%; min-height: 40px; border: 1px solid #999; padding: 8px 10px; }
+    .component-card { min-height: 70px; border: 1px solid #aaa; padding: 12px; background: #ffffff; }
+
+    .plain-evidence { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .evidence-card { padding: 16px; border-left: 3px solid var(--ink); background: var(--soft); }
+    .evidence-card p { margin-top: 7px; color: var(--muted); }
+    .engineer-details { margin-top: 10px; border: 1px solid var(--line); }
+    .engineer-details summary { min-height: 46px; padding: 10px 13px; cursor: pointer; font-weight: 700; }
+    .engineer-details[open] summary { border-bottom: 1px solid var(--line); }
+    .source-list { display: grid; gap: 8px; padding: 12px; }
+    .source-row { min-width: 0; padding: 10px; background: var(--soft); }
+    .source-row code { display: block; color: var(--muted); }
+    .source-row pre { margin: 7px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+    fieldset.user-choice { margin: 18px 0 0; border: 1px solid var(--ink); padding: 18px; }
+    fieldset.user-choice legend { padding: 0 7px; font-weight: 800; }
+    .choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+    .choice { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 9px; min-height: 82px; padding: 11px; border: 1px solid var(--line); border-radius: 3px; cursor: pointer; }
+    .choice:hover { background: var(--soft); }
+    .choice:has(input:checked) { border-color: var(--ink); box-shadow: inset 3px 0 0 var(--ink); }
+    .choice input { width: 18px; height: 18px; margin: 2px 0 0; }
+    .choice strong, .choice small { display: block; }
+    .choice small { margin-top: 5px; color: var(--muted); line-height: 1.45; }
+    .recommended-choice { display: inline-flex; margin-left: 5px; padding: 1px 5px; background: var(--target); color: var(--target-line); font-size: 11px; }
+    .note-field { display: block; margin-top: 12px; }
+    .note-field span { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 700; }
+    .empty { padding: 24px; border: 1px dashed #aaa; color: var(--muted); text-align: center; }
+
+    .completion { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center; margin-top: 32px; padding: 22px; border: 2px solid var(--ink); }
+    .completion p { margin-top: 5px; color: var(--muted); }
+    .completion-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    .export-status { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+    .technical-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .technical-term { padding: 15px; border: 1px solid var(--line); }
+    .technical-term strong { display: block; font-size: 24px; }
+    .technical-term span { display: block; margin-top: 4px; font-weight: 700; }
+    .technical-term p { margin-top: 7px; color: var(--muted); font-size: 13px; }
+    .appendix-block { margin-top: 14px; border: 1px solid var(--line); }
+    .appendix-block > summary { min-height: 48px; padding: 11px 14px; cursor: pointer; font-weight: 800; }
+    .appendix-block[open] > summary { border-bottom: 1px solid var(--line); }
+    .appendix-content { padding: 14px; }
+    .owner-list, .finding-list { display: grid; gap: 7px; }
+    .raw-row { padding: 11px; background: var(--soft); }
+    .raw-row p { margin-top: 5px; color: var(--muted); }
+    .raw-finding { border: 1px solid var(--line); }
+    .raw-finding summary { padding: 9px 11px; cursor: pointer; overflow-wrap: anywhere; }
+    .raw-finding pre { margin: 0; padding: 11px; border-top: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; background: var(--soft); }
+
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 1040px) {
+      .layout { grid-template-columns: 1fr; gap: 40px; }
+      nav { position: static; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      nav a { padding: 9px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); }
+      .comparison { grid-template-columns: 1fr 1fr; }
+      .state-card.recommendation { grid-column: 1 / -1; }
+      .blueprint-items { grid-template-columns: 1fr; }
+      .category-columns { grid-template-columns: 1fr 1fr; }
+      .category-panel.recommendation-panel { grid-column: 1 / -1; }
+      .color-verdict { grid-template-columns: 1fr; }
+      .target-pipeline { grid-template-columns: 1fr; }
     }
-    .stat, .panel, .conflict, .finding, .owner {
-      min-width: 0;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .stat { padding: 16px; }
-    .stat strong { display: block; font-size: 26px; font-variant-numeric: tabular-nums; }
-    .stat span { color: var(--text-muted); font-size: 13px; }
 
-    .layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 24px; align-items: start; }
-    nav { position: sticky; top: 16px; padding: 12px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); }
-    nav a { display: block; min-height: 44px; padding: 10px 12px; color: var(--text); text-decoration: none; border-radius: 7px; }
-    nav a:hover { background: var(--accent-soft); color: var(--accent-strong); }
-    main { min-width: 0; display: grid; gap: 24px; }
-    section { scroll-margin-top: 20px; }
-    .section-heading { display: flex; justify-content: space-between; gap: 16px; align-items: end; margin-bottom: 12px; }
-    .section-heading p { color: var(--text-muted); max-width: 70ch; }
-    .panel { padding: 20px; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .owner { padding: 14px; box-shadow: none; }
-    .owner code { display: block; margin-top: 6px; color: var(--accent-strong); }
-    .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .pill { display: inline-flex; align-items: center; min-height: 28px; padding: 3px 9px; border-radius: 999px; background: var(--surface-muted); color: var(--text-muted); font-size: 12px; font-weight: 650; }
-    .pill.high { background: var(--danger-soft); color: var(--danger); }
-    .pill.medium { background: var(--warning-soft); color: var(--warning); }
-    .pill.low { background: var(--accent-soft); color: var(--accent-strong); }
-
-    .conflicts { display: grid; gap: 14px; }
-    .conflict { padding: 18px; box-shadow: none; }
-    .conflict-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
-    .conflict p { color: var(--text-muted); margin-top: 8px; }
-    .token-list { display: grid; gap: 8px; margin-top: 14px; }
-    .token-row { display: grid; grid-template-columns: 38px minmax(140px, 0.8fr) minmax(180px, 1fr) minmax(220px, 1.3fr); gap: 10px; align-items: center; padding: 10px; background: var(--page); border: 1px solid var(--border); border-radius: 8px; }
-    .swatch { width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--border); background: repeating-linear-gradient(45deg, #deddd7 0 6px, #f7f6f2 6px 12px); }
-    .decision { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
-    .choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 10px 0 12px; }
-    .choice { display: flex; gap: 9px; align-items: start; min-height: 44px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
-    .choice:hover { background: var(--accent-soft); }
-    .choice input { width: 20px; height: 20px; margin: 1px 0 0; }
-    .decision-fields { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 10px; }
-
-    .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 10px; margin-bottom: 12px; }
-    .findings { display: grid; gap: 8px; }
-    .finding { display: grid; grid-template-columns: 90px minmax(170px, 0.7fr) minmax(0, 1.6fr); gap: 12px; align-items: start; padding: 12px; box-shadow: none; }
-    .finding.hidden { display: none; }
-    .file { overflow-wrap: anywhere; color: var(--accent-strong); }
-    .evidence { overflow-wrap: anywhere; }
-    .muted { color: var(--text-muted); }
-    .empty { padding: 22px; text-align: center; color: var(--text-muted); border: 1px dashed var(--border); border-radius: var(--radius); }
-    .list { margin: 0; padding-left: 20px; }
-    .list li + li { margin-top: 7px; }
-    .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
-
-    @media (max-width: 1100px) {
-      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .layout { grid-template-columns: 1fr; }
-      nav { position: static; display: flex; overflow-x: auto; gap: 4px; }
-      nav a { flex: 0 0 auto; }
-    }
     @media (max-width: 720px) {
-      .shell { padding: 18px 14px; }
-      .hero { grid-template-columns: 1fr; align-items: start; }
-      .stats, .grid, .choice-grid, .decision-fields, .toolbar { grid-template-columns: 1fr; }
-      .token-row { grid-template-columns: 38px minmax(0, 1fr); }
-      .token-row > :nth-child(n + 3) { grid-column: 2; }
-      .finding { grid-template-columns: 1fr; }
-      .conflict-head, .section-heading { display: grid; }
+      .shell { padding: 20px 16px 56px; }
+      .hero, .section-heading, .summary-action, .decision-head, .completion { grid-template-columns: 1fr; display: grid; }
+      .hero-actions { justify-content: flex-start; }
+      .layout { margin-top: 36px; }
+      nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      main { gap: 60px; }
+      .summary-columns, .comparison, .plain-evidence, .choice-grid, .dynamic-grid, .technical-summary, .review-toolbar, .category-columns { grid-template-columns: 1fr; }
+      .summary-column { border-right: 0; border-bottom: 1px solid var(--line); }
+      .summary-column:last-child { border-bottom: 0; }
+      .blueprint-layer { grid-template-columns: 1fr; }
+      .blueprint-items { grid-template-columns: 1fr; }
+      .category-panel.recommendation-panel { grid-column: auto; }
+      .category-specimens { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .color-architecture, .convergence-grid { grid-template-columns: 1fr; }
+      .color-section-head, .color-next, .color-ui-preview { display: grid; grid-template-columns: 1fr; }
+      .state-card.recommendation { grid-column: auto; }
+      .progress-copy { text-align: left; }
+      .progress { width: 100%; }
+      .completion-actions { justify-content: flex-start; }
     }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+    /* v0.6 — designer-facing review sheets, derived from a real component-library document. */
+    :root {
+      --page: #ffffff;
+      --ink: #111111;
+      --muted: #666662;
+      --line: #deded8;
+      --line-strong: #b8b8b0;
+      --soft: #f5f5f2;
+      --soft-strong: #ecece8;
+      --current: #fff8e7;
+      --current-line: #9a6412;
+      --target: #eef6f0;
+      --target-line: #38634a;
+      --danger: #a33a32;
+      --focus: #1459c7;
+      --accent: #1459c7;
+      --radius: 12px;
+      --sheet-radius: 28px;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        color-scheme: dark;
-        --page: #1b1d1b;
-        --surface: #252825;
-        --surface-muted: #343734;
-        --text: #f1f0ea;
-        --text-muted: #b8bbb4;
-        --border: #50544f;
-        --accent: #72bba6;
-        --accent-strong: #9bd0c0;
-        --accent-soft: #243f37;
-        --danger: #efaaa3;
-        --danger-soft: #4c2926;
-        --warning: #e2c178;
-        --warning-soft: #443a22;
-        --focus: #73b8e5;
-        --shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-      }
-      button { color: #13211d; }
-      button.secondary { color: var(--text); }
-      .swatch { background: repeating-linear-gradient(45deg, #323532 0 6px, #222422 6px 12px); }
+
+    body {
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.58;
+      text-rendering: optimizeLegibility;
+    }
+    h1, h2, h3, h4 { letter-spacing: -.018em; }
+    h1 { font-size: clamp(44px, 6vw, 78px); font-weight: 650; }
+    h2 { font-size: clamp(32px, 4vw, 52px); font-weight: 650; }
+    h3 { font-size: 22px; }
+    button { border-radius: 10px; padding: 10px 17px; }
+    button:active { transform: scale(.985); }
+    input[type="search"], textarea { border-radius: 10px; }
+
+    .shell { width: min(1480px, 100%); padding: 28px 40px 120px; }
+    .hero {
+      min-height: 430px;
+      grid-template-columns: minmax(0, 1fr) 390px;
+      gap: 72px;
+      align-items: end;
+      padding: 42px 0 52px;
+      border-top: 0;
+      border-bottom: 1px solid var(--ink);
+    }
+    .hero-copy { align-self: end; }
+    .hero .eyebrow { margin-bottom: 24px; }
+    .hero .lede { max-width: 68ch; margin-top: 24px; font-size: 17px; }
+    .hero-actions {
+      align-self: start;
+      justify-content: flex-end;
+      padding-top: 4px;
+    }
+    .hero-guide {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 34px;
+      border: 1px solid var(--line);
+      background: var(--line);
+    }
+    .hero-guide > span { padding: 12px 14px; background: #ffffff; color: var(--muted); font-size: 13px; }
+    .hero-guide > span > span { display: block; }
+    .hero-guide strong { display: block; margin-bottom: 2px; color: var(--ink); font-size: 15px; }
+    .language-switch { border-color: var(--line-strong); border-radius: 10px; }
+    .language-switch button { border-radius: 7px; }
+
+    .layout { display: block; margin-top: 0; }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin: 0 -12px;
+      padding: 14px 12px;
+      border-top: 0;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(16px);
+    }
+    nav a {
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+      text-align: center;
+    }
+    nav a:last-child { border-right: 0; }
+    nav a:hover { padding-left: 14px; background: var(--soft); color: var(--ink); }
+    main { gap: 120px; padding-top: 88px; }
+    section { scroll-margin-top: 86px; }
+    .section-heading {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+      gap: 64px;
+      align-items: end;
+      margin-bottom: 34px;
+      padding-bottom: 24px;
+      border-bottom-color: var(--line-strong);
+    }
+    .section-heading .eyebrow { margin-bottom: 12px; }
+    .section-heading p { justify-self: end; font-size: 15px; }
+
+    .summary-box { overflow: hidden; border: 1px solid var(--line-strong); border-radius: var(--sheet-radius); }
+    .summary-lead { padding: 44px 48px; background: #111111; }
+    .summary-lead h3 { max-width: 32ch; font-size: clamp(30px, 4vw, 48px); font-weight: 620; }
+    .summary-lead p { max-width: 76ch; margin-top: 16px; color: rgba(255,255,255,.72); font-size: 16px; }
+    .summary-columns { background: var(--line); gap: 1px; }
+    .summary-column { min-height: 190px; padding: 28px 30px; border-right: 0; background: #ffffff; }
+    .summary-column h4 { margin-bottom: 16px; color: var(--muted); }
+    .summary-column ul { padding-left: 18px; }
+    .summary-column li + li { margin-top: 10px; }
+    .summary-action { padding: 22px 30px; border-top-color: var(--line); background: var(--soft); }
+    .summary-action a { border-radius: 10px; }
+
+    .blueprint { display: grid; gap: 34px; border-top: 0; }
+    .blueprint-layer {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 40px;
+      padding: 42px;
+      border: 0;
+      border-radius: var(--sheet-radius);
+      background: var(--soft);
+    }
+    .blueprint-layer > div:first-child { position: sticky; top: 84px; align-self: start; }
+    .blueprint-layer > div:first-child h3 { font-size: 28px; }
+    .blueprint-layer > div:first-child p { margin-top: 12px; font-size: 14px; }
+    .blueprint-layer > div:first-child .status { margin-top: 18px; }
+    .blueprint-items { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    details.system-category { overflow: hidden; border-color: var(--line); border-radius: 16px; }
+    details.system-category[open] { box-shadow: 0 12px 34px rgba(17,17,17,.05); }
+    details.system-category > summary { grid-template-columns: minmax(0, 1fr) auto 34px; align-items: start; min-height: 82px; padding: 18px 20px; }
+    details.system-category > summary > .status { grid-column: 2; grid-row: 1; align-self: start; justify-self: end; margin-top: 0; }
+    details.system-category > summary::after { grid-column: 3; grid-row: 1; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; font-size: 20px; line-height: 30px; text-align: center; }
+    .category-title { min-width: 0; }
+    .category-title h3 { font-size: 18px; }
+    .category-title p { max-width: 54ch; margin-top: 6px; }
+    .category-body { padding: 24px; }
+
+    .category-sheet { display: grid; grid-template-columns: 170px minmax(0, 1fr); border-top: 1px solid var(--line); }
+    .category-sheet:first-child { border-top: 0; }
+    .sheet-label { padding: 22px 22px 22px 0; }
+    .sheet-label span { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+    .sheet-label h4 { margin-top: 7px; font-size: 15px; }
+    .sheet-stage { min-width: 0; padding: 22px; border-left: 1px solid var(--line); background: var(--soft); }
+    .sheet-stage > p { max-width: 76ch; color: var(--muted); }
+    .sheet-stage.recommendation-stage { background: #ffffff; }
+    .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; margin-bottom: 16px; border: 1px solid var(--line); background: var(--line); }
+    .metric { min-height: 82px; padding: 12px; border: 0; }
+    .metric strong { font-size: 22px; }
+    .coverage-matrix { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .coverage-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; min-width: 0; min-height: 48px; padding: 10px 12px; border: 1px solid var(--line); background: #ffffff; }
+    .coverage-row strong { min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
+    .coverage-row .status { flex: none; margin-top: 0; }
+    .category-specimens { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); margin: 0 0 16px; }
+    .category-swatch span { height: 64px; border-radius: 8px; }
+    .recommendation-rule { display: flex; gap: 12px; align-items: flex-start; }
+    .recommendation-rule::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: var(--ink); }
+
+    .dynamic-intro { margin-top: 72px; padding-top: 32px; border-top: 1px solid var(--line-strong); }
+    .dynamic-intro p { max-width: 76ch; }
+    .dynamic-grid { display: block; margin-top: 24px; }
+
+    .color-workbench { gap: 22px; }
+    .color-verdict { grid-template-columns: minmax(0, 1fr) 420px; gap: 36px; padding: 34px; border: 0; border-radius: 20px; background: #111111; color: #ffffff; }
+    .color-verdict p { color: rgba(255,255,255,.68); }
+    .color-verdict .implementation-pill { border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.07); color: #ffffff; }
+    .color-architecture { gap: 1px; align-content: start; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.16); }
+    .color-health { padding: 14px; border: 0; background: rgba(255,255,255,.07); }
+    .color-health span { color: rgba(255,255,255,.62); }
+    .color-section, .target-system {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 34px;
+      padding: 30px;
+      border: 0;
+      border-radius: 20px;
+      background: var(--soft);
+    }
+    .color-section-head { display: block; margin: 0; }
+    .color-section-head h3 { font-size: 19px; }
+    .color-section-head p { margin-top: 10px; font-size: 13px; }
+    .palette-lanes, .color-table-wrap, .hardcode-grid, .convergence-grid, .target-pipeline, .color-ui-preview { grid-column: 2; }
+    .palette-lane { overflow: hidden; border-radius: 14px; }
+    .palette-lane.candidate { border-width: 1px; border-color: var(--ink); box-shadow: inset 5px 0 0 var(--ink); }
+    .palette-lane-head { padding: 16px 18px; }
+    .palette-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    .palette-color { height: 74px; border-radius: 8px; }
+    .color-table-wrap { border-radius: 14px; background: #ffffff; }
+    .color-table th { background: #efefeb; }
+    .hardcode-card { border-radius: 12px; background: #ffffff; }
+    .convergence-panel { border: 0; border-radius: 14px; background: #ffffff; }
+    .target-system { border: 1px solid var(--target-line); background: var(--target); }
+    .target-system .color-section-head { grid-column: 1; }
+    .target-pipeline { margin-top: 0; }
+    .target-stage { border-radius: 12px; }
+    .color-ui-preview { border-radius: 12px; }
+    .color-next { border-radius: 14px; }
+
+    .review-toolbar { position: sticky; top: 70px; z-index: 10; margin-bottom: 28px; padding: 16px 18px; border-radius: 14px; background: rgba(245,245,242,.97); backdrop-filter: blur(16px); }
+    .decision-list { gap: 56px; }
+    .decision-card { overflow: hidden; padding: 0; border: 1px solid var(--line-strong); border-radius: var(--sheet-radius); }
+    .decision-head { padding: 32px 36px; border-bottom: 1px solid var(--line); }
+    .decision-head h3 { max-width: 30ch; font-size: clamp(26px, 3vw, 38px); }
+    .decision-head p { max-width: 68ch; }
+    .decision-card > .system-path { margin: 0; padding: 18px 36px 0; }
+    .decision-number { margin-right: 10px; color: var(--ink); }
+    .standard-contract { margin: 0; padding: 24px 36px; border: 0; border-bottom: 1px solid var(--line); background: var(--soft); }
+    .standard-contract h4 { color: var(--muted); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; }
+    .comparison { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin: 0; border-bottom: 1px solid var(--line); background: var(--line); }
+    .state-card { min-height: 320px; padding: 30px 34px; border: 0; border-radius: 0; background: #ffffff; }
+    .state-card.current { border: 0; background: var(--current); }
+    .state-card.target { border: 0; background: var(--target); }
+    .target-standard { margin: 14px 0 18px; padding: 14px 16px; border: 1px solid rgba(56,99,74,.28); border-radius: 10px; background: rgba(255,255,255,.58); }
+    .target-standard strong { display: block; margin-bottom: 5px; color: var(--target-line); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .target-standard p { color: var(--ink); font-size: 13px; }
+    .state-card.recommendation { grid-column: 1 / -1; min-height: 0; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 28px; border: 0; background: #111111; color: #ffffff; }
+    .state-card.recommendation .state-label { margin: 0; align-content: start; }
+    .state-card.recommendation .reason-list { margin-top: 12px; }
+    .state-card.recommendation .limitation { color: rgba(255,255,255,.66); border-color: rgba(255,255,255,.18); }
+    .recommendation-mark { background: #ffffff; color: #111111; }
+    .specimens { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+    .specimen { min-height: 132px; padding: 14px; border-radius: 12px; background: rgba(255,255,255,.84); }
+    .ownership-specimen > strong { overflow-wrap: anywhere; }
+    .ownership-specimen .owner-flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+    .ownership-specimen .owner-node { display: grid; min-height: 48px; place-items: center; text-align: center; }
+    .color-sample { height: 76px; border-radius: 8px; }
+    .component-preview { min-height: 88px; display: grid; place-items: center; border-radius: 10px; }
+    .plain-evidence { margin: 0; padding: 26px 36px 0; }
+    .evidence-card { border-left: 0; border-top: 3px solid var(--ink); border-radius: 0 0 12px 12px; }
+    .engineer-details { margin: 14px 36px 0; border-radius: 10px; }
+    fieldset.user-choice { margin: 30px 36px 36px; padding: 24px; border-color: var(--line-strong); border-radius: 16px; background: var(--soft); }
+    .choice { min-height: 104px; border-radius: 12px; background: #ffffff; }
+    .choice:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+    .completion { border-radius: 20px; }
+
+    .technical-summary { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--line); background: var(--line); }
+    .technical-term { min-height: 154px; border: 0; background: #ffffff; }
+    .appendix-block { border-radius: 12px; }
+
+    @media (max-width: 1120px) {
+      .hero { grid-template-columns: 1fr; min-height: 0; }
+      .hero-actions { justify-content: flex-start; }
+      .section-heading { grid-template-columns: 1fr; gap: 18px; }
+      .section-heading p { justify-self: start; }
+      .blueprint-layer { grid-template-columns: 1fr; }
+      .blueprint-layer > div:first-child { position: static; }
+      .color-verdict { grid-template-columns: 1fr; }
+      .color-section, .target-system { grid-template-columns: 1fr; }
+      .palette-lanes, .color-table-wrap, .hardcode-grid, .convergence-grid, .target-pipeline, .color-ui-preview, .target-system .color-section-head { grid-column: 1; }
+      .technical-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      .shell { padding: 18px 14px 72px; }
+      .hero { gap: 34px; padding: 26px 0 36px; }
+      .hero-guide { grid-template-columns: 1fr; }
+      .hero-actions { align-items: stretch; }
+      nav { top: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 10px 0; }
+      nav a:nth-child(2) { border-right: 0; }
+      main { gap: 84px; padding-top: 56px; }
+      .summary-lead, .summary-column { padding: 26px 22px; }
+      .blueprint-layer { gap: 24px; padding: 22px 14px; border-radius: 20px; }
+      details.system-category > summary { grid-template-columns: minmax(0, 1fr) 34px; }
+      details.system-category > summary > .status { grid-column: 1; grid-row: 2; justify-self: start; margin-top: 10px; }
+      details.system-category > summary::after { grid-column: 2; grid-row: 1; }
+      .category-body { padding: 16px; }
+      .category-sheet { grid-template-columns: 1fr; }
+      .sheet-label { padding: 18px 0 10px; }
+      .sheet-stage { padding: 16px; border-left: 0; }
+      .metric-grid, .coverage-matrix { grid-template-columns: 1fr 1fr; }
+      .color-verdict, .color-section, .target-system { padding: 20px 16px; border-radius: 16px; }
+      .color-architecture, .convergence-grid, .target-pipeline, .foundation-verdict, .foundation-health, .foundation-target-grid { grid-template-columns: 1fr; }
+      .review-toolbar { top: 106px; }
+      .decision-card { border-radius: 20px; }
+      .decision-card > .system-path { padding: 18px 20px 0; }
+      .decision-head { padding: 24px 20px; }
+      .comparison { grid-template-columns: 1fr; }
+      .state-card { min-height: 0; padding: 24px 20px; }
+      .state-card.recommendation { grid-column: auto; grid-template-columns: 1fr; }
+      .plain-evidence { padding: 22px 20px 0; }
+      .engineer-details { margin: 14px 20px 0; }
+      fieldset.user-choice { margin: 24px 20px 28px; padding: 18px; }
+      .technical-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .technical-term { min-height: 132px; }
     }
   </style>
 </head>
 <body>
   <div class="shell">
     <header class="hero">
-      <div>
-        <div class="eyebrow">Source-derived review</div>
-        <h1 id="title">{{REPORT_TITLE}}</h1>
-        <p class="lede" id="summary"></p>
+      <div class="hero-copy">
+        <div class="eyebrow" data-i18n="hero.eyebrow">System-first design review</div>
+        <h1 id="report-title">Design system review</h1>
+        <p class="lede" id="report-explanation"></p>
+        <div class="hero-guide" aria-label="Review sequence" data-i18n-aria-label="hero.guideLabel">
+          <span><strong data-i18n="hero.guideCurrent">1 · Current</strong><span data-i18n="hero.guideCurrentHelp">See the real styles and variants found in the product.</span></span>
+          <span><strong data-i18n="hero.guideTarget">2 · Target</strong><span data-i18n="hero.guideTargetHelp">Compare them with a standard design-library contract.</span></span>
+          <span><strong data-i18n="hero.guideDecide">3 · Decide</strong><span data-i18n="hero.guideDecideHelp">Choose what to keep, merge, scope, or verify.</span></span>
+        </div>
       </div>
       <div class="hero-actions">
-        <button id="export-decisions" type="button">Export decision draft</button>
-        <button id="import-decisions" class="secondary" type="button">Import draft</button>
+        <div class="language-switch" role="group" aria-label="Language" data-i18n-aria-label="language.label">
+          <button type="button" data-locale="zh" aria-pressed="false">中文</button>
+          <button type="button" data-locale="en" aria-pressed="false">EN</button>
+        </div>
+        <button id="import-decisions" class="secondary" type="button" data-i18n="hero.import">Import previous review</button>
         <input id="decision-file" type="file" accept="application/json,.json" hidden>
-        <span class="muted" id="export-status" aria-live="polite"></span>
       </div>
     </header>
-    <div class="notice" role="note">
-      This page visualizes source evidence and inferred relationships. Exported choices remain a draft and do not authorize source changes.
-    </div>
-    <div class="stats" id="stats"></div>
 
     <div class="layout">
-      <nav aria-label="Report sections">
-        <a href="#overview">Overview</a>
-        <a href="#owners">Owners</a>
-        <a href="#conflicts">Token decisions</a>
-        <a href="#findings">Findings</a>
-        <a href="#coverage">Coverage</a>
+      <nav aria-label="Report sections" data-i18n-aria-label="nav.label">
+        <a href="#overview" data-i18n="nav.overview">01 · Conclusion</a>
+        <a href="#blueprint" data-i18n="nav.blueprint">02 · System matrix</a>
+        <a href="#decisions" data-i18n="nav.decisions">03 · Key decisions</a>
+        <a href="#technical" data-i18n="nav.technical">04 · Engineer details</a>
       </nav>
 
       <main>
         <section id="overview">
           <div class="section-heading">
-            <div><div class="eyebrow">Recommended lane</div><h2 id="lane"></h2></div>
-            <p id="lane-confidence"></p>
+            <div><div class="eyebrow" data-i18n="overview.eyebrow">Plain conclusion</div><h2 data-i18n="overview.title">What this report recommends</h2></div>
+            <p data-i18n="overview.description">Only the decisions that affect the product are shown here. Scanner counts stay in the engineer appendix.</p>
           </div>
-          <div class="panel"><ul class="list" id="lane-evidence"></ul></div>
+          <div class="summary-box">
+            <div class="summary-lead"><h3 id="summary-verdict"></h3><p id="summary-explanation"></p></div>
+            <div class="summary-columns">
+              <article class="summary-column"><h4 data-i18n="summary.keep">Keep</h4><ul id="summary-keep"></ul></article>
+              <article class="summary-column"><h4 data-i18n="summary.change">Change first</h4><ul id="summary-change"></ul></article>
+              <article class="summary-column"><h4 data-i18n="summary.later">Verify later</h4><ul id="summary-later"></ul></article>
+            </div>
+            <div class="summary-action"><p id="summary-action-copy"></p><a href="#decisions" id="start-review"></a></div>
+          </div>
         </section>
 
-        <section id="owners">
+        <section id="blueprint">
           <div class="section-heading">
-            <div><div class="eyebrow">Source of truth</div><h2>Candidate owners</h2></div>
-            <p>Candidate status is evidence, not a canonical decision.</p>
+            <div><div class="eyebrow" data-i18n="blueprint.eyebrow">Design-library map</div><h2 data-i18n="blueprint.title">From foundations to complete interactions</h2></div>
+            <p data-i18n="blueprint.description">The report reads like a component library: open a category to see its current inventory, visual or state matrix, target contract, and recommendation.</p>
           </div>
-          <div class="grid" id="owner-grid"></div>
+          <h3 data-i18n="blueprint.static">Static system</h3>
+          <div class="blueprint" id="blueprint-static"></div>
+          <div class="dynamic-intro"><h3 data-i18n="blueprint.dynamic">Dynamic system</h3><p data-i18n="blueprint.dynamicDescription">Dynamic categories are horizontal behavior contracts. They remain unverified until real runtime behavior is inspected.</p></div>
+          <div class="dynamic-grid" id="blueprint-dynamic"></div>
         </section>
 
-        <section id="conflicts">
+        <section id="decisions">
           <div class="section-heading">
-            <div><div class="eyebrow">Human review required</div><h2>Token decisions</h2></div>
-            <p>Compare values, ownership and scope before choosing. Equal values do not prove equal semantics.</p>
+            <div><div class="eyebrow" data-i18n="decisions.eyebrow">Visual review</div><h2 data-i18n="decisions.title">Decisions that need you</h2></div>
+            <p data-i18n="decisions.description">Compare the current result with the intended target, then choose an outcome. Your choices remain a draft and do not modify source code.</p>
           </div>
-          <div class="conflicts" id="conflict-list"></div>
+          <div class="review-toolbar">
+            <label><span data-i18n="decisions.searchLabel">Find a decision</span><input id="decision-search" type="search" data-i18n-placeholder="decisions.searchPlaceholder" placeholder="Search by screen, style, or question"></label>
+            <div class="progress-copy"><strong id="progress-text"></strong><div class="progress" aria-hidden="true"><span id="progress-bar"></span></div></div>
+          </div>
+          <div class="decision-list" id="decision-list"></div>
+          <div class="completion">
+            <div><h3 data-i18n="completion.title">Return your review to Codex</h3><p data-i18n="completion.description">Export the draft JSON and attach it in the conversation. You do not need to return the HTML file.</p><div class="export-status" id="export-status" aria-live="polite"></div></div>
+            <div class="completion-actions"><button id="export-decisions" type="button" data-i18n="completion.export">Export review draft</button></div>
+          </div>
         </section>
 
-        <section id="findings">
+        <section id="technical">
           <div class="section-heading">
-            <div><div class="eyebrow">File evidence</div><h2>Findings</h2></div>
-            <p>High confidence can gate new debt. Medium and Low remain review material.</p>
+            <div><div class="eyebrow" data-i18n="technical.eyebrow">Optional appendix</div><h2 data-i18n="technical.title">Engineer details</h2></div>
+            <p data-i18n="technical.description">You can ignore this section unless you need to verify how a conclusion was derived.</p>
           </div>
-          <div class="toolbar">
-            <label>Search findings<input id="finding-search" type="search" placeholder="File, rule, or evidence"></label>
-            <label>Severity<select id="severity-filter"><option value="all">All</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
-          </div>
-          <p class="muted" id="finding-status" aria-live="polite"></p>
-          <div class="findings" id="finding-list"></div>
-          <button id="load-more-findings" class="secondary" type="button">Load 200 more findings</button>
-        </section>
-
-        <section id="coverage">
-          <div class="section-heading">
-            <div><div class="eyebrow">Honest scope</div><h2>Coverage and next actions</h2></div>
-          </div>
-          <div class="grid">
-            <div class="panel"><h3>Unassessed</h3><ul class="list" id="unassessed"></ul></div>
-            <div class="panel"><h3>Next actions</h3><ul class="list" id="next-actions"></ul></div>
-          </div>
+          <div class="technical-summary" id="technical-summary"></div>
+          <details class="appendix-block"><summary data-i18n="technical.sources">Raw style entry points</summary><div class="appendix-content owner-list" id="owner-list"></div></details>
+          <details class="appendix-block"><summary data-i18n="technical.findings">Raw scanner findings</summary><div class="appendix-content"><p class="lede" id="finding-limit"></p><div class="finding-list" id="finding-list"></div></div></details>
+          <details class="appendix-block"><summary data-i18n="technical.coverage">Scan coverage and limitations</summary><div class="appendix-content" id="coverage"></div></details>
         </section>
       </main>
     </div>
-
-    <footer class="footer" id="footer"></footer>
   </div>
 
   <script type="application/json" id="report-data">{{REPORT_JSON}}</script>
   <script>
     (() => {
-      "use strict";
       const report = JSON.parse(document.getElementById("report-data").textContent);
-      const definitions = new Map(report.tokenDefinitions.map((item) => [item.id, item]));
-      const owners = new Map(report.tokenOwners.map((item) => [item.id, item]));
-      const choices = [
-        ["canonical", "Set canonical"],
-        ["keep-separate", "Keep separate"],
-        ["alias", "Create alias"],
-        ["migrate", "Migrate"],
-        ["exception", "Register exception"],
-        ["defer", "Defer"],
-      ];
-      const storageKey = `design-governance:${report.repoId}:${report.reportId}`;
-
-      const e = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
-      const setHtml = (id, html) => { document.getElementById(id).innerHTML = html; };
-      const count = (items, selector, value) => items.filter((item) => selector(item) === value).length;
-      const safeHex = (value) => /^#[0-9a-f]{3,8}$/i.test(String(value).trim()) ? String(value).trim() : null;
-      const persisted = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch { return {}; } })();
-
-      document.getElementById("summary").textContent = `${report.scan.scannedFiles} files scanned. ${report.conflicts.length} Token groups need review. Runtime behavior remains unverified.`;
-      document.getElementById("lane").textContent = report.recommendedLane;
-      document.getElementById("lane-confidence").textContent = `${Math.round(report.maturity.confidence * 100)}% confidence · ${report.styleSystems.join(" · ") || "No style system detected"}`;
-      setHtml("lane-evidence", report.maturity.evidence.map((item) => `<li>${e(item)}</li>`).join(""));
-
-      const stats = [
-        [report.scan.scannedFiles, "Files scanned"],
-        [report.tokenDefinitions.length, "Token definitions"],
-        [report.tokenOwners.length, "Token owners"],
-        [report.componentCandidates.length, "Component candidates"],
-        [report.conflicts.length, "Decision groups"],
-        [count(report.findings, (item) => item.severity, "high"), "High findings"],
-      ];
-      setHtml("stats", stats.map(([value, label]) => `<div class="stat"><strong>${e(value)}</strong><span>${e(label)}</span></div>`).join(""));
-
-      const tokenOwnerCards = report.tokenOwners.map((owner) => `
-        <article class="owner">
-          <span class="pill">Token owner candidate</span>
-          <code>${e(owner.file)}</code>
-          <div class="meta"><span class="pill">${e(owner.definitionCount)} definitions</span><span class="pill">${e(owner.sourceTypes.join(", "))}</span></div>
-        </article>`);
-      const componentOwnerCards = report.componentOwners.map((owner) => `
-        <article class="owner">
-          <span class="pill">Component owner candidate</span>
-          <code>${e(owner.directory)}</code>
-          <div class="meta"><span class="pill">${e(owner.componentCount)} components</span><span class="pill">${e(owner.primitives.join(", "))}</span></div>
-        </article>`);
-      setHtml("owner-grid", [...tokenOwnerCards, ...componentOwnerCards].join("") || '<div class="empty">No shared owner candidate was detected.</div>');
-
-      function tokenRow(definition) {
-        const hex = safeHex(definition.value);
-        const swatchStyle = hex ? ` style="background:${e(hex)}"` : "";
-        return `<div class="token-row">
-          <span class="swatch"${swatchStyle} aria-label="${hex ? `Color ${e(hex)}` : "No safe static color preview"}"></span>
-          <div><strong>${e(definition.name)}</strong><div class="muted">${e(definition.kind)} · ${e(definition.sourceType)}</div></div>
-          <code>${e(definition.value)}</code>
-          <div class="file"><code>${e(definition.file)}:${e(definition.line)}</code><div class="muted">${e(definition.selector)}</div></div>
-        </div>`;
-      }
-
-      function decisionCard(conflict) {
-        const conflictDefinitions = conflict.definitionIds.map((id) => definitions.get(id)).filter(Boolean);
-        const state = persisted[conflict.id] || {};
-        const ownerOptions = conflict.ownerIds.map((id) => owners.get(id)).filter(Boolean);
-        return `<article class="conflict" data-conflict-id="${e(conflict.id)}">
-          <div class="conflict-head">
-            <div><span class="pill ${conflict.type === "semantic-conflict" || conflict.type === "owner-conflict" ? "high" : "medium"}">${e(conflict.type)}</span><h3>${e(conflict.title || conflict.type)}</h3></div>
-            <span class="pill">${Math.round(conflict.confidence * 100)}% source confidence</span>
-          </div>
-          <p>${e(conflict.reason)}</p>
-          <div class="token-list">${conflictDefinitions.slice(0, 80).map(tokenRow).join("") || '<div class="empty">This owner-level conflict summarizes multiple definition sources.</div>'}</div>
-          <fieldset class="decision">
-            <legend><strong>Decision draft</strong></legend>
-            <div class="choice-grid">${choices.map(([value, label]) => `<label class="choice"><input type="radio" name="decision-${e(conflict.id)}" value="${e(value)}" ${state.decision === value ? "checked" : ""}><span>${e(label)}</span></label>`).join("")}</div>
-            <div class="decision-fields">
-              <label>Canonical owner<select data-field="canonicalOwnerId"><option value="">Not selected</option>${ownerOptions.map((owner) => `<option value="${e(owner.id)}" ${state.canonicalOwnerId === owner.id ? "selected" : ""}>${e(owner.file)}</option>`).join("")}</select></label>
-              <label>Review note<textarea data-field="note" placeholder="Why this decision is safe, or what remains unknown">${e(state.note || "")}</textarea></label>
-            </div>
-          </fieldset>
-        </article>`;
-      }
-      setHtml("conflict-list", report.conflicts.map(decisionCard).join("") || '<div class="empty">No review-required Token conflict was detected. Confirm source coverage before treating this as proof of consistency.</div>');
-
-      function findingRow(finding) {
-        const searchable = `${finding.severity} ${finding.ruleId} ${finding.file} ${finding.evidence}`.toLowerCase();
-        return `<article class="finding" data-severity="${e(finding.severity)}" data-search="${e(searchable)}">
-          <span class="pill ${e(finding.severity)}">${e(finding.severity)}</span>
-          <div><strong>${e(finding.ruleId)}</strong><div class="file"><code>${e(finding.file)}:${e(finding.line)}</code></div></div>
-          <div class="evidence"><code>${e(finding.evidence)}</code><div class="muted">${e(finding.suggestedAction)}</div></div>
-        </article>`;
-      }
-      const severityOrder = { high: 0, medium: 1, low: 2 };
-      const visibleFindings = [...report.findings].sort((left, right) => (severityOrder[left.severity] - severityOrder[right.severity]) || (right.confidence - left.confidence) || left.file.localeCompare(right.file)).slice(0, 2500);
-      const findingPageSize = matchMedia("(max-width: 720px)").matches ? 80 : 200;
-      let findingLimit = findingPageSize;
-      document.getElementById("load-more-findings").textContent = `Load ${findingPageSize} more findings`;
-      if (report.findings.length > visibleFindings.length) {
-        document.getElementById("finding-list").insertAdjacentHTML("beforebegin", `<div class="notice" role="note">Showing the 2,500 highest-priority findings in HTML. The complete evidence set remains in audit.json.</div>`);
-      }
-      setHtml("unassessed", report.scan.unassessedAreas.map((item) => `<li>${e(item)}</li>`).join(""));
-      setHtml("next-actions", report.nextActions.map((item) => `<li>${e(item)}</li>`).join(""));
-      document.getElementById("footer").textContent = `Report ${report.reportId} · Ruleset ${report.rulesetVersion} · Generated ${report.generatedAt}`;
-
-      function collectDecisions() {
-        const decisions = [];
-        document.querySelectorAll("[data-conflict-id]").forEach((card) => {
-          const conflictId = card.dataset.conflictId;
-          const selected = card.querySelector('input[type="radio"]:checked');
-          decisions.push({
-            conflictId,
-            decision: selected ? selected.value : "defer",
-            canonicalOwnerId: card.querySelector('[data-field="canonicalOwnerId"]').value || null,
-            note: card.querySelector('[data-field="note"]').value.trim(),
-          });
-        });
-        return decisions;
-      }
-
-      function saveDraft() {
-        const keyed = Object.fromEntries(collectDecisions().map((item) => [item.conflictId, item]));
-        localStorage.setItem(storageKey, JSON.stringify(keyed));
-      }
-      document.getElementById("conflict-list").addEventListener("input", saveDraft);
-
-      document.getElementById("export-decisions").addEventListener("click", () => {
-        saveDraft();
-        const value = {
-          schemaVersion: 1,
-          reportId: report.reportId,
-          repoId: report.repoId,
-          status: "draft",
-          createdAt: new Date().toISOString(),
-          decisions: collectDecisions(),
-        };
-        const blob = new Blob([`${JSON.stringify(value, null, 2)}\n`], { type: "application/json" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "token-decisions.json";
-        document.body.append(link);
-        link.click();
-        link.remove();
-        document.getElementById("export-status").textContent = "Decision draft prepared as token-decisions.json";
-        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-      });
-
-      const fileInput = document.getElementById("decision-file");
-      document.getElementById("import-decisions").addEventListener("click", () => fileInput.click());
-      fileInput.addEventListener("change", async () => {
-        const file = fileInput.files && fileInput.files[0];
-        if (!file) return;
-        try {
-          const value = JSON.parse(await file.text());
-          if (value.schemaVersion !== 1 || value.reportId !== report.reportId || value.repoId !== report.repoId || !Array.isArray(value.decisions)) throw new Error("This draft does not match the current report");
-          const keyed = Object.fromEntries(value.decisions.map((item) => [item.conflictId, item]));
-          localStorage.setItem(storageKey, JSON.stringify(keyed));
-          location.reload();
-        } catch (error) {
-          alert(`Could not import decision draft: ${error.message}`);
+      const brief = report.reviewBrief;
+      const translations = {
+        en: {
+          "language.label": "Report language", "hero.eyebrow": "GovernUI · Design-library review", "hero.import": "Import previous review", "hero.guideLabel": "Review sequence", "hero.guideCurrent": "1 · Current", "hero.guideCurrentHelp": "See the real styles and variants found in the product.", "hero.guideTarget": "2 · Target", "hero.guideTargetHelp": "Compare them with a standard design-library contract.", "hero.guideDecide": "3 · Decide", "hero.guideDecideHelp": "Choose what to keep, merge, scope, or verify.",
+          "nav.label": "Report sections", "nav.overview": "01 · Conclusion", "nav.blueprint": "02 · Design-library map", "nav.decisions": "03 · Compare and decide", "nav.technical": "04 · Engineer details",
+          "overview.eyebrow": "Start here", "overview.title": "What to keep and what to fix first", "overview.description": "Read the product conclusion first. Scanner counts stay in the optional engineer appendix.",
+          "summary.keep": "Keep", "summary.change": "Change first", "summary.later": "Verify later", "summary.action": "There are {count} product decisions to review.", "summary.start": "Review {count} decisions",
+          "blueprint.eyebrow": "Design-library map", "blueprint.title": "From foundations to complete interactions", "blueprint.description": "The report now reads like a component library: open a category to see its current inventory, visual or state matrix, target contract, and recommendation.", "blueprint.static": "Static foundations and components", "blueprint.dynamic": "Interaction states and coordinated behavior", "blueprint.dynamicDescription": "The dynamic system describes how components respond and work together. Runtime-only behavior remains explicitly unverified.",
+          "layer.Foundation": "Foundation", "layer.Atoms": "Atoms", "layer.Molecules": "Molecules", "layer.Components": "Components",
+          "layerPurpose.Foundation": "Color, typography, spacing, radius, shadow, motion, and layer rules.", "layerPurpose.Atoms": "Small controls such as Button, Input, Checkbox, and Switch.", "layerPurpose.Molecules": "Compositions such as FormField, Select, Popover, and Tooltip.", "layerPurpose.Components": "Product surfaces such as Dialog, Sheet, and Toast.",
+          "status.detected": "Existing source found", "status.missing": "Not yet confirmed",
+          "dynamic.Controls": "Controls", "dynamic.Dialog / Sheet": "Dialog and Sheet", "dynamic.Popover / Dropdown / Tooltip": "Popover, Dropdown, and Tooltip", "dynamic.Toast": "Toast",
+          "dynamic.states.Controls": "States: default, hover, focus, active, disabled, loading, and invalid", "dynamic.focus.Controls": "Focus: visible keyboard focus without trapping the user", "dynamic.layer.Controls": "Layer: normal page content",
+          "dynamic.states.Dialog / Sheet": "States: closed, opening, open, closing, and nested", "dynamic.focus.Dialog / Sheet": "Focus: contained while open and restored to the trigger on close", "dynamic.layer.Dialog / Sheet": "Layer: modal",
+          "dynamic.states.Popover / Dropdown / Tooltip": "States: closed, opening, open, closing, and collision-adjusted", "dynamic.focus.Popover / Dropdown / Tooltip": "Focus: managed by role and restored to the trigger on close", "dynamic.layer.Popover / Dropdown / Tooltip": "Layer: floating",
+          "dynamic.states.Toast": "States: queued, entering, visible, paused, exiting, and dismissed", "dynamic.focus.Toast": "Focus: never taken automatically", "dynamic.layer.Toast": "Layer: notification",
+          "decisions.eyebrow": "Compare and decide", "decisions.title": "Review the current and target design side by side", "decisions.description": "Each review sheet shows the current product, the intended design-system result, and the recommended convergence path before asking for a choice.", "decisions.searchLabel": "Find a decision", "decisions.searchPlaceholder": "Search by screen, style, or question", "decisions.progress": "{done} of {total} decided", "decisions.empty": "No decision matches this search.",
+          "category.token": "Visual rule", "category.component": "Component", "category.overlay": "Layering", "category.ownership": "Ownership", "category.behavior": "Behavior",
+          "state.current": "Current state", "state.target": "Target result", "state.recommendation": "Recommendation", "state.recommended": "Recommended",
+          "confidence.high": "High confidence", "confidence.medium": "Medium confidence", "confidence.low": "Needs more verification",
+          "evidence.fact": "What we confirmed", "evidence.impact": "Why this matters", "evidence.engineer": "View source details (engineers)", "evidence.none": "No raw source reference was attached to this brief.", "specimen.styleSource": "Style source", "specimen.sharedUI": "Shared UI",
+          "choice.legend": "What should happen?", "choice.recommended": "Recommended", "choice.note": "Add product context for Codex (optional)", "choice.notePlaceholder": "For example: this difference is intentional on the Dashboard page",
+          "completion.title": "Return your review to Codex", "completion.description": "Export the draft JSON and attach it in the conversation. You do not need to return the HTML file.", "completion.export": "Export review draft", "completion.status": "Exported {count} decisions. Unreviewed decisions were omitted.", "completion.none": "Choose at least one decision before exporting.",
+          "import.success": "Imported {count} reviewed decisions.", "import.error": "Could not import this draft: {message}",
+          "technical.eyebrow": "Optional appendix", "technical.title": "Engineer details", "technical.description": "You can ignore this section unless you need to verify how a conclusion was derived.", "technical.sources": "Raw style entry points", "technical.findings": "Raw scanner findings", "technical.coverage": "Scan coverage and limitations", "technical.findingLimit": "Showing the first {count} source findings here. The complete set remains in audit.json.",
+          "term.files": "Files inspected", "term.filesHelp": "Source files the scanner actually read. This is coverage, not a quality score.", "term.definitions": "Style definitions", "term.definitionsHelp": "Places where the repository assigns a color, spacing, typography, or other visual value.", "term.owners": "Possible entry points", "term.ownersHelp": "Files that currently look responsible for many shared style definitions. They are not automatically the final owner.", "term.components": "Shared controls found", "term.componentsHelp": "Files with exact primitive names such as Button or Dialog. Feature files are not counted as owners.", "term.findings": "Source observations", "term.findingsHelp": "Scanner observations that may require review. They are evidence, not automatically bugs.", "term.groups": "Decision groups", "term.groupsHelp": "Related observations bundled into one product decision.",
+          "coverage.scanned": "The scanner inspected {files} source files and skipped {skipped} entries according to its scope rules.", "coverage.unassessed": "Still not verified by source scanning:",
+          "primitive.color": "Color", "primitive.typography": "Typography", "primitive.spacing": "Spacing", "primitive.radius": "Radius", "primitive.shadow": "Shadow", "primitive.motion": "Motion", "primitive.layer": "Layer", "primitive.button": "Button", "primitive.iconbutton": "Icon button", "primitive.input": "Input", "primitive.textarea": "Textarea", "primitive.checkbox": "Checkbox", "primitive.radio": "Radio", "primitive.switch": "Switch", "primitive.formfield": "Form field", "primitive.select": "Select", "primitive.dropdown": "Dropdown", "primitive.popover": "Popover", "primitive.tooltip": "Tooltip", "primitive.dialog": "Dialog", "primitive.sheet": "Sheet", "primitive.toast": "Toast"
+        },
+        zh: {
+          "language.label": "报告语言", "hero.eyebrow": "GovernUI · 设计组件库评审", "hero.import": "导入上次评审", "hero.guideLabel": "评审顺序", "hero.guideCurrent": "1 · 看现状", "hero.guideCurrentHelp": "先看项目里真实存在的样式、组件和状态。", "hero.guideTarget": "2 · 看目标", "hero.guideTargetHelp": "再对照标准设计组件库应该形成的契约。", "hero.guideDecide": "3 · 做决定", "hero.guideDecideHelp": "选择保留、合并、限定范围或补充验证。",
+          "nav.label": "报告章节", "nav.overview": "01 · 先看结论", "nav.blueprint": "02 · 组件库全景", "nav.decisions": "03 · 对比与决策", "nav.technical": "04 · 工程师详情",
+          "overview.eyebrow": "从这里开始", "overview.title": "哪些保留，哪些优先处理", "overview.description": "先阅读产品结论。扫描数量等技术信息只放在可选的工程师附录里。",
+          "summary.keep": "建议保留", "summary.change": "优先处理", "summary.later": "后续验证", "summary.action": "当前有 {count} 个产品问题需要你判断。", "summary.start": "开始评审 {count} 个问题",
+          "blueprint.eyebrow": "设计组件库全景", "blueprint.title": "从基础规范到完整交互", "blueprint.description": "报告按照真正的组件库来阅读：展开每一类，依次查看当前盘点、视觉或状态矩阵、标准目标与收敛建议。", "blueprint.static": "静态规范与组件", "blueprint.dynamic": "交互状态与组合行为", "blueprint.dynamicDescription": "动态系统说明组件如何响应、如何协同；只能在运行时确认的行为会明确标记为尚未验证。",
+          "layer.Foundation": "基础层", "layer.Atoms": "原子层", "layer.Molecules": "分子层", "layer.Components": "组件层",
+          "layerPurpose.Foundation": "颜色、文字、间距、圆角、阴影、动效与层级规则。", "layerPurpose.Atoms": "Button、Input、Checkbox、Switch 等小型基础控件。", "layerPurpose.Molecules": "FormField、Select、Popover、Tooltip 等组合控件。", "layerPurpose.Components": "Dialog、Sheet、Toast 等产品级界面。",
+          "status.detected": "已找到现有实现", "status.missing": "尚未确认",
+          "dynamic.Controls": "基础控件", "dynamic.Dialog / Sheet": "Dialog 与 Sheet", "dynamic.Popover / Dropdown / Tooltip": "Popover、Dropdown 与 Tooltip", "dynamic.Toast": "Toast",
+          "dynamic.states.Controls": "状态：默认、悬停、键盘焦点、按下、禁用、加载与错误", "dynamic.focus.Controls": "焦点：键盘焦点清晰可见，但不会限制用户离开", "dynamic.layer.Controls": "层级：普通页面内容",
+          "dynamic.states.Dialog / Sheet": "状态：关闭、打开中、已打开、关闭中与嵌套", "dynamic.focus.Dialog / Sheet": "焦点：打开时限制在弹窗内，关闭后回到触发按钮", "dynamic.layer.Dialog / Sheet": "层级：弹窗层",
+          "dynamic.states.Popover / Dropdown / Tooltip": "状态：关闭、打开中、已打开、关闭中与防碰撞调整", "dynamic.focus.Popover / Dropdown / Tooltip": "焦点：按控件角色管理，关闭后回到触发按钮", "dynamic.layer.Popover / Dropdown / Tooltip": "层级：浮层",
+          "dynamic.states.Toast": "状态：排队、进入、显示、暂停、退出与关闭", "dynamic.focus.Toast": "焦点：绝不自动抢占用户焦点", "dynamic.layer.Toast": "层级：通知层",
+          "decisions.eyebrow": "对比与决策", "decisions.title": "把当前样式与目标组件库并排比较", "decisions.description": "每张评审页先展示现状、目标和收敛建议，再请你选择处理方式；保存的仍只是草稿，不会修改源码。", "decisions.searchLabel": "查找决策问题", "decisions.searchPlaceholder": "搜索页面、样式或问题", "decisions.progress": "已决定 {done}/{total}", "decisions.empty": "没有符合当前搜索条件的决策问题。",
+          "category.token": "视觉规则", "category.component": "组件", "category.overlay": "界面层级", "category.ownership": "归属", "category.behavior": "交互行为",
+          "state.current": "当前现状", "state.target": "目标效果", "state.recommendation": "我的建议", "state.recommended": "建议采用",
+          "confidence.high": "把握较高", "confidence.medium": "把握中等", "confidence.low": "还需要补充验证",
+          "evidence.fact": "我们确认了什么", "evidence.impact": "这会影响什么", "evidence.engineer": "查看源码详情（工程师）", "evidence.none": "这份简报没有附带原始源码位置。", "specimen.styleSource": "样式来源", "specimen.sharedUI": "公共界面",
+          "choice.legend": "你希望怎么处理？", "choice.recommended": "推荐", "choice.note": "补充产品背景，交给 Codex（可选）", "choice.notePlaceholder": "例如：Dashboard 页面有意使用不同的品牌样式",
+          "completion.title": "把评审结果交回 Codex", "completion.description": "导出 JSON 草稿并在对话里发送给 Codex；不需要把 HTML 文件传回来。", "completion.export": "导出评审草稿", "completion.status": "已导出 {count} 个决定；没有选择的问题不会写入草稿。", "completion.none": "请至少完成一个决定后再导出。",
+          "import.success": "已导入 {count} 个评审结果。", "import.error": "无法导入这份草稿：{message}",
+          "technical.eyebrow": "可选附录", "technical.title": "工程师详情", "technical.description": "除非你需要核对结论是怎么得出的，否则可以忽略整个章节。", "technical.sources": "原始样式入口", "technical.findings": "扫描器原始发现", "technical.coverage": "扫描范围与局限", "technical.findingLimit": "这里只展示前 {count} 条源码发现；完整内容保存在 audit.json。",
+          "term.files": "检查过的文件", "term.filesHelp": "扫描器真正读取过的源码文件数量。它表示覆盖范围，不代表代码质量。", "term.definitions": "样式定义位置", "term.definitionsHelp": "仓库里给颜色、间距、文字或其他视觉属性赋值的位置。", "term.owners": "可能的样式入口", "term.ownersHelp": "当前集中保存较多公共样式的文件；它们只是线索，不代表已经确认最终归属。", "term.components": "发现的公共控件", "term.componentsHelp": "文件名明确是 Button、Dialog 等基础控件的实现；功能页面不会因此被当作公共组件。", "term.findings": "源码观察", "term.findingsHelp": "扫描器发现的可疑现象，可能需要评审；它们不是自动成立的 Bug。", "term.groups": "决策问题", "term.groupsHelp": "把互相关联的源码观察合并成一个用户需要判断的问题。",
+          "coverage.scanned": "扫描器检查了 {files} 个源码文件，并根据范围规则跳过了 {skipped} 个条目。", "coverage.unassessed": "仅靠源码仍无法确认：",
+          "primitive.color": "颜色", "primitive.typography": "文字", "primitive.spacing": "间距", "primitive.radius": "圆角", "primitive.shadow": "阴影", "primitive.motion": "动效", "primitive.layer": "层级", "primitive.button": "按钮", "primitive.iconbutton": "图标按钮", "primitive.input": "输入框", "primitive.textarea": "多行输入", "primitive.checkbox": "复选框", "primitive.radio": "单选", "primitive.switch": "开关", "primitive.formfield": "表单项", "primitive.select": "选择器", "primitive.dropdown": "下拉菜单", "primitive.popover": "浮层", "primitive.tooltip": "提示", "primitive.dialog": "对话框", "primitive.sheet": "侧边面板", "primitive.toast": "消息提示"
         }
-      });
+      };
 
-      function filteredFindings() {
-        const search = document.getElementById("finding-search").value.trim().toLowerCase();
-        const severity = document.getElementById("severity-filter").value;
-        return visibleFindings.filter((finding) => {
-          const searchable = `${finding.severity} ${finding.ruleId} ${finding.file} ${finding.evidence}`.toLowerCase();
-          return (!search || searchable.includes(search)) && (severity === "all" || finding.severity === severity);
+      const systemTranslations = {
+        en: {
+          "system.static": "Static system", "system.dynamic": "Dynamic system",
+          "layer.foundation": "Foundation", "layer.atoms": "Atoms and primitives", "layer.molecules": "Molecules", "layer.components": "Components", "layer.patterns": "Patterns and templates",
+          "layer.interaction-foundation": "Interaction foundation", "layer.component-behavior": "Component behavior", "layer.cross-component-orchestration": "Cross-component orchestration", "layer.flow-lifecycle": "Flow and lifecycle",
+          "layerPurpose.foundation": "Visual decisions, token architecture, layout rules, assets, and accessibility baselines.", "layerPurpose.atoms": "Small reusable building blocks with stable anatomy and ownership.", "layerPurpose.molecules": "Local compositions that coordinate input, disclosure, navigation, or feedback.", "layerPurpose.components": "Reusable product surfaces organized by user function.", "layerPurpose.patterns": "Repeated experience patterns that compose foundations and components.",
+          "layerPurpose.interaction-foundation": "Shared state, input, feedback, and motion language.", "layerPurpose.component-behavior": "Behavior contracts inside interactive components.", "layerPurpose.cross-component-orchestration": "Portal, focus, scroll, queue, and gesture coordination across components.", "layerPurpose.flow-lifecycle": "Loading, navigation, persistence, adaptation, permissions, and runtime accessibility.",
+          "categoryName.token-architecture": "Token architecture and ownership", "categoryName.color": "Color", "categoryName.typography": "Typography", "categoryName.spacing-density": "Spacing, size, and density", "categoryName.grid-responsive": "Grid and responsive", "categoryName.shape-stroke": "Shape and stroke", "categoryName.depth-layer": "Depth and layer", "categoryName.icon-assets": "Icons and assets", "categoryName.motion-parameters": "Motion parameters", "categoryName.accessibility-baseline": "Accessibility baseline",
+          "categoryName.layout-primitives": "Layout primitives", "categoryName.content-primitives": "Content primitives", "categoryName.action-primitives": "Action primitives", "categoryName.input-primitives": "Input primitives", "categoryName.selection-primitives": "Selection primitives", "categoryName.status-primitives": "Status primitives",
+          "categoryName.field-composition": "Field composition", "categoryName.selection-disclosure": "Selection and disclosure", "categoryName.navigation-aids": "Navigation aids", "categoryName.anchored-feedback": "Anchored feedback",
+          "categoryName.navigation-components": "Navigation", "categoryName.data-display": "Data display", "categoryName.overlay-components": "Overlays", "categoryName.messaging-feedback": "Messaging and feedback", "categoryName.complex-input": "Complex input", "categoryName.product-components": "Product-specific components",
+          "categoryName.page-layout-patterns": "Page layout patterns", "categoryName.form-validation-patterns": "Form and validation patterns", "categoryName.search-filter-patterns": "Search, filter, and sort patterns", "categoryName.loading-empty-error-patterns": "Loading, empty, and error patterns", "categoryName.destructive-permission-patterns": "Destructive and permission patterns", "categoryName.responsive-composition-patterns": "Responsive composition patterns",
+          "categoryName.state-vocabulary": "State vocabulary", "categoryName.input-modalities": "Input modalities", "categoryName.feedback-contract": "Feedback contract", "categoryName.motion-rules": "Motion rules",
+          "categoryName.activation-selection": "Activation and selection", "categoryName.input-validation": "Input and validation", "categoryName.focus-keyboard": "Focus and keyboard", "categoryName.disclosure-dismissal": "Disclosure and dismissal", "categoryName.async-feedback": "Async feedback",
+          "categoryName.portal-layering": "Portal and layering", "categoryName.focus-orchestration": "Focus orchestration", "categoryName.scroll-management": "Scroll management", "categoryName.global-managers": "Global managers", "categoryName.drag-gesture": "Drag and gesture",
+          "categoryName.loading-recovery": "Loading and recovery", "categoryName.navigation-restoration": "Navigation and restoration", "categoryName.persistence": "Persistence", "categoryName.responsive-adaptation": "Responsive adaptation", "categoryName.permission-session": "Permissions and session", "categoryName.runtime-accessibility": "Runtime accessibility",
+          "standard.token-architecture": "Define primitive, semantic, and component tokens, plus aliases, scope boundaries, and one accountable owner.", "standard.color": "Map primitive colors to semantic roles and then to component tokens; keep brand, theme, and data-visualization scopes explicit.", "standard.typography": "Define families, script fallbacks, semantic text roles, scale, weight, line height, tracking, and numeric styles.", "standard.spacing-density": "Separate component inset, inter-component spacing, layout spacing, control sizing, and density modes.", "standard.grid-responsive": "Define breakpoints, containers, columns, gutters, reflow rules, and safe areas.", "standard.shape-stroke": "Define radius, borders, dividers, and focus rings as deliberate shared roles.", "standard.depth-layer": "Define elevation, shadow, opacity, scrim, blur, semantic layers, and stacking-context ownership.", "standard.icon-assets": "Define approved assets, icon grid, size, stroke/fill, logos, illustration, and imagery rules.", "standard.motion-parameters": "Define duration, easing, delay, spring parameters, and reduced-motion alternatives.", "standard.accessibility-baseline": "Define contrast, text and target minimums, visible focus, and non-color state cues.",
+          "standard.layer.atoms": "A standard primitive category has one public owner, documented anatomy, variants, sizes, tokens, and applicable states.", "standard.layer.molecules": "A standard molecule coordinates its child primitives through one clear API and state contract.", "standard.layer.components": "A standard component solves a reusable user problem with explicit ownership, variants, accessibility, and behavior.", "standard.layer.patterns": "A standard pattern documents how components work together across a complete user task and its edge states.",
+          "standard.layer.interaction-foundation": "A standard interaction foundation defines shared states, precedence, input methods, feedback, and motion rules.", "standard.layer.component-behavior": "A standard component behavior contract defines events, focus, validation, dismissal, and async states.", "standard.layer.cross-component-orchestration": "A standard orchestration contract defines ownership when multiple components share portals, focus, scroll, queues, or gestures.", "standard.layer.flow-lifecycle": "A standard lifecycle contract defines transitions across loading, navigation, persistence, adaptation, permissions, and accessibility.",
+          "panel.current": "Current inventory", "panel.target": "Standard target", "panel.recommendation": "Recommendation", "panel.subcategories": "Subcategories and expected coverage", "panel.appliesTo": "Applies to",
+          "recommendation.fragmented": "Compare real owners and scopes, then choose what becomes shared and what remains an explicit exception.", "recommendation.missing": "Confirm the category is applicable, then establish the smallest governing owner before migrating consumers.", "recommendation.partial": "Keep the working foundation, close role and state gaps, and migrate bypasses in bounded slices.", "recommendation.detected": "Keep the detected source, verify ownership and runtime behavior, then document the contract.", "recommendation.not-detected": "Confirm whether this category is used. Do not invent it solely because it appears in the standard taxonomy.", "recommendation.unverified": "Inspect real rendered and runtime behavior before approving this category.",
+          "status.fragmented": "Fragmented", "status.missing": "System missing", "status.partial": "Partial", "status.detected": "Source found", "status.not-detected": "Not detected", "status.unverified": "Runtime unverified",
+          "metric.definition-files": "Definition files", "metric.definitions": "Canonical definitions", "metric.unique-values": "Unique values", "metric.references": "References", "metric.brand-roles": "Names containing Brand", "metric.primary-roles": "Names containing Primary", "metric.observed-primary-uses": "Observed primary-action use", "metric.secondary-roles": "Names containing Secondary", "metric.tertiary-roles": "Names containing Tertiary", "metric.hardcoded-occurrences": "Hardcoded occurrences", "metric.hardcoded-files": "Files with hardcodes", "metric.class-selectors": "Selectors assigning color", "metric.value-collision-groups": "Same-value name groups", "metric.semantic-conflict-groups": "Conflicting role groups", "metric.theme-scope-definitions": "Theme/scope definitions", "metric.source-findings": "Source observations", "metric.implementations": "Implementations", "metric.owner-implementations": "Owner candidates", "metric.adapters": "Adapters", "metric.covered-items": "Items detected", "metric.applicable-components": "Applicable components found", "metric.runtime-checks": "Runtime checks completed",
+          "subcategory.primitive-palette": "Primitive palette", "subcategory.brand-action": "Brand and action hierarchy", "subcategory.semantic-surface": "Surface, content, and border roles", "subcategory.feedback-color": "Feedback colors", "subcategory.interaction-color": "Interaction-state colors", "subcategory.theme-scope": "Theme and scope", "subcategory.data-visualization": "Data visualization",
+          "subcategory.font-family": "Font families and scripts", "subcategory.type-roles": "Semantic text roles", "subcategory.type-scale": "Type scale", "subcategory.type-metrics": "Weight, line height, and tracking", "subcategory.numeric-code": "Numeric and code styles", "subcategory.responsive-type": "Responsive typography",
+          "subcategory.spacing-scale": "Spacing scale", "subcategory.component-spacing": "Component inset", "subcategory.layout-spacing": "Layout spacing", "subcategory.control-sizing": "Control sizing", "subcategory.density-modes": "Density modes",
+          "subcategory.breakpoints": "Breakpoints", "subcategory.containers": "Containers", "subcategory.columns-gutters": "Columns and gutters", "subcategory.responsive-rules": "Responsive rules", "subcategory.safe-area": "Safe areas",
+          "subcategory.radius-scale": "Radius scale", "subcategory.border-width": "Border width", "subcategory.border-style": "Border style", "subcategory.dividers": "Dividers", "subcategory.focus-ring": "Focus ring",
+          "subcategory.elevation": "Elevation", "subcategory.shadow": "Shadow", "subcategory.opacity-scrim": "Opacity and scrim", "subcategory.blur": "Blur", "subcategory.z-index-stack": "Layer and stacking context",
+          "subcategory.icon-library": "Icon library", "subcategory.icon-size-grid": "Icon size and grid", "subcategory.stroke-fill": "Stroke and fill", "subcategory.logos": "Logos", "subcategory.illustration-image": "Illustration and imagery",
+          "subcategory.duration": "Duration", "subcategory.easing": "Easing", "subcategory.delay": "Delay", "subcategory.spring": "Spring parameters", "subcategory.reduced-motion": "Reduced motion",
+          "subcategory.contrast": "Contrast", "subcategory.minimum-text": "Minimum text size", "subcategory.touch-target": "Touch targets", "subcategory.focus-visibility": "Focus visibility", "subcategory.non-color-cues": "Non-color cues",
+          "color.categoryHint": "Open the complete color-system review: current sources, real palettes, role conflicts, consolidation plan, and target contract.",
+          "color.section.conclusion": "Color-system conclusion", "color.section.systems": "1 · Current color sources and palettes", "color.section.systemsHelp": "Each lane is one independent canonical source. Framework adapters stay attached to the source they consume instead of being counted as another design system.",
+          "color.section.roles": "2 · How current colors describe the same roles", "color.section.rolesHelp": "This comparison is based on declared token names and scopes. It does not claim that a color is visually used as the primary action until rendered screens are inspected.",
+          "color.section.hardcodes": "3 · Colors that bypass the system", "color.section.hardcodesHelp": "Repeated literals are grouped by actual color, then mapped to an existing token only when source evidence supports that mapping.",
+          "color.section.convergence": "4 · What to keep, merge, or scope", "color.section.convergenceHelp": "These are source-derived consolidation recommendations. Product intent still decides whether a difference is global, themed, branded, or legacy.",
+          "color.section.target": "5 · Proposed target color contract", "color.section.targetHelp": "Use {candidate} as the starting candidate, then complete the missing roles. This is one semantic contract with controlled theme mappings—not one flat list of hex values.",
+          "color.verdict.fragmented": "There are {systems} independent color sources. {candidate} is the strongest source-derived candidate, but the global color contract is not yet unified.", "color.verdict.detected": "One color source currently covers the standard contract. Keep it as the candidate and verify the rendered product.", "color.verdict.partial": "A color source exists, but the palette and semantic roles are incomplete.",
+          "color.candidate.strong-source-candidate": "The candidate has the strongest ownership, scope, and role evidence in source. Its actual visual hierarchy still needs product and runtime confirmation.", "color.candidate.needs-owner-decision": "Two or more sources have similar evidence. Choose the intended global owner before consolidating values.", "color.candidate.unverified": "No viable canonical color source was found.",
+          "color.health.palette": "Is there a real palette?", "color.health.paletteDetail": "{count} scale-based primitive colors found", "color.health.semantic": "Are semantic roles defined?", "color.health.semanticDetail": "{count} tokens cover {covered}/{total} core roles", "color.health.component": "Are component colors defined?", "color.health.componentDetail": "{count} component-specific color tokens found", "color.health.contract": "Is global usage governed?", "color.health.contractDetail": "{count} independent canonical color sources found",
+          "color.sourceType.css-variable": "CSS variables", "color.sourceType.js-theme": "JS/TS theme", "color.sourceType.json-token": "JSON tokens", "color.sourceType.tailwind-config": "Tailwind adapter", "color.approachCounts": "{canonical} source definitions · {adapters} adapters · {files} files",
+          "color.systemLabel": "Color source {number}", "color.systemShort": "Source {number}", "color.systemDecisionLabel": "Source {number} · {kind}", "color.systemKind.keep-candidate": "Global color candidate", "color.systemKind.merge-deprecate": "Likely legacy colors", "color.systemKind.preserve-scope": "Theme or brand colors", "color.systemKind.compare-or-merge": "Unconfirmed color source", "color.scope.global-candidate": "Global candidate", "color.scope.theme-or-scope": "Theme or scoped", "color.scope.legacy": "Legacy", "color.scope.unclear": "Scope unclear",
+          "color.action.keep-candidate": "Keep as leading candidate", "color.action.merge-deprecate": "Merge and deprecate", "color.action.preserve-scope": "Keep only if scope is intentional", "color.action.compare-or-merge": "Compare and decide", "color.actionTarget": "Consolidate into {target} after review.", "color.actionKeepReason": "Keep this source, then complete its missing roles and scope contract.",
+          "color.role.brand": "Brand", "color.role.action-primary": "Primary action", "color.role.action-secondary": "Secondary action", "color.role.action-tertiary": "Tertiary action", "color.role.background": "Page background", "color.role.surface": "Surface", "color.role.content": "Text and content", "color.role.border": "Border and divider", "color.role.success": "Success", "color.role.warning": "Warning", "color.role.error": "Error", "color.role.info": "Information", "color.role.interaction": "Interaction states", "color.role.data-visualization": "Data visualization", "color.role.other": "Unclassified",
+          "color.notDefined": "Not defined", "color.targetMissing": "Missing from target", "color.roleColumn": "Standard role", "color.targetColumn": "Proposed target",
+          "color.hardcodeUsage": "{count} uses across {files} files", "color.hardcodeMapped": "Exact token match found: {token}; remap after the owner decision.", "color.mapping.candidate-match": "Matches the leading candidate", "color.mapping.single-match": "Matches one existing token", "color.mapping.ambiguous-match": "Matches several tokens; choose the intended role", "color.mapping.unmapped": "No existing token match; decide the semantic role", "color.noHardcodes": "No hardcoded color literals were found in the scanned product source.",
+          "color.systemActions": "Color-source decisions", "color.tokenDecisions": "Conflicting token decisions", "color.tokenAction.merge-alias": "Merge through one canonical token or compatibility alias", "color.tokenAction.map-to-candidate": "Map competing values to the reviewed candidate", "color.tokenAction.choose-owner": "Choose the canonical owner first", "color.tokenTarget": "Proposed target token: {token}", "color.tokenTargetMissing": "No safe target can be inferred yet.", "color.noTokenDecisions": "No same-name cross-source token decision was detected.",
+          "color.targetPaletteMissing": "No scale-based primitive palette is defined in the candidate. Build or explicitly adopt one before claiming a complete palette.", "color.targetSemanticMissing": "No semantic color layer is defined in the candidate.", "color.targetRolesMissing": "Still missing: {roles}.", "color.targetRolesComplete": "All core semantic role families are represented in source.", "color.targetComponentMissing": "No component-specific color tokens were found. Add them only where a component needs a stable contract beyond semantic roles.",
+          "color.previewTitle": "Source-derived component preview", "color.previewDescription": "This uses current candidate values only. It is evidence for comparison, not an approved visual design.", "color.previewButton": "Primary action", "color.previewUnavailable": "The candidate lacks enough surface, content, and action roles to render an honest component preview.",
+          "color.sourceDerived": "Source-derived proposal", "color.nextTitle": "Now confirm the product decisions", "color.nextDescription": "Choose the global owner, intentional theme scopes, token merges, and allowed exceptions. Exported choices remain a draft.", "color.reviewDecisions": "Review related decisions", "color.noSystems": "No canonical color source was detected.", "color.none": "none",
+          "foundation.categoryHint": "Open the full review: current sources, role coverage, visual scale, direct values, utility patterns, consolidation, and target contract.", "foundation.categorySummary": "{sources} design sources · {definitions} formal definitions · {bypasses} direct values · {utilities} utility uses",
+          "foundation.section.conclusion": "System conclusion", "foundation.section.sources": "1 · Current sources and visual inventory", "foundation.section.sourcesHelp": "Each source is shown separately so a real system, scoped exception, and historical copy are not flattened into one list.", "foundation.section.roles": "2 · How the current sources cover standard roles", "foundation.section.rolesHelp": "Compare the same standard roles across sources. Names are source-derived clues, not proof of product intent.", "foundation.section.bypasses": "3 · Direct values and utility patterns", "foundation.section.bypassesHelp": "Raw CSS values are possible bypasses. Ordinary Tailwind utilities are implementation usage—not automatically debt—and are shown separately as adoption and scale evidence.", "foundation.section.convergence": "4 · What to keep, merge, or scope", "foundation.section.convergenceHelp": "Start from the strongest source candidate, preserve intentional scopes, and retire redundant owners in reviewable slices.", "foundation.section.target": "5 · Proposed target contract", "foundation.section.targetHelp": "The target reuses the strongest existing source and explicitly lists the standard roles that still need a product decision.",
+          "foundation.verdict.fragmented": "{systems} independent sources describe this foundation. A shared contract is not yet unified.", "foundation.verdict.detected": "One source covers the core standard roles. Keep it as the candidate and verify it in the rendered product.", "foundation.verdict.partial": "A source exists, but its role coverage or adoption is incomplete.", "foundation.verdict.missing": "No canonical source was found. Confirm product need before creating a new contract.",
+          "foundation.candidate": "Leading source candidate: {file}", "foundation.noCandidate": "No canonical source candidate was found.", "foundation.health.sources": "Canonical sources", "foundation.health.definitions": "Defined tokens", "foundation.health.coverage": "Standard roles covered", "foundation.health.bypasses": "Direct values", "foundation.health.utilities": "Utility-class uses", "foundation.sourceLabel": "Source {number}", "foundation.sourceCandidate": "Leading candidate", "foundation.sourceScoped": "Scoped or separate source", "foundation.tokens": "{count} definitions · {values} unique values", "foundation.none": "No source evidence found.",
+          "foundation.roleColumn": "Standard role", "foundation.targetColumn": "Proposed target", "foundation.notDefined": "Not defined", "foundation.more": "+{count} more", "foundation.bypassUsage": "{count} uses across {files} files", "foundation.usage.direct-value": "Direct CSS value", "foundation.usage.utility": "Framework utility", "foundation.bypassMapped": "Exact candidate token: {token}", "foundation.bypassUnmapped": "No safe token match; decide its intended role", "foundation.utilityNote": "Scale usage evidence; verify which Tailwind theme owns it", "foundation.action.keep-candidate": "Keep as the starting owner", "foundation.action.merge-deprecate": "Merge and phase out", "foundation.action.preserve-scope": "Keep only as an explicit scope", "foundation.action.compare-or-merge": "Compare intent, then merge or scope", "foundation.action.preserve-assets": "Keep as product-owned assets", "foundation.targetOwner": "Proposed owner", "foundation.targetTokens": "Existing candidate scale and roles", "foundation.targetMissing": "Roles still missing: {roles}", "foundation.targetComplete": "The candidate represents all core role families in source.", "foundation.noBypasses": "No direct values or utility patterns were found in scanned product source.",
+          "foundation.role.font-family": "Font family and fallback", "foundation.role.display-heading": "Display and heading", "foundation.role.body": "Body text", "foundation.role.label-caption": "Label and caption", "foundation.role.numeric-code": "Numeric and code", "foundation.role.metrics": "Weight, line height, tracking", "foundation.role.responsive": "Responsive typography", "foundation.role.base-scale": "Base scale", "foundation.role.component-inset": "Component inset", "foundation.role.component-gap": "Component gap", "foundation.role.layout": "Layout spacing", "foundation.role.control-size": "Control size", "foundation.role.density": "Density mode", "foundation.role.radius": "Radius", "foundation.role.border-width": "Border width", "foundation.role.border-style": "Border style", "foundation.role.divider": "Divider", "foundation.role.focus-ring": "Focus ring", "foundation.role.shadow": "Shadow", "foundation.role.elevation": "Elevation", "foundation.role.scrim-opacity": "Scrim and opacity", "foundation.role.blur": "Blur", "foundation.role.z-index": "Semantic layer", "foundation.role.other": "Unclassified",
+          "icon.section.sources": "1 · Current icon and asset sources", "icon.section.sourcesHelp": "Libraries, local SVG assets, imported files, and inline SVGs are counted separately.", "icon.section.contract": "2 · Current visual contract", "icon.section.contractHelp": "A usable icon system needs a primary source plus a clear grid, size, stroke/fill, and exception policy.", "icon.section.target": "3 · Proposed icon contract", "icon.section.targetHelp": "Keep one primary icon source and treat logos, illustrations, and product-specific marks as named exceptions.", "icon.verdict.fragmented": "The project uses {sources} icon or asset sources with inconsistent or incomplete visual rules.", "icon.verdict.partial": "A primary source exists, but grid, stroke, fill, or exception rules are not fully declared.", "icon.verdict.missing": "No icon source was detected in scanned product source.", "icon.categorySummary": "{sources} asset sources · {assets} icon references · {components} shared component candidates", "icon.health.sources": "Asset sources", "icon.health.assets": "Icon references", "icon.health.libraries": "Icon libraries", "icon.health.components": "Icon/Image/Avatar components", "icon.sourceUsage": "{count} references across {files} files", "icon.grid": "Grid", "icon.stroke": "Stroke", "icon.fill": "Fill", "icon.notDeclared": "Not declared", "icon.targetPrimary": "Primary source", "icon.targetRules": "Rules to confirm", "icon.targetMissing": "Contracts still missing: {items}", "icon.contract.primary-source": "primary source", "icon.contract.size-grid": "size and grid", "icon.contract.stroke-fill": "stroke and fill",
+          "target.primitive": "Primitive palette", "target.semantic": "Semantic roles", "target.component": "Component tokens", "blueprint.categoryHint": "Open to review the standard, current evidence, and recommendation.", "blueprint.detectedDisclaimer": "Source found does not mean healthy. Runtime and visual checks remain separate."
+        },
+        zh: {
+          "system.static": "静态系统", "system.dynamic": "动态系统",
+          "layer.foundation": "基础层", "layer.atoms": "原子层", "layer.molecules": "分子层", "layer.components": "组件层", "layer.patterns": "模式与模板层",
+          "layer.interaction-foundation": "交互基础层", "layer.component-behavior": "组件行为层", "layer.cross-component-orchestration": "跨组件协调层", "layer.flow-lifecycle": "流程与生命周期层",
+          "layerPurpose.foundation": "视觉决策、Token 架构、布局规则、资产与无障碍基线。", "layerPurpose.atoms": "结构稳定、有明确归属的最小可复用构件。", "layerPurpose.molecules": "负责输入、展开、导航或反馈的局部组合。", "layerPurpose.components": "按用户功能组织的可复用产品界面。", "layerPurpose.patterns": "组合基础规范与组件，完成重复出现的用户任务。",
+          "layerPurpose.interaction-foundation": "统一状态、输入、反馈与动效语言。", "layerPurpose.component-behavior": "单个交互组件内部的行为契约。", "layerPurpose.cross-component-orchestration": "跨组件协调 Portal、焦点、滚动、队列与手势。", "layerPurpose.flow-lifecycle": "加载、导航、持久化、适配、权限与运行时无障碍。",
+          "categoryName.token-architecture": "Token 架构与归属", "categoryName.color": "颜色", "categoryName.typography": "字体与排版", "categoryName.spacing-density": "间距、尺寸与密度", "categoryName.grid-responsive": "栅格与响应式", "categoryName.shape-stroke": "形状与描边", "categoryName.depth-layer": "深度与层级", "categoryName.icon-assets": "图标与资产", "categoryName.motion-parameters": "动效参数", "categoryName.accessibility-baseline": "无障碍基线",
+          "categoryName.layout-primitives": "布局原子", "categoryName.content-primitives": "内容原子", "categoryName.action-primitives": "操作原子", "categoryName.input-primitives": "输入原子", "categoryName.selection-primitives": "选择原子", "categoryName.status-primitives": "状态原子",
+          "categoryName.field-composition": "表单项组合", "categoryName.selection-disclosure": "选择与展开", "categoryName.navigation-aids": "导航辅助", "categoryName.anchored-feedback": "锚定反馈",
+          "categoryName.navigation-components": "导航组件", "categoryName.data-display": "数据展示", "categoryName.overlay-components": "浮层组件", "categoryName.messaging-feedback": "消息与反馈", "categoryName.complex-input": "复杂输入", "categoryName.product-components": "产品专用组件",
+          "categoryName.page-layout-patterns": "页面布局模式", "categoryName.form-validation-patterns": "表单与校验模式", "categoryName.search-filter-patterns": "搜索、筛选与排序模式", "categoryName.loading-empty-error-patterns": "加载、空与错误模式", "categoryName.destructive-permission-patterns": "危险操作与权限模式", "categoryName.responsive-composition-patterns": "响应式组合模式",
+          "categoryName.state-vocabulary": "状态词汇", "categoryName.input-modalities": "输入方式", "categoryName.feedback-contract": "反馈契约", "categoryName.motion-rules": "动效规则",
+          "categoryName.activation-selection": "激活与选择", "categoryName.input-validation": "输入与校验", "categoryName.focus-keyboard": "焦点与键盘", "categoryName.disclosure-dismissal": "展开与关闭", "categoryName.async-feedback": "异步反馈",
+          "categoryName.portal-layering": "Portal 与层级", "categoryName.focus-orchestration": "焦点协调", "categoryName.scroll-management": "滚动管理", "categoryName.global-managers": "全局管理器", "categoryName.drag-gesture": "拖拽与手势",
+          "categoryName.loading-recovery": "加载与恢复", "categoryName.navigation-restoration": "导航与恢复", "categoryName.persistence": "状态持久化", "categoryName.responsive-adaptation": "响应式适配", "categoryName.permission-session": "权限与会话", "categoryName.runtime-accessibility": "运行时无障碍",
+          "standard.token-architecture": "明确原始 Token、语义 Token、组件 Token、别名、作用域边界和唯一责任归属。", "standard.color": "把原始色板映射为语义角色，再由组件 Token 使用；品牌、主题和数据可视化范围必须明确。", "standard.typography": "统一字体家族与脚本回退、语义文字角色、字号、字重、行高、字距和数字样式。", "standard.spacing-density": "区分组件内部间距、组件之间间距、布局间距、控件尺寸和密度模式。", "standard.grid-responsive": "定义断点、容器、列、沟槽、重排规则和安全区域。", "standard.shape-stroke": "把圆角、边框、分隔线和焦点环定义成明确的共享角色。", "standard.depth-layer": "统一海拔、阴影、透明度、遮罩、模糊、语义层级和 Stacking Context 归属。", "standard.icon-assets": "明确允许使用的资产、图标网格、尺寸、线宽/填充、Logo、插画和图片规则。", "standard.motion-parameters": "统一时长、缓动、延迟、弹簧参数和弱化动效替代方案。", "standard.accessibility-baseline": "明确对比度、文字和触控最小值、可见焦点和非颜色状态提示。",
+          "standard.layer.atoms": "标准原子类别应有一个公开 owner，并明确结构、变体、尺寸、Token 和适用状态。", "standard.layer.molecules": "标准分子组件应通过一个清晰 API 协调其子原子与状态。", "standard.layer.components": "标准组件应解决可复用的用户问题，并明确归属、变体、无障碍和行为。", "standard.layer.patterns": "标准模式应描述多个组件如何共同完成完整任务及其边界状态。",
+          "standard.layer.interaction-foundation": "标准交互基础应统一状态、优先级、输入方式、反馈和动效规则。", "standard.layer.component-behavior": "标准组件行为应定义事件、焦点、校验、关闭和异步状态。", "standard.layer.cross-component-orchestration": "标准协调契约应明确多个组件共享 Portal、焦点、滚动、队列和手势时由谁负责。", "standard.layer.flow-lifecycle": "标准生命周期应覆盖加载、导航、持久化、适配、权限和无障碍的状态变化。",
+          "panel.current": "当前现状", "panel.target": "标准目标", "panel.recommendation": "建议", "panel.subcategories": "子类与应覆盖内容", "panel.appliesTo": "适用对象",
+          "recommendation.fragmented": "先核对真实 owner 和作用域，再决定哪些收为共享、哪些保留成明确例外。", "recommendation.missing": "先确认这个类别是否适用，再建立最小责任入口，最后迁移使用方。", "recommendation.partial": "保留已有可用基础，补齐角色和状态，并分批迁移绕过系统的写法。", "recommendation.detected": "保留检测到的入口，继续验证真实归属和运行时行为，再形成正式契约。", "recommendation.not-detected": "先确认产品是否需要这一类；不要只因为标准目录里有就凭空创建。", "recommendation.unverified": "在批准这个类别前，需要查看真实页面和运行时行为。",
+          "status.fragmented": "体系分散", "status.missing": "缺少体系", "status.partial": "覆盖不完整", "status.detected": "已找到源码", "status.not-detected": "未检测到", "status.unverified": "运行时未验证",
+          "metric.definition-files": "定义文件", "metric.definitions": "正式定义", "metric.unique-values": "不同实际值", "metric.references": "引用次数", "metric.brand-roles": "名称含 Brand", "metric.primary-roles": "名称含 Primary", "metric.observed-primary-uses": "实际用于主操作", "metric.secondary-roles": "名称含 Secondary", "metric.tertiary-roles": "名称含 Tertiary", "metric.hardcoded-occurrences": "硬编码次数", "metric.hardcoded-files": "存在硬编码的文件", "metric.class-selectors": "赋予颜色的选择器", "metric.value-collision-groups": "同值不同名组", "metric.semantic-conflict-groups": "语义冲突组", "metric.theme-scope-definitions": "主题/局部定义", "metric.source-findings": "源码观察", "metric.implementations": "实现数量", "metric.owner-implementations": "Owner 候选", "metric.adapters": "适配层", "metric.covered-items": "已覆盖项目", "metric.applicable-components": "发现的适用组件", "metric.runtime-checks": "已完成运行时检查",
+          "subcategory.primitive-palette": "原始色板", "subcategory.brand-action": "品牌与操作层级", "subcategory.semantic-surface": "背景、内容与边框语义", "subcategory.feedback-color": "反馈色", "subcategory.interaction-color": "交互状态色", "subcategory.theme-scope": "主题与作用域", "subcategory.data-visualization": "数据可视化",
+          "subcategory.font-family": "字体家族与脚本", "subcategory.type-roles": "语义文字角色", "subcategory.type-scale": "字号比例", "subcategory.type-metrics": "字重、行高与字距", "subcategory.numeric-code": "数字与代码样式", "subcategory.responsive-type": "响应式文字",
+          "subcategory.spacing-scale": "间距刻度", "subcategory.component-spacing": "组件内部间距", "subcategory.layout-spacing": "布局间距", "subcategory.control-sizing": "控件尺寸", "subcategory.density-modes": "密度模式",
+          "subcategory.breakpoints": "断点", "subcategory.containers": "容器", "subcategory.columns-gutters": "列与沟槽", "subcategory.responsive-rules": "响应式规则", "subcategory.safe-area": "安全区域",
+          "subcategory.radius-scale": "圆角刻度", "subcategory.border-width": "边框宽度", "subcategory.border-style": "边框样式", "subcategory.dividers": "分隔线", "subcategory.focus-ring": "焦点环",
+          "subcategory.elevation": "海拔", "subcategory.shadow": "阴影", "subcategory.opacity-scrim": "透明度与遮罩", "subcategory.blur": "模糊", "subcategory.z-index-stack": "层级与堆叠上下文",
+          "subcategory.icon-library": "图标库", "subcategory.icon-size-grid": "图标尺寸与网格", "subcategory.stroke-fill": "线宽与填充", "subcategory.logos": "Logo", "subcategory.illustration-image": "插画与图片",
+          "subcategory.duration": "时长", "subcategory.easing": "缓动", "subcategory.delay": "延迟", "subcategory.spring": "弹簧参数", "subcategory.reduced-motion": "弱化动效",
+          "subcategory.contrast": "对比度", "subcategory.minimum-text": "最小文字", "subcategory.touch-target": "触控区域", "subcategory.focus-visibility": "焦点可见性", "subcategory.non-color-cues": "非颜色提示",
+          "color.categoryHint": "展开完整颜色系统评审：现有来源、真实色板、角色冲突、收敛方案与目标契约。",
+          "color.section.conclusion": "颜色系统结论", "color.section.systems": "1 · 当前有哪些颜色来源和色板", "color.section.systemsHelp": "每一条代表一套独立的正式颜色来源。Tailwind 等接入方式会挂在真实来源下面，不会被误算成另一套设计系统。",
+          "color.section.roles": "2 · 不同来源如何定义同一类颜色", "color.section.rolesHelp": "这里根据 Token 名称和作用域进行比较。没有检查真实页面之前，不会把名称含 Primary 直接当成实际主操作色。",
+          "color.section.hardcodes": "3 · 哪些颜色绕过了系统", "color.section.hardcodesHelp": "硬编码先按真实色值聚合；只有源码证据足够时，才会建议它映射到某个现有 Token。",
+          "color.section.convergence": "4 · 哪些保留、合并或限定范围", "color.section.convergenceHelp": "这些是基于源码得出的收敛建议。一个差异究竟属于全局、主题、品牌还是历史遗留，仍然需要产品判断。",
+          "color.section.target": "5 · 建议的目标颜色契约", "color.section.targetHelp": "以 {candidate} 为起点补齐缺失角色。目标是一套统一语义契约加受控主题映射，而不是让所有场景共享一张扁平 Hex 列表。",
+          "color.verdict.fragmented": "当前有 {systems} 套独立颜色来源。{candidate} 是源码证据最强的候选，但全局颜色契约还没有统一。", "color.verdict.detected": "当前只有一套颜色来源覆盖标准契约。建议保留为候选，并继续验证真实页面。", "color.verdict.partial": "项目已经有颜色来源，但色板和语义角色还不完整。",
+          "color.candidate.strong-source-candidate": "这个候选在归属、作用域和角色覆盖上拥有更强的源码证据；真实视觉层级仍需结合产品意图和运行页面确认。", "color.candidate.needs-owner-decision": "有两套以上来源的证据接近。收敛色值前，需要先选择真正的全局负责人。", "color.candidate.unverified": "没有找到可以承担全局职责的正式颜色来源。",
+          "color.health.palette": "是否存在真正的色板？", "color.health.paletteDetail": "找到 {count} 个带色阶的基础颜色", "color.health.semantic": "是否定义了语义角色？", "color.health.semanticDetail": "{count} 个 Token 覆盖 {covered}/{total} 个核心角色", "color.health.component": "是否定义了组件颜色？", "color.health.componentDetail": "找到 {count} 个组件专用颜色 Token", "color.health.contract": "全局使用是否被统一管理？", "color.health.contractDetail": "找到 {count} 套独立正式颜色来源",
+          "color.sourceType.css-variable": "CSS Variables", "color.sourceType.js-theme": "JS/TS Theme", "color.sourceType.json-token": "JSON Token", "color.sourceType.tailwind-config": "Tailwind 适配层", "color.approachCounts": "{canonical} 个正式定义 · {adapters} 个适配 · {files} 个文件",
+          "color.systemLabel": "颜色来源 {number}", "color.systemShort": "来源 {number}", "color.systemDecisionLabel": "来源 {number} · {kind}", "color.systemKind.keep-candidate": "全局颜色候选", "color.systemKind.merge-deprecate": "疑似历史颜色", "color.systemKind.preserve-scope": "主题或品牌颜色", "color.systemKind.compare-or-merge": "尚未确认的颜色来源", "color.scope.global-candidate": "全局候选", "color.scope.theme-or-scope": "主题或局部范围", "color.scope.legacy": "历史遗留", "color.scope.unclear": "作用域不明确",
+          "color.action.keep-candidate": "建议作为主要候选保留", "color.action.merge-deprecate": "建议合并并逐步废弃", "color.action.preserve-scope": "仅在范围有意时保留", "color.action.compare-or-merge": "对比后决定是否合并", "color.actionTarget": "评审确认后收敛到 {target}。", "color.actionKeepReason": "保留这个来源，再补齐缺失角色和作用域契约。",
+          "color.role.brand": "品牌色", "color.role.action-primary": "主操作", "color.role.action-secondary": "次操作", "color.role.action-tertiary": "最次级操作", "color.role.background": "页面背景", "color.role.surface": "容器与表面", "color.role.content": "文字与内容", "color.role.border": "边框与分隔线", "color.role.success": "成功", "color.role.warning": "警告", "color.role.error": "错误", "color.role.info": "信息", "color.role.interaction": "交互状态", "color.role.data-visualization": "数据可视化", "color.role.other": "尚未归类",
+          "color.notDefined": "没有定义", "color.targetMissing": "目标仍需补齐", "color.roleColumn": "标准角色", "color.targetColumn": "建议目标",
+          "color.hardcodeUsage": "{count} 处使用，分布在 {files} 个文件", "color.hardcodeMapped": "找到相同 Token：{token}；确认 owner 后再迁移。", "color.mapping.candidate-match": "与主要候选完全匹配", "color.mapping.single-match": "与一个现有 Token 匹配", "color.mapping.ambiguous-match": "匹配多个 Token，需要选择真实语义", "color.mapping.unmapped": "没有匹配 Token，需要判断语义角色", "color.noHardcodes": "扫描到的产品源码里没有发现颜色硬编码。",
+          "color.systemActions": "颜色来源怎么处理", "color.tokenDecisions": "冲突 Token 怎么处理", "color.tokenAction.merge-alias": "合并为一个正式 Token，必要时保留兼容别名", "color.tokenAction.map-to-candidate": "把竞争值映射到评审确认后的候选", "color.tokenAction.choose-owner": "先选择正式 owner", "color.tokenTarget": "建议目标 Token：{token}", "color.tokenTargetMissing": "目前还无法安全推断目标。", "color.noTokenDecisions": "没有检测到跨来源的同名 Token 决策。",
+          "color.targetPaletteMissing": "候选中没有带色阶的基础色板。在声称色板完整之前，需要创建或明确采用一套基础色板。", "color.targetSemanticMissing": "候选中没有语义颜色层。", "color.targetRolesMissing": "仍然缺少：{roles}。", "color.targetRolesComplete": "源码已覆盖全部核心语义角色。", "color.targetComponentMissing": "没有发现组件专用颜色 Token。只有当组件需要超出通用语义角色的稳定契约时才补充。",
+          "color.previewTitle": "基于候选值的组件预览", "color.previewDescription": "这里只使用候选里已经存在的值，用于比较，不代表目标视觉已经批准。", "color.previewButton": "主操作", "color.previewUnavailable": "候选缺少足够的表面、内容和操作角色，暂时无法诚实地渲染组件预览。",
+          "color.sourceDerived": "源码推导方案", "color.nextTitle": "接下来确认产品决策", "color.nextDescription": "选择全局 owner、明确主题范围、确认 Token 合并和允许的例外。导出结果仍然只是草稿。", "color.reviewDecisions": "评审相关决策", "color.noSystems": "没有检测到正式颜色来源。", "color.none": "暂无",
+          "foundation.categoryHint": "展开完整评审：现有来源、角色覆盖、视觉刻度、直接值、工具类模式、收敛方案与目标契约。", "foundation.categorySummary": "{sources} 套设计来源 · {definitions} 个正式定义 · {bypasses} 处直接值 · {utilities} 次工具类使用",
+          "foundation.section.conclusion": "体系结论", "foundation.section.sources": "1 · 当前有哪些来源与视觉定义", "foundation.section.sourcesHelp": "每个来源单独展示，避免把真正的体系、局部例外和历史副本压成一份看不懂的清单。", "foundation.section.roles": "2 · 现有来源如何覆盖标准角色", "foundation.section.rolesHelp": "把不同来源放到相同标准角色下比较。名称只是源码线索，不等于已经确认产品意图。", "foundation.section.bypasses": "3 · 直接值与工具类使用模式", "foundation.section.bypassesHelp": "原始 CSS 值是可能的绕过；普通 Tailwind 工具类只是采用方式，不会自动被判成债务，会单独作为刻度和采用证据展示。", "foundation.section.convergence": "4 · 哪些保留、合并或限定范围", "foundation.section.convergenceHelp": "从证据最强的来源开始，保留明确的局部范围，并分批退出重复 owner。", "foundation.section.target": "5 · 建议的目标契约", "foundation.section.targetHelp": "目标优先复用现有最强候选，并明确列出仍需产品判断的标准角色。",
+          "foundation.verdict.fragmented": "当前有 {systems} 套独立来源在描述这项基础规范，共享契约还没有统一。", "foundation.verdict.detected": "已有一套来源覆盖核心标准角色。建议保留为候选，并去真实页面验证。", "foundation.verdict.partial": "项目已有正式来源，但角色覆盖或实际采用仍不完整。", "foundation.verdict.missing": "没有找到正式来源。创建新契约前，先确认产品确实需要这一类。",
+          "foundation.candidate": "主要来源候选：{file}", "foundation.noCandidate": "没有找到可承担责任的正式来源。", "foundation.health.sources": "正式来源", "foundation.health.definitions": "已定义 Token", "foundation.health.coverage": "标准角色覆盖", "foundation.health.bypasses": "直接值", "foundation.health.utilities": "工具类使用", "foundation.sourceLabel": "来源 {number}", "foundation.sourceCandidate": "主要候选", "foundation.sourceScoped": "局部或独立来源", "foundation.tokens": "{count} 个定义 · {values} 个不同值", "foundation.none": "没有找到源码证据。",
+          "foundation.roleColumn": "标准角色", "foundation.targetColumn": "建议目标", "foundation.notDefined": "没有定义", "foundation.more": "另有 {count} 个", "foundation.bypassUsage": "{count} 处使用，分布在 {files} 个文件", "foundation.usage.direct-value": "直接 CSS 值", "foundation.usage.utility": "框架工具类", "foundation.bypassMapped": "可精确对应候选 Token：{token}", "foundation.bypassUnmapped": "没有安全对应的 Token，需要判断真实用途", "foundation.utilityNote": "这是刻度采用证据；需要确认由哪套 Tailwind 主题负责", "foundation.action.keep-candidate": "保留为责任起点", "foundation.action.merge-deprecate": "合并并逐步退出", "foundation.action.preserve-scope": "仅作为明确局部范围保留", "foundation.action.compare-or-merge": "对比意图后合并或限定范围", "foundation.action.preserve-assets": "保留为产品专用资产", "foundation.targetOwner": "建议责任入口", "foundation.targetTokens": "候选中已有的刻度与角色", "foundation.targetMissing": "仍需补齐：{roles}", "foundation.targetComplete": "候选源码已覆盖全部核心角色类型。", "foundation.noBypasses": "扫描到的产品源码里没有发现直接值或工具类模式。",
+          "foundation.role.font-family": "字体家族与回退", "foundation.role.display-heading": "展示与标题", "foundation.role.body": "正文", "foundation.role.label-caption": "标签与说明", "foundation.role.numeric-code": "数字与代码", "foundation.role.metrics": "字重、行高与字距", "foundation.role.responsive": "响应式排版", "foundation.role.base-scale": "基础刻度", "foundation.role.component-inset": "组件内部间距", "foundation.role.component-gap": "组件之间间距", "foundation.role.layout": "布局间距", "foundation.role.control-size": "控件尺寸", "foundation.role.density": "密度模式", "foundation.role.radius": "圆角", "foundation.role.border-width": "边框宽度", "foundation.role.border-style": "边框样式", "foundation.role.divider": "分隔线", "foundation.role.focus-ring": "焦点环", "foundation.role.shadow": "阴影", "foundation.role.elevation": "海拔", "foundation.role.scrim-opacity": "遮罩与透明度", "foundation.role.blur": "模糊", "foundation.role.z-index": "语义层级", "foundation.role.other": "尚未归类",
+          "icon.section.sources": "1 · 当前有哪些图标与资产来源", "icon.section.sourcesHelp": "图标库、本地 SVG、导入文件和内联 SVG 会分开统计。", "icon.section.contract": "2 · 当前视觉契约", "icon.section.contractHelp": "可用的图标系统需要一个主要来源，并明确网格、尺寸、线宽/填充和例外规则。", "icon.section.target": "3 · 建议的图标契约", "icon.section.targetHelp": "保留一个主要图标来源；Logo、插画和产品专用标记作为命名清楚的例外。", "icon.verdict.fragmented": "项目使用了 {sources} 个图标或资产来源，视觉规则不一致或不完整。", "icon.verdict.partial": "已经有主要来源，但网格、线宽、填充或例外规则还没有完整声明。", "icon.verdict.missing": "扫描到的产品源码里没有发现图标来源。", "icon.categorySummary": "{sources} 个资产来源 · {assets} 次图标引用 · {components} 个公共组件候选", "icon.health.sources": "资产来源", "icon.health.assets": "图标引用", "icon.health.libraries": "图标库", "icon.health.components": "Icon/Image/Avatar 组件", "icon.sourceUsage": "{count} 次引用，分布在 {files} 个文件", "icon.grid": "网格", "icon.stroke": "线宽", "icon.fill": "填充", "icon.notDeclared": "未声明", "icon.targetPrimary": "主要来源", "icon.targetRules": "待确认规则", "icon.targetMissing": "仍需补齐：{items}", "icon.contract.primary-source": "主要来源", "icon.contract.size-grid": "尺寸与网格", "icon.contract.stroke-fill": "线宽与填充",
+          "target.primitive": "原始色板", "target.semantic": "语义角色", "target.component": "组件 Token", "blueprint.categoryHint": "展开查看标准、当前证据和建议。", "blueprint.detectedDisclaimer": "找到源码不代表体系健康；运行时与视觉仍需单独验证。"
+        }
+      };
+
+      const localeKey = "govern-ui:locale";
+      let locale = (() => {
+        try { const saved = localStorage.getItem(localeKey); if (saved === "zh" || saved === "en") return saved; } catch {}
+        return navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en";
+      })();
+      const stateKey = `govern-ui:review:${report.reportId}`;
+      let decisionState = (() => { try { return JSON.parse(localStorage.getItem(stateKey) || "{}"); } catch { return {}; } })();
+
+      const e = (value) => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+      const t = (key, values = {}) => {
+        let value = systemTranslations[locale]?.[key] ?? systemTranslations.en[key] ?? translations[locale][key] ?? translations.en[key] ?? key;
+        for (const [name, replacement] of Object.entries(values)) value = value.replaceAll(`{${name}}`, String(replacement));
+        return value;
+      };
+      const l = (value) => typeof value === "string" ? value : (value?.[locale] ?? value?.en ?? value?.zh ?? "");
+      const setHtml = (id, html) => { document.getElementById(id).innerHTML = html; };
+      const safeStyleValue = (value) => typeof value === "string" && value.length < 160 && !/[;{}<>]/.test(value) ? value : "";
+      const cssNumber = (value, fallback = 16) => { const number = Number.parseFloat(value); return Number.isFinite(number) ? number : fallback; };
+
+      function applyTranslations() {
+        document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
+        document.querySelectorAll("[data-i18n]").forEach((node) => { node.textContent = t(node.dataset.i18n); });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
+        document.querySelectorAll("[data-i18n-aria-label]").forEach((node) => { node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel)); });
+        document.querySelectorAll("[data-locale]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.locale === locale)));
+      }
+
+      function renderSummary() {
+        document.getElementById("report-title").textContent = `${locale === "zh" ? "设计系统评审" : "Design system review"} — ${report.repoProfile.rootName}`;
+        document.getElementById("report-explanation").textContent = l(brief.summary.explanation);
+        document.getElementById("summary-verdict").textContent = l(brief.summary.verdict);
+        document.getElementById("summary-explanation").textContent = l(brief.summary.explanation);
+        for (const [id, values] of [["summary-keep", brief.summary.keep], ["summary-change", brief.summary.changeFirst], ["summary-later", brief.summary.later]]) setHtml(id, values.map((item) => `<li>${e(l(item))}</li>`).join(""));
+        document.getElementById("summary-action-copy").textContent = t("summary.action", { count: brief.decisionPackages.length });
+        document.getElementById("start-review").textContent = t("summary.start", { count: brief.decisionPackages.length });
+      }
+
+      function renderBlueprint() {
+        const systemReview = report.systemReview || report.componentBlueprint;
+        const humanize = (value) => String(value).replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+        const translatedOrHumanized = (prefix, value) => {
+          const key = `${prefix}.${value}`;
+          const translated = t(key);
+          return translated === key ? humanize(value) : translated;
+        };
+        const standardFor = (layer, category) => {
+          const exactKey = `standard.${category.id}`;
+          const exact = t(exactKey);
+          return exact === exactKey ? t(`standard.layer.${layer.id}`) : exact;
+        };
+        const coverage = (category) => {
+          if (Array.isArray(category.subcategories)) return category.subcategories.map((item) => ({ id: item.id, status: item.status }));
+          if (Array.isArray(category.items)) return category.items.map((id) => ({ id, status: "not-detected", primitive: true }));
+          if (Array.isArray(category.appliesTo)) return category.appliesTo.map((id) => ({ id, status: "unverified", primitive: true }));
+          return [];
+        };
+        const roleTokens = (tokens, missingKey = "color.notDefined") => tokens.length ? tokens.map((token) => {
+          const color = safeStyleValue(token.value);
+          const scope = token.selector && token.selector !== "unknown" && token.selector !== ":root" ? `<small>${e(token.selector)}</small>` : "";
+          return `<div class="role-token"><span class="role-swatch" ${color ? `style="background:${e(color)}"` : ""}></span><span><strong>${e(token.name)}</strong><small>${e(token.value)}</small>${scope}</span></div>`;
+        }).join("") : `<span class="missing-role">${e(t(missingKey))}</span>`;
+        const colorWorkbenchCard = (system, layer, category) => {
+          const workbench = category.colorWorkbench;
+          const architecture = workbench.architecture;
+          const candidateNumber = Math.max(1, workbench.systems.findIndex((item) => item.ownerId === architecture.candidateOwnerId) + 1);
+          const candidateLabel = t("color.systemShort", { number: candidateNumber });
+          const verdictKey = architecture.systemCount > 1 ? "color.verdict.fragmented" : architecture.contractStatus === "detected" ? "color.verdict.detected" : "color.verdict.partial";
+          const health = [
+            ["color.health.palette", architecture.paletteStatus, t("color.health.paletteDetail", { count: architecture.paletteTokenCount })],
+            ["color.health.semantic", architecture.semanticStatus, t("color.health.semanticDetail", { count: architecture.semanticTokenCount, covered: architecture.semanticRoleCoverage, total: architecture.semanticRoleTotal })],
+            ["color.health.component", architecture.componentStatus, t("color.health.componentDetail", { count: architecture.componentTokenCount })],
+            ["color.health.contract", architecture.contractStatus, t("color.health.contractDetail", { count: architecture.systemCount })],
+          ].map(([label, status, detail]) => `<article class="color-health"><span>${e(t(label))}</span><strong>${e(t(`status.${status}`))}</strong><span>${e(detail)}</span></article>`).join("");
+          const approaches = workbench.implementationApproaches.map((item) => `<span class="implementation-pill"><strong>${e(t(`color.sourceType.${item.sourceType}`))}</strong> · ${e(t("color.approachCounts", { canonical: item.canonicalCount, adapters: item.adapterCount, files: item.files.length }))}</span>`).join("");
+          const lanes = workbench.systems.map((lane, index) => {
+            const candidate = lane.ownerId === architecture.candidateOwnerId;
+            const colors = lane.tokens.map((token) => {
+              const color = safeStyleValue(token.value);
+              return `<article class="palette-token"><div class="palette-color" ${color ? `style="background:${e(color)}"` : ""}></div><strong>${e(token.name)}</strong><small>${e(token.value)}</small><small>${e(t(`color.role.${token.roleFamily}`))}${token.selector && token.selector !== ":root" && token.selector !== "unknown" ? ` · ${e(token.selector)}` : ""}</small></article>`;
+            }).join("");
+            return `<article class="palette-lane ${candidate ? "candidate" : ""}"><div class="palette-lane-head"><div><h4>${e(t("color.systemLabel", { number: index + 1 }))}</h4><strong>${e(t(`color.systemKind.${lane.recommendation}`))}</strong><code>${e(lane.file)}</code></div><div class="palette-lane-badges"><span class="color-badge">${e(t(`color.scope.${lane.scope}`))}</span><span class="color-badge ${candidate ? "recommended" : ""}">${e(t(`color.action.${lane.recommendation}`))}</span></div></div><div class="palette-grid">${colors}</div></article>`;
+          }).join("");
+          const matrixHead = workbench.systems.map((lane, index) => `<th>${e(t("color.systemShort", { number: index + 1 }))}<br><small>${e(t(`color.systemKind.${lane.recommendation}`))}</small></th>`).join("");
+          const roleRows = workbench.roleRows.filter((row) => row.role !== "other" || row.systems.some((item) => item.tokens.length)).map((row) => `<tr><td><strong>${e(t(`color.role.${row.role}`))}</strong></td>${row.systems.map((item) => `<td>${roleTokens(item.tokens)}</td>`).join("")}<td>${roleTokens(row.targetTokens, "color.targetMissing")}</td></tr>`).join("");
+          const hardcodes = workbench.hardcodes.length ? workbench.hardcodes.map((item) => {
+            const color = safeStyleValue(item.value);
+            const mapping = item.suggestedToken ? t("color.hardcodeMapped", { token: item.suggestedToken }) : t(`color.mapping.${item.mappingStatus}`);
+            return `<article class="hardcode-card"><span class="hardcode-swatch" ${color ? `style="background:${e(color)}"` : ""}></span><div><strong>${e(item.value)}</strong><small>${e(t("color.hardcodeUsage", { count: item.occurrenceCount, files: item.fileCount }))}</small><small>${e(mapping)}</small></div></article>`;
+          }).join("") : `<div class="empty">${e(t("color.noHardcodes"))}</div>`;
+          const systemActions = workbench.systemActions.map((item) => {
+            const sourceNumber = workbench.systems.findIndex((systemItem) => systemItem.ownerId === item.ownerId) + 1;
+            return `<div class="convergence-row"><strong>${e(t("color.systemDecisionLabel", { number: sourceNumber, kind: t(`color.systemKind.${item.action}`) }))}</strong><code>${e(item.file)}</code><span>${e(item.targetFile && item.targetFile !== item.file ? t("color.actionTarget", { target: candidateLabel }) : t("color.actionKeepReason"))}</span></div>`;
+          }).join("");
+          const tokenDecisions = workbench.tokenDecisions.length ? workbench.tokenDecisions.map((item) => `<div class="convergence-row"><code>${e(item.normalizedName)}</code><div class="target-token-list">${item.values.map((value) => `<span>${e(value)}</span>`).join("")}</div><strong>${e(t(`color.tokenAction.${item.action}`))}</strong><span>${e(item.targetToken ? t("color.tokenTarget", { token: item.targetToken }) : t("color.tokenTargetMissing"))}</span></div>`).join("") : `<div class="convergence-row"><span>${e(t("color.noTokenDecisions"))}</span></div>`;
+          const target = workbench.target;
+          const targetPalette = target.palette.length ? roleTokens(target.palette) : `<p>${e(t("color.targetPaletteMissing"))}</p>`;
+          const semanticTokens = target.semanticTokens.length ? `<div class="target-token-list">${target.semanticTokens.map((item) => `<span>${e(item.name)} · ${e(item.value)}</span>`).join("")}</div>` : `<p>${e(t("color.targetSemanticMissing"))}</p>`;
+          const missingRoles = target.missingRoles.length ? `<p>${e(t("color.targetRolesMissing", { roles: target.missingRoles.map((role) => t(`color.role.${role}`)).join(locale === "zh" ? "、" : ", ") }))}</p>` : `<p>${e(t("color.targetRolesComplete"))}</p>`;
+          const componentTokens = target.componentTokens.length ? `<div class="target-token-list">${target.componentTokens.map((item) => `<span>${e(item.name)}</span>`).join("")}</div>` : `<p>${e(t("color.targetComponentMissing"))}</p>`;
+          const canPreview = target.preview.primary && target.preview.surface && target.preview.content;
+          const preview = canPreview ? `<div class="color-ui-preview" style="background:${e(safeStyleValue(target.preview.surface))};color:${e(safeStyleValue(target.preview.content))};border-color:${e(safeStyleValue(target.preview.border || "transparent"))}"><div><h4>${e(t("color.previewTitle"))}</h4><p>${e(t("color.previewDescription"))}</p></div><button type="button" tabindex="-1" style="background:${e(safeStyleValue(target.preview.primary))};color:${e(safeStyleValue(target.preview.surface))};border-color:${e(safeStyleValue(target.preview.primary))}">${e(t("color.previewButton"))}</button></div>` : `<div class="empty">${e(t("color.previewUnavailable"))}</div>`;
+          const sourceRefs = (category.sourceRefs || []).map((ref) => `<div class="source-row"><code>${e(ref.file)}${ref.line ? `:${e(ref.line)}` : ""}</code><pre>${e(ref.name || "")} · ${e(ref.value || "")}</pre></div>`).join("");
+          return `<details class="system-category" id="system-${e(system)}-${e(layer.id)}-${e(category.id)}" open><summary><div class="category-title"><h3>${e(t("categoryName.color"))}</h3><p>${e(t("color.categoryHint"))}</p></div><span class="status ${e(category.status)}">${e(t(`status.${category.status}`))}</span></summary><div class="category-body"><div class="color-workbench">
+            <section class="color-verdict"><div><h4>${e(t("color.section.conclusion"))}</h4><h3>${e(t(verdictKey, { systems: architecture.systemCount, candidate: candidateLabel }))}</h3><p>${e(t(`color.candidate.${architecture.candidateStrength}`))}</p><div class="implementation-list">${approaches}</div></div><div class="color-architecture">${health}</div></section>
+            <section class="color-section"><div class="color-section-head"><div><h3>${e(t("color.section.systems"))}</h3><p>${e(t("color.section.systemsHelp"))}</p></div></div><div class="palette-lanes">${lanes || `<div class="empty">${e(t("color.noSystems"))}</div>`}</div></section>
+            <section class="color-section"><div class="color-section-head"><div><h3>${e(t("color.section.roles"))}</h3><p>${e(t("color.section.rolesHelp"))}</p></div></div><div class="color-table-wrap"><table class="color-table"><thead><tr><th>${e(t("color.roleColumn"))}</th>${matrixHead}<th>${e(t("color.targetColumn"))}</th></tr></thead><tbody>${roleRows}</tbody></table></div></section>
+            <section class="color-section"><div class="color-section-head"><div><h3>${e(t("color.section.hardcodes"))}</h3><p>${e(t("color.section.hardcodesHelp"))}</p></div></div><div class="hardcode-grid">${hardcodes}</div></section>
+            <section class="color-section"><div class="color-section-head"><div><h3>${e(t("color.section.convergence"))}</h3><p>${e(t("color.section.convergenceHelp"))}</p></div></div><div class="convergence-grid"><article class="convergence-panel"><h4>${e(t("color.systemActions"))}</h4>${systemActions}</article><article class="convergence-panel"><h4>${e(t("color.tokenDecisions"))}</h4>${tokenDecisions}</article></div></section>
+            <section class="target-system"><div class="color-section-head"><div><h3>${e(t("color.section.target"))}</h3><p>${e(t("color.section.targetHelp", { candidate: candidateLabel }))}</p></div><span class="color-badge recommended">${e(t("color.sourceDerived"))}</span></div><div class="target-pipeline"><article class="target-stage"><h4>${e(t("target.primitive"))}</h4>${targetPalette}</article><article class="target-stage"><h4>${e(t("target.semantic"))}</h4>${semanticTokens}${missingRoles}</article><article class="target-stage"><h4>${e(t("target.component"))}</h4>${componentTokens}</article></div>${preview}</section>
+            <div class="color-next"><div><strong>${e(t("color.nextTitle"))}</strong><p>${e(t("color.nextDescription"))}</p></div><a href="#decisions">${e(t("color.reviewDecisions"))}</a></div>
+            <details class="engineer-details"><summary>${e(t("evidence.engineer"))}</summary><div class="source-list">${sourceRefs || `<div class="empty">${e(t("evidence.none"))}</div>`}</div></details>
+          </div></div></details>`;
+        };
+        const foundationSpecimen = (categoryId, token) => {
+          const value = safeStyleValue(token.value);
+          if (categoryId === "typography") {
+            let style = "";
+            if (token.roleFamily === "font-family") style = `font-family:${e(value)}`;
+            else if (/(?:font-size|display|heading|title)/.test(token.normalizedName) && value) style = `font-size:${e(value)}`;
+            else if (/(?:weight)/.test(token.normalizedName) && value) style = `font-weight:${e(value)}`;
+            else if (/(?:line-height|leading)/.test(token.normalizedName) && value) style = `line-height:${e(value)}`;
+            else if (/(?:letter|tracking)/.test(token.normalizedName) && value) style = `letter-spacing:${e(value)}`;
+            return `<div class="token-specimen type" ${style ? `style="${style}"` : ""}>Ag 字体 0123</div>`;
+          }
+          if (categoryId === "spacing-density") {
+            const multiplier = /rem|em/.test(value) ? 16 : 1;
+            const width = Math.max(4, Math.min(140, cssNumber(value, 12) * multiplier));
+            return `<div class="token-specimen space"><span style="width:${e(width)}px"></span></div>`;
+          }
+          if (categoryId === "shape-stroke") {
+            const style = token.roleFamily === "radius" && value ? `border-radius:${e(value)}` : token.roleFamily === "border-width" && value ? `border-width:${e(value)}` : token.roleFamily === "border-style" && value ? `border-style:${e(value)}` : token.roleFamily === "focus-ring" && value ? `outline:${e(value)} solid #111;outline-offset:2px` : "";
+            return `<div class="token-specimen shape"><span ${style ? `style="${style}"` : ""}></span></div>`;
+          }
+          if (categoryId === "depth-layer") {
+            let style = "";
+            if (["shadow", "elevation"].includes(token.roleFamily) && value) style = `box-shadow:${e(value)}`;
+            else if (token.roleFamily === "scrim-opacity" && value) style = `opacity:${e(value)};background:#111111`;
+            else if (token.roleFamily === "blur" && value) style = `filter:blur(${e(value)})`;
+            return `<div class="token-specimen depth"><span ${style ? `style="${style}"` : ""}></span></div>`;
+          }
+          return `<div class="token-specimen"><code>${e(token.value)}</code></div>`;
+        };
+        const compactTokenList = (tokens) => {
+          if (!tokens.length) return `<span class="missing-role">${e(t("foundation.notDefined"))}</span>`;
+          const visible = tokens.slice(0, 8).map((token) => `<div><code>${e(token.name)}</code><small>${e(token.value)}</small></div>`).join("");
+          const more = tokens.length > 8 ? `<div class="more">${e(t("foundation.more", { count: tokens.length - 8 }))}</div>` : "";
+          return visible + more;
+        };
+        const foundationWorkbenchCard = (system, layer, category) => {
+          const workbench = category.foundationWorkbench;
+          const architecture = workbench.architecture;
+          const verdictKey = architecture.contractStatus === "fragmented" ? "foundation.verdict.fragmented" : architecture.contractStatus === "detected" ? "foundation.verdict.detected" : architecture.contractStatus === "missing" ? "foundation.verdict.missing" : "foundation.verdict.partial";
+          const candidateNumber = Math.max(1, workbench.systems.findIndex((item) => item.ownerId === architecture.candidateOwnerId) + 1);
+          const health = [
+            ["foundation.health.sources", architecture.systemCount],
+            ["foundation.health.definitions", architecture.definitionCount],
+            ["foundation.health.coverage", `${architecture.roleCoverage}/${architecture.roleTotal}`],
+            ["foundation.health.bypasses", architecture.bypassCount],
+            ["foundation.health.utilities", architecture.utilityUsageCount],
+          ].map(([label, value]) => `<article><span>${e(t(label))}</span><strong>${e(value)}</strong></article>`).join("");
+          const sources = workbench.systems.map((source, index) => {
+            const candidate = source.ownerId === architecture.candidateOwnerId;
+            const tokens = source.tokens.slice(0, 48).map((token) => `<article class="foundation-token">${foundationSpecimen(category.id, token)}<strong>${e(token.name)}</strong><small>${e(token.value)}</small><small>${e(t(`foundation.role.${token.roleFamily}`))}</small></article>`).join("");
+            return `<article class="foundation-source ${candidate ? "candidate" : ""}"><div class="foundation-source-head"><div><h4>${e(t("foundation.sourceLabel", { number: index + 1 }))} · ${e(candidate ? t("foundation.sourceCandidate") : t("foundation.sourceScoped"))}</h4><code>${e(source.file)}</code><small>${e(t("foundation.tokens", { count: source.definitionCount, values: source.uniqueValueCount }))}</small></div><span class="color-badge ${candidate ? "recommended" : ""}">${e(t(`foundation.action.${source.recommendation}`))}</span></div><div class="foundation-token-grid">${tokens}</div></article>`;
+          }).join("");
+          const matrixHead = workbench.systems.map((source, index) => `<th>${e(t("foundation.sourceLabel", { number: index + 1 }))}${source.ownerId === architecture.candidateOwnerId ? `<br><small>${e(t("foundation.sourceCandidate"))}</small>` : ""}</th>`).join("");
+          const roleRows = workbench.roleRows.filter((row) => row.role !== "other" || row.systems.some((entry) => entry.tokens.length)).map((row) => `<tr><td><strong>${e(t(`foundation.role.${row.role}`))}</strong></td>${row.systems.map((entry) => `<td>${compactTokenList(entry.tokens)}</td>`).join("")}<td>${compactTokenList(row.targetTokens)}</td></tr>`).join("");
+          const usageGroups = workbench.usageGroups || workbench.bypasses || [];
+          const bypasses = usageGroups.length ? usageGroups.map((item) => `<article class="bypass-card"><code>${e(t(`foundation.usage.${item.usageType || "direct-value"}`))} · ${e(item.property)} · ${e(t(`foundation.role.${item.roleFamily}`))}</code><strong>${e(item.value)}</strong><small>${e(t("foundation.bypassUsage", { count: item.occurrenceCount, files: item.fileCount }))}</small><small>${e(item.usageType === "utility" ? t("foundation.utilityNote") : item.suggestedToken ? t("foundation.bypassMapped", { token: item.suggestedToken }) : t("foundation.bypassUnmapped"))}</small></article>`).join("") : `<div class="empty">${e(t("foundation.noBypasses"))}</div>`;
+          const actions = workbench.systemActions.map((item) => `<div class="convergence-row"><code>${e(item.file)}</code><strong>${e(t(`foundation.action.${item.action}`))}</strong>${item.targetFile && item.targetFile !== item.file ? `<span>→ ${e(item.targetFile)}</span>` : ""}</div>`).join("");
+          const targetTokens = workbench.target.tokens.length ? `<div class="foundation-token-grid">${workbench.target.tokens.slice(0, 36).map((token) => `<article class="foundation-token">${foundationSpecimen(category.id, token)}<strong>${e(token.name)}</strong><small>${e(token.value)}</small><small>${e(t(`foundation.role.${token.roleFamily}`))}</small></article>`).join("")}</div>` : `<div class="empty">${e(t("foundation.none"))}</div>`;
+          const missing = workbench.target.missingRoles.length ? t("foundation.targetMissing", { roles: workbench.target.missingRoles.map((role) => t(`foundation.role.${role}`)).join(locale === "zh" ? "、" : ", ") }) : t("foundation.targetComplete");
+          const sourceRefs = (category.sourceRefs || []).map((ref) => `<div class="source-row"><code>${e(ref.file)}${ref.line ? `:${e(ref.line)}` : ""}</code><pre>${e(ref.name || "")} · ${e(ref.value || "")}</pre></div>`).join("");
+          return `<details class="system-category" id="system-${e(system)}-${e(layer.id)}-${e(category.id)}"><summary><div class="category-title"><h3>${e(t(`categoryName.${category.id}`))}</h3><p>${e(t("foundation.categorySummary", { sources: architecture.systemCount, definitions: architecture.definitionCount, bypasses: architecture.bypassCount, utilities: architecture.utilityUsageCount }))}</p></div><span class="status ${e(category.status)}">${e(t(`status.${category.status}`))}</span></summary><div class="category-body"><div class="foundation-workbench">
+            <section class="foundation-verdict"><div><h4>${e(t("foundation.section.conclusion"))}</h4><h3>${e(t(verdictKey, { systems: architecture.systemCount }))}</h3><p>${e(architecture.candidateFile ? t("foundation.candidate", { file: architecture.candidateFile }) : t("foundation.noCandidate"))}</p></div><div class="foundation-health">${health}</div></section>
+            <section class="foundation-section"><div class="foundation-section-head"><div><h3>${e(t("foundation.section.sources"))}</h3><p>${e(t("foundation.section.sourcesHelp"))}</p></div></div><div class="foundation-sources">${sources || `<div class="empty">${e(t("foundation.none"))}</div>`}</div></section>
+            <section class="foundation-section"><div class="foundation-section-head"><div><h3>${e(t("foundation.section.roles"))}</h3><p>${e(t("foundation.section.rolesHelp"))}</p></div></div><div class="foundation-table-wrap"><table class="foundation-table"><thead><tr><th>${e(t("foundation.roleColumn"))}</th>${matrixHead}<th>${e(t("foundation.targetColumn"))}</th></tr></thead><tbody>${roleRows}</tbody></table></div></section>
+            <section class="foundation-section"><div class="foundation-section-head"><div><h3>${e(t("foundation.section.bypasses"))}</h3><p>${e(t("foundation.section.bypassesHelp"))}</p></div></div><div class="bypass-grid">${bypasses}</div></section>
+            <section class="foundation-section"><div class="foundation-section-head"><div><h3>${e(t("foundation.section.convergence"))}</h3><p>${e(t("foundation.section.convergenceHelp"))}</p></div></div><div class="convergence-panel">${actions || `<div class="empty">${e(t("foundation.none"))}</div>`}</div></section>
+            <section class="foundation-target"><div class="foundation-section-head"><div><h3>${e(t("foundation.section.target"))}</h3><p>${e(t("foundation.section.targetHelp"))}</p></div><span class="color-badge recommended">${e(t("color.sourceDerived"))}</span></div><div class="foundation-target-grid"><div><h4>${e(t("foundation.targetTokens"))}</h4>${targetTokens}</div><article class="foundation-target-board"><h4>${e(t("foundation.targetOwner"))}</h4><p><code>${e(workbench.target.ownerFile || t("foundation.none"))}</code></p><div class="contract-chips"><span>${e(missing)}</span></div></article></div></section>
+            <details class="engineer-details"><summary>${e(t("evidence.engineer"))}</summary><div class="source-list">${sourceRefs || `<div class="empty">${e(t("evidence.none"))}</div>`}</div></details>
+          </div></div></details>`;
+        };
+        const iconWorkbenchCard = (system, layer, category) => {
+          const workbench = category.iconWorkbench;
+          const architecture = workbench.architecture;
+          const verdictKey = architecture.contractStatus === "fragmented" ? "icon.verdict.fragmented" : architecture.contractStatus === "missing" ? "icon.verdict.missing" : "icon.verdict.partial";
+          const health = [["icon.health.sources", architecture.sourceCount], ["icon.health.assets", architecture.assetCount], ["icon.health.libraries", architecture.libraryCount], ["icon.health.components", architecture.componentCount]].map(([label, value]) => `<article><span>${e(t(label))}</span><strong>${e(value)}</strong></article>`).join("");
+          const sources = workbench.sources.map((source) => {
+            const candidate = source.key === architecture.primarySource;
+            const names = source.names.length ? `<div class="contract-chips">${source.names.slice(0, 12).map((name) => `<span>${e(name)}</span>`).join("")}</div>` : "";
+            return `<article class="icon-source ${candidate ? "candidate" : ""}"><div class="icon-demo"><span aria-hidden="true">◇</span><div><strong>${e(source.source || source.type)}</strong><small>${e(source.type)}</small></div></div><small>${e(t("icon.sourceUsage", { count: source.count, files: source.fileCount }))}</small><small>${e(t("icon.grid"))}: ${e(source.grids.join(", ") || t("icon.notDeclared"))}</small><small>${e(t("icon.stroke"))}: ${e(source.strokeWidths.join(", ") || t("icon.notDeclared"))}</small><small>${e(t("icon.fill"))}: ${e(source.fills.join(", ") || t("icon.notDeclared"))}</small>${names}<div class="contract-chips"><span>${e(t(`foundation.action.${source.recommendation}`))}</span></div></article>`;
+          }).join("");
+          const contractRows = [["icon.grid", workbench.grids], ["icon.stroke", workbench.strokeWidths], ["icon.fill", workbench.fills]].map(([label, values]) => `<article class="foundation-target-board"><h4>${e(t(label))}</h4><div class="contract-chips">${values.length ? values.map((value) => `<span>${e(value)}</span>`).join("") : `<span>${e(t("icon.notDeclared"))}</span>`}</div></article>`).join("");
+          const missing = workbench.target.missingContracts.map((item) => t(`icon.contract.${item}`));
+          const sourceRefs = (category.sourceRefs || []).map((ref) => `<div class="source-row"><code>${e(ref.file)}${ref.line ? `:${e(ref.line)}` : ""}</code><pre>${e(ref.name || "")} · ${e(ref.value || "")}</pre></div>`).join("");
+          return `<details class="system-category" id="system-${e(system)}-${e(layer.id)}-${e(category.id)}"><summary><div class="category-title"><h3>${e(t("categoryName.icon-assets"))}</h3><p>${e(t("icon.categorySummary", { sources: architecture.sourceCount, assets: architecture.assetCount, components: architecture.componentCount }))}</p></div><span class="status ${e(category.status)}">${e(t(`status.${category.status}`))}</span></summary><div class="category-body"><div class="foundation-workbench">
+            <section class="foundation-verdict"><div><h4>${e(t("foundation.section.conclusion"))}</h4><h3>${e(t(verdictKey, { sources: architecture.sourceCount }))}</h3><p>${e(architecture.primarySource ? t("foundation.candidate", { file: workbench.target.source }) : t("foundation.noCandidate"))}</p></div><div class="foundation-health">${health}</div></section>
+            <section class="foundation-section"><div class="foundation-section-head"><div><h3>${e(t("icon.section.sources"))}</h3><p>${e(t("icon.section.sourcesHelp"))}</p></div></div><div class="icon-source-grid">${sources || `<div class="empty">${e(t("foundation.none"))}</div>`}</div></section>
+            <section class="foundation-section"><div class="foundation-section-head"><div><h3>${e(t("icon.section.contract"))}</h3><p>${e(t("icon.section.contractHelp"))}</p></div></div><div class="foundation-target-grid">${contractRows}</div></section>
+            <section class="foundation-target"><div class="foundation-section-head"><div><h3>${e(t("icon.section.target"))}</h3><p>${e(t("icon.section.targetHelp"))}</p></div><span class="color-badge recommended">${e(t("color.sourceDerived"))}</span></div><div class="foundation-target-grid"><article class="foundation-target-board"><h4>${e(t("icon.targetPrimary"))}</h4><p><code>${e(workbench.target.source || t("foundation.none"))}</code></p></article><article class="foundation-target-board"><h4>${e(t("icon.targetRules"))}</h4><p>${e(missing.length ? t("icon.targetMissing", { items: missing.join(locale === "zh" ? "、" : ", ") }) : t("foundation.targetComplete"))}</p></article></div></section>
+            <details class="engineer-details"><summary>${e(t("evidence.engineer"))}</summary><div class="source-list">${sourceRefs || `<div class="empty">${e(t("evidence.none"))}</div>`}</div></details>
+          </div></div></details>`;
+        };
+        const categoryCard = (system, layer, category) => {
+          if (category.id === "color" && category.colorWorkbench) return colorWorkbenchCard(system, layer, category);
+          if (category.foundationWorkbench) return foundationWorkbenchCard(system, layer, category);
+          if (category.iconWorkbench) return iconWorkbenchCard(system, layer, category);
+          const metrics = (category.metrics || []).map((item) => {
+            const rawValue = item.value === "unverified" ? t("status.unverified") : item.value;
+            const value = item.detail != null && Number.isFinite(Number(item.detail)) ? `${rawValue}/${item.detail}` : rawValue;
+            return `<div class="metric"><strong>${e(value)}</strong><span>${e(t(`metric.${item.id}`))}</span></div>`;
+          }).join("");
+          const coverageItems = coverage(category).map((item) => `<div class="coverage-row"><strong>${e(item.primitive ? humanize(item.id) : translatedOrHumanized("subcategory", item.id))}</strong><span class="status ${e(item.status || "")}">${e(t(`status.${item.status || category.status}`))}</span></div>`).join("");
+          const specimens = (category.specimens || []).map((item) => {
+            const color = safeStyleValue(item.value);
+            return `<div class="category-swatch"><span ${color ? `style="background:${e(color)}"` : ""}></span><small>${e(item.label)}</small></div>`;
+          }).join("");
+          return `<details class="system-category" id="system-${e(system)}-${e(layer.id)}-${e(category.id)}" ${category.id === "color" ? "open" : ""}>
+            <summary><div class="category-title"><h3>${e(t(`categoryName.${category.id}`))}</h3><p>${e(t("blueprint.categoryHint"))}</p></div><span class="status ${e(category.status)}">${e(t(`status.${category.status}`))}</span></summary>
+            <div class="category-body">
+              <section class="category-sheet"><div class="sheet-label"><span>${e(t("state.current"))}</span><h4>${e(t("panel.current"))}</h4></div><div class="sheet-stage">${metrics ? `<div class="metric-grid">${metrics}</div>` : `<p>${e(t("blueprint.detectedDisclaimer"))}</p>`}${specimens ? `<div class="category-specimens">${specimens}</div>` : ""}${coverageItems ? `<h4 style="margin:16px 0 10px">${e(t(system === "dynamic" ? "panel.appliesTo" : "panel.subcategories"))}</h4><div class="coverage-matrix">${coverageItems}</div>` : ""}</div></section>
+              <section class="category-sheet"><div class="sheet-label"><span>${e(t("state.target"))}</span><h4>${e(t("panel.target"))}</h4></div><div class="sheet-stage"><p>${e(standardFor(layer, category))}</p></div></section>
+              <section class="category-sheet"><div class="sheet-label"><span>${e(t("state.recommendation"))}</span><h4>${e(t("panel.recommendation"))}</h4></div><div class="sheet-stage recommendation-stage"><p class="recommendation-rule">${e(t(`recommendation.${category.status}`))}</p></div></section>
+            </div>
+          </details>`;
+        };
+        const renderLayers = (system, layers) => layers.map((layer) => `
+          <article class="blueprint-layer">
+            <div><h3>${e(t(`layer.${layer.id}`))}</h3><p>${e(t(`layerPurpose.${layer.id}`))}</p><span class="status ${e(layer.status)}">${e(t(`status.${layer.status}`))}</span></div>
+            <div class="blueprint-items">${layer.categories.map((category) => categoryCard(system, layer, category)).join("")}</div>
+          </article>`).join("");
+        setHtml("blueprint-static", renderLayers("static", systemReview.staticLayers));
+        setHtml("blueprint-dynamic", `<div class="blueprint">${renderLayers("dynamic", systemReview.dynamicLayers)}</div>`);
+      }
+
+      function appearanceStyle(appearance = {}) {
+        const allowed = { background: "background", color: "color", borderColor: "border-color", borderRadius: "border-radius", fontFamily: "font-family", fontSize: "font-size", fontWeight: "font-weight", boxShadow: "box-shadow", padding: "padding" };
+        return Object.entries(appearance).flatMap(([key, value]) => allowed[key] && safeStyleValue(String(value)) ? [`${allowed[key]}:${value}`] : []).join(";");
+      }
+
+      function renderSpecimen(item) {
+        const label = e(l(item.label));
+        const detail = item.detail ? `<small>${e(l(item.detail))}</small>` : "";
+        const value = typeof item.value === "object" ? l(item.value) : String(item.value ?? "");
+        if (item.type === "color") {
+          const color = safeStyleValue(value);
+          return `<div class="specimen"><strong>${label}</strong><div class="color-sample" ${color ? `style="background:${e(color)}"` : ""}></div><div class="specimen-value">${e(value)}</div>${detail}</div>`;
+        }
+        if (item.type === "spacing") {
+          const width = Math.max(8, Math.min(120, cssNumber(value, 16) * 3));
+          return `<div class="specimen"><strong>${label}</strong><div class="spacing-track"><div class="spacing-bar" style="width:${width}px"></div></div><div class="specimen-value">${e(value)}</div>${detail}</div>`;
+        }
+        if (item.type === "radius") {
+          const radius = Math.max(0, Math.min(36, cssNumber(value, 4)));
+          return `<div class="specimen"><strong>${label}</strong><div class="radius-sample" style="border-radius:${radius}px"></div><div class="specimen-value">${e(value)}</div>${detail}</div>`;
+        }
+        if (item.type === "typography") return `<div class="specimen"><strong>${label}</strong><div class="type-sample">Aa 界面文字</div><div class="specimen-value">${e(value)}</div>${detail}</div>`;
+        if (item.type === "ownership") {
+          const sourceName = String(value).split(/[\\/]/).filter(Boolean).at(-1) || value;
+          return `<div class="specimen ownership-specimen"><strong>${e(sourceName)}</strong><div class="owner-flow"><span class="owner-node">${e(t("specimen.styleSource"))}</span><span aria-hidden="true">→</span><span class="owner-node">${e(t("specimen.sharedUI"))}</span></div>${detail}</div>`;
+        }
+        if (item.type === "behavior") {
+          const states = Array.isArray(item.states) ? item.states : value.split(/[,·]/).map((part) => part.trim()).filter(Boolean);
+          return `<div class="specimen"><strong>${label}</strong><div class="behavior-states">${states.map((state) => `<span>${e(state)}</span>`).join("")}</div>${detail}</div>`;
+        }
+        if (item.type === "layer") {
+          const level = Math.max(1, Math.min(5, cssNumber(value, 3)));
+          return `<div class="specimen"><strong>${label}</strong><div class="behavior-states">${Array.from({ length: level }, (_, index) => `<span>${index + 1}</span>`).join("")}</div><div class="specimen-value">${e(value)}</div>${detail}</div>`;
+        }
+        if (item.type === "component") {
+          const style = appearanceStyle(item.appearance);
+          const component = item.component || "card";
+          const preview = component === "button" ? `<button type="button" tabindex="-1" style="${e(style)}">${label}</button>` : component === "input" ? `<input tabindex="-1" aria-label="${label}" value="${e(value || label)}" style="${e(style)}">` : `<div class="component-card" style="${e(style)}"><strong>${label}</strong><small>${e(value)}</small></div>`;
+          return `<div class="specimen"><strong>${label}</strong><div class="component-preview">${preview}</div>${detail}</div>`;
+        }
+        return `<div class="specimen"><strong>${label}</strong><div class="specimen-value">${e(value)}</div>${detail}</div>`;
+      }
+
+      function confidenceLabel(value) { return t(value >= .8 ? "confidence.high" : value >= .6 ? "confidence.medium" : "confidence.low"); }
+
+      function evidenceHtml(item) {
+        const sourceRefs = (item.sourceRefs || []).filter((ref) => ref && (ref.file || ref.excerpt));
+        return `<div class="plain-evidence"><article class="evidence-card"><h4>${e(t("evidence.fact"))}</h4><p>${e(l(item.fact))}</p></article><article class="evidence-card"><h4>${e(t("evidence.impact"))}</h4><p>${e(l(item.impact))}</p></article></div>
+          <details class="engineer-details"><summary>${e(t("evidence.engineer"))}</summary><div class="source-list">${sourceRefs.length ? sourceRefs.map((ref) => `<div class="source-row"><code>${e(ref.file || "")}${ref.line ? `:${e(ref.line)}` : ""}</code>${ref.excerpt ? `<pre>${e(ref.excerpt)}</pre>` : ""}</div>`).join("") : `<div class="empty">${e(t("evidence.none"))}</div>`}</div></details>`;
+      }
+
+      function decisionCard(item, index) {
+        const state = decisionState[item.id] || {};
+        const recommendation = item.recommendation;
+        const path = item.systemPath ? [t(`system.${item.systemPath.system}`), t(`layer.${item.systemPath.layer}`), t(`categoryName.${item.systemPath.category}`)].join(" / ") : t(`category.${item.category}`);
+        return `<article class="decision-card" data-package-id="${e(item.id)}">
+          <div class="system-path">${e(path)}</div>
+          <div class="decision-head"><div><span class="decision-number">${String(index + 1).padStart(2, "0")}</span><h3>${e(l(item.title))}</h3><p>${e(l(item.question))}</p></div><span class="category">${e(t(`category.${item.category}`))}</span></div>
+          <div class="comparison">
+            <section class="state-card current"><div class="state-label">${e(t("state.current"))}</div><p>${e(l(item.current.summary))}</p><div class="specimens">${item.current.specimens.map(renderSpecimen).join("")}</div></section>
+            <section class="state-card target"><div class="state-label">${e(t("state.target"))}</div>${item.standard ? `<div class="target-standard"><strong>${e(t("panel.target"))}</strong><p>${e(l(item.standard))}</p></div>` : ""}<p>${e(l(item.target.summary))}</p><div class="specimens">${item.target.specimens.map(renderSpecimen).join("")}</div></section>
+            <section class="state-card recommendation"><div class="state-label"><span>${e(t("state.recommendation"))}</span><span class="recommendation-mark">${e(confidenceLabel(recommendation.confidence))}</span></div><p><strong>${e(l(recommendation.summary))}</strong></p><ul class="reason-list">${recommendation.reasons.map((reason) => `<li>${e(l(reason))}</li>`).join("")}</ul>${recommendation.limitation ? `<p class="limitation">${e(l(recommendation.limitation))}</p>` : ""}</section>
+          </div>
+          ${item.evidence.map(evidenceHtml).join("")}
+          <fieldset class="user-choice"><legend>${e(t("choice.legend"))}</legend><div class="choice-grid">${item.choices.map((choice) => {
+            const recommended = choice.decision === recommendation.decision && (!choice.canonicalOwnerId || choice.canonicalOwnerId === recommendation.canonicalOwnerId);
+            return `<label class="choice"><input type="radio" name="decision-${e(item.id)}" value="${e(choice.decision)}" data-owner-id="${e(choice.canonicalOwnerId || "")}" ${state.decision === choice.decision && (state.canonicalOwnerId || "") === (choice.canonicalOwnerId || (recommended ? recommendation.canonicalOwnerId || "" : "")) ? "checked" : ""}><span><strong>${e(l(choice.label))}${recommended ? `<span class="recommended-choice">${e(t("choice.recommended"))}</span>` : ""}</strong><small>${e(l(choice.consequence))}</small></span></label>`;
+          }).join("")}</div><label class="note-field"><span>${e(t("choice.note"))}</span><textarea data-note placeholder="${e(t("choice.notePlaceholder"))}">${e(state.note || "")}</textarea></label></fieldset>
+        </article>`;
+      }
+
+      function renderDecisions() {
+        const query = document.getElementById("decision-search").value.trim().toLowerCase();
+        const filtered = brief.decisionPackages.filter((item) => [l(item.title), l(item.question), l(item.standard), item.systemPath?.layer, item.systemPath?.category, l(item.current.summary), l(item.target.summary), l(item.recommendation.summary)].join(" ").toLowerCase().includes(query));
+        setHtml("decision-list", filtered.length ? filtered.map((item) => decisionCard(item, brief.decisionPackages.indexOf(item))).join("") : `<div class="empty">${e(t("decisions.empty"))}</div>`);
+        const done = brief.decisionPackages.filter((item) => decisionState[item.id]?.decision).length;
+        document.getElementById("progress-text").textContent = t("decisions.progress", { done, total: brief.decisionPackages.length });
+        document.getElementById("progress-bar").style.width = `${brief.decisionPackages.length ? Math.round(done / brief.decisionPackages.length * 100) : 100}%`;
+      }
+
+      function renderTechnical() {
+        const componentCount = report.componentOwners.reduce((total, item) => total + item.componentCount, 0);
+        const terms = [
+          [report.scan.scannedFiles, "term.files", "term.filesHelp"], [report.tokenDefinitions.length, "term.definitions", "term.definitionsHelp"], [report.tokenOwners.length, "term.owners", "term.ownersHelp"],
+          [componentCount, "term.components", "term.componentsHelp"], [report.scan.totalFindings, "term.findings", "term.findingsHelp"], [brief.decisionPackages.length, "term.groups", "term.groupsHelp"]
+        ];
+        setHtml("technical-summary", terms.map(([value, label, help]) => `<article class="technical-term"><strong>${e(value)}</strong><span>${e(t(label))}</span><p>${e(t(help))}</p></article>`).join(""));
+        setHtml("owner-list", [...report.tokenOwners.map((item) => `<div class="raw-row"><code>${e(item.file)}</code><p>${e(item.definitionCount)} definitions · ${e(item.sourceTypes.join(" · "))}</p></div>`), ...report.componentOwners.map((item) => `<div class="raw-row"><code>${e(item.directory)}</code><p>${e(item.primitives.join(" · "))}</p></div>`)].join("") || `<div class="empty">—</div>`);
+        const findings = report.findings.slice(0, 80);
+        document.getElementById("finding-limit").textContent = t("technical.findingLimit", { count: findings.length });
+        setHtml("finding-list", findings.map((item) => `<details class="raw-finding"><summary><strong>${e(item.ruleId)}</strong> · ${e(item.file)}:${e(item.line)} · ${Math.round(item.confidence * 100)}%</summary><pre>${e(item.evidence)}\n\n${e(item.suggestedAction)}</pre></details>`).join("") || `<div class="empty">—</div>`);
+        setHtml("coverage", `<p>${e(t("coverage.scanned", { files: report.scan.scannedFiles, skipped: report.scan.skippedFiles }))}</p><h4 style="margin-top:14px">${e(t("coverage.unassessed"))}</h4><ul>${report.scan.unassessedAreas.map((item) => `<li>${e(item)}</li>`).join("")}</ul>`);
+      }
+
+      function saveState() { try { localStorage.setItem(stateKey, JSON.stringify(decisionState)); } catch {} }
+
+      function exportedPackages() {
+        return brief.decisionPackages.flatMap((item) => {
+          const state = decisionState[item.id];
+          if (!state?.decision) return [];
+          return [{ packageId: item.id, systemPath: item.systemPath || null, conflictIds: item.conflictIds, findingFingerprints: item.findingFingerprints || [], decision: state.decision, canonicalOwnerId: state.canonicalOwnerId || null, note: state.note || "" }];
         });
       }
-      function renderFindings() {
-        const filtered = filteredFindings();
-        const shown = filtered.slice(0, findingLimit);
-        setHtml("finding-list", shown.map(findingRow).join("") || '<div class="empty">No findings match the current filters.</div>');
-        document.getElementById("finding-status").textContent = `Showing ${shown.length} of ${filtered.length} matching findings`;
-        document.getElementById("load-more-findings").hidden = shown.length >= filtered.length;
+
+      function exportDraft() {
+        const packageDecisions = exportedPackages();
+        if (!packageDecisions.length) { document.getElementById("export-status").textContent = t("completion.none"); return; }
+        const decisions = packageDecisions.flatMap((item) => item.conflictIds.map((conflictId) => ({ conflictId, decision: item.decision, canonicalOwnerId: item.canonicalOwnerId, note: item.note })));
+        const payload = { schemaVersion: 1, reportId: report.reportId, repoId: report.repoId, status: "draft", packageDecisions, decisions };
+        const blob = new Blob([JSON.stringify(payload, null, 2) + "\n"], { type: "application/json" });
+        const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = "govern-ui-decisions.json"; link.click(); URL.revokeObjectURL(url);
+        document.getElementById("export-status").textContent = t("completion.status", { count: packageDecisions.length });
       }
-      renderFindings();
-      document.getElementById("finding-search").addEventListener("input", () => { findingLimit = findingPageSize; renderFindings(); });
-      document.getElementById("severity-filter").addEventListener("change", () => { findingLimit = findingPageSize; renderFindings(); });
-      document.getElementById("load-more-findings").addEventListener("click", () => { findingLimit += findingPageSize; renderFindings(); });
+
+      async function importDraft(file) {
+        try {
+          const payload = JSON.parse(await file.text());
+          if (payload.reportId !== report.reportId || payload.repoId !== report.repoId) throw new Error("report or repository does not match");
+          let count = 0;
+          if (Array.isArray(payload.packageDecisions)) {
+            for (const item of payload.packageDecisions) if (brief.decisionPackages.some((entry) => entry.id === item.packageId)) { decisionState[item.packageId] = { decision: item.decision, canonicalOwnerId: item.canonicalOwnerId || null, note: item.note || "" }; count += 1; }
+          } else if (Array.isArray(payload.decisions)) {
+            for (const item of brief.decisionPackages) {
+              const matches = payload.decisions.filter((entry) => item.conflictIds.includes(entry.conflictId));
+              if (matches.length && matches.every((entry) => entry.decision === matches[0].decision)) { decisionState[item.id] = { decision: matches[0].decision, canonicalOwnerId: matches[0].canonicalOwnerId || null, note: matches[0].note || "" }; count += 1; }
+            }
+          }
+          saveState(); renderDecisions(); document.getElementById("export-status").textContent = t("import.success", { count });
+        } catch (error) { document.getElementById("export-status").textContent = t("import.error", { message: error.message }); }
+      }
+
+      function renderAll() { applyTranslations(); renderSummary(); renderBlueprint(); renderDecisions(); renderTechnical(); }
+
+      document.querySelectorAll("[data-locale]").forEach((button) => button.addEventListener("click", () => { locale = button.dataset.locale; try { localStorage.setItem(localeKey, locale); } catch {} renderAll(); }));
+      document.getElementById("decision-search").addEventListener("input", renderDecisions);
+      document.getElementById("decision-list").addEventListener("change", (event) => {
+        const card = event.target.closest("[data-package-id]"); if (!card) return; const packageItem = brief.decisionPackages.find((item) => item.id === card.dataset.packageId); if (!packageItem) return;
+        const current = decisionState[packageItem.id] || {};
+        if (event.target.matches('input[type="radio"]')) {
+          const recommended = event.target.value === packageItem.recommendation.decision;
+          decisionState[packageItem.id] = { ...current, decision: event.target.value, canonicalOwnerId: event.target.dataset.ownerId || (recommended ? packageItem.recommendation.canonicalOwnerId || null : null) };
+        }
+        saveState(); renderDecisions();
+      });
+      document.getElementById("decision-list").addEventListener("input", (event) => {
+        if (!event.target.matches("[data-note]")) return; const card = event.target.closest("[data-package-id]"); const current = decisionState[card.dataset.packageId] || {}; decisionState[card.dataset.packageId] = { ...current, note: event.target.value }; saveState();
+      });
+      document.getElementById("export-decisions").addEventListener("click", exportDraft);
+      document.getElementById("import-decisions").addEventListener("click", () => document.getElementById("decision-file").click());
+      document.getElementById("decision-file").addEventListener("change", (event) => { if (event.target.files[0]) importDraft(event.target.files[0]); event.target.value = ""; });
+      renderAll();
     })();
   </script>
 </body>

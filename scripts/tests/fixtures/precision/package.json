@@ -1,0 +1,5 @@
+{
+  "name": "governance-precision-fixture",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"]
+}

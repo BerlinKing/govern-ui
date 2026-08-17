@@ -2,5 +2,14 @@
   color: #222222;
   background: #fafafa;
   padding: 18px;
+  gap: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid #dddddd;
+  border-radius: 9px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  opacity: 0.96;
   z-index: 9999;
 }

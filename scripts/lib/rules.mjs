@@ -1,6 +1,6 @@
 import { normalizeEvidence, sha, stableSort } from "./utils.mjs";
 
-export const RULESET_VERSION = "lite-0.1.0";
+export const RULESET_VERSION = "lite-0.7.0";
 export const POLICY_HASH = sha(`govern-ui:${RULESET_VERSION}`, 24);
 
 function findingFactory() {
@@ -30,7 +30,7 @@ export function evaluateRules(scan, classification) {
   const make = findingFactory();
   const findings = [];
   const hasTokenOwner = classification.tokenOwners.length > 0;
-  const sharedPrimitives = new Set(scan.componentCandidates.filter((item) => item.shared).map((item) => item.primitive));
+  const sharedPrimitives = new Set(scan.componentCandidates.filter((item) => item.shared && item.role === "owner").map((item) => item.primitive));
 
   if (!hasTokenOwner) {
     findings.push(make({
@@ -101,6 +101,39 @@ export function evaluateRules(scan, classification) {
         line: raw.line,
         evidence: raw.evidence,
         suggestedAction: "Review whether this is semantic spacing/typography or legitimate geometry",
+        category: "token",
+      }));
+    } else if (raw.kind === "typography") {
+      findings.push(make({
+        ruleId: "token.raw-typography",
+        severity: "low",
+        confidence: 0.84,
+        file: raw.file,
+        line: raw.line,
+        evidence: raw.evidence,
+        suggestedAction: "Review this font or text metric against the shared typography contract",
+        category: "token",
+      }));
+    } else if (raw.kind === "stroke") {
+      findings.push(make({
+        ruleId: "token.raw-stroke",
+        severity: "low",
+        confidence: 0.82,
+        file: raw.file,
+        line: raw.line,
+        evidence: raw.evidence,
+        suggestedAction: "Review this border or outline against shared shape and stroke roles",
+        category: "token",
+      }));
+    } else if (raw.kind === "shadow" || raw.kind === "depth-effect") {
+      findings.push(make({
+        ruleId: raw.kind === "shadow" ? "token.raw-shadow" : "token.raw-depth-effect",
+        severity: "low",
+        confidence: 0.82,
+        file: raw.file,
+        line: raw.line,
+        evidence: raw.evidence,
+        suggestedAction: "Review this visual depth value against the shared elevation and layer contract",
         category: "token",
       }));
     } else if (raw.kind === "motion") {

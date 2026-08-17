@@ -1,4 +1,4 @@
 interface:
   display_name: "GovernUI"
-  short_description: "Map tokens, owners, and new UI debt"
-  default_prompt: "Use $govern-ui to audit this frontend repository and generate an evidence-backed design-system review."
+  short_description: "Turn frontend source into user-facing design decisions"
+  default_prompt: "Use $govern-ui to audit this frontend as a complete static and dynamic design system, then create a bilingual designer-facing specification-sheet review with real current specimens or state matrices, target contracts, convergence recommendations, and product decisions in plain language."
