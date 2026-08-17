@@ -37,7 +37,7 @@ export const IGNORED_DIRECTORIES = new Set([
 export const SCANNABLE_EXTENSIONS = new Set([
   ".css", ".scss", ".sass", ".less", ".pcss",
   ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs",
-  ".json", ".vue", ".svelte", ".astro",
+  ".json", ".svg", ".vue", ".svelte", ".astro",
 ]);
 
 const SENSITIVE_BASENAMES = /^(?:\.env(?:\..+)?|.*\.(?:pem|key|p12|pfx|crt|cer)|id_rsa.*)$/i;
@@ -155,13 +155,19 @@ export async function collectFiles(root, options = {}) {
 }
 
 export function inferTokenKind(name, value = "") {
-  const haystack = `${name} ${value}`.toLowerCase();
-  if (/(?:#(?:[0-9a-f]{3,8})\b|\brgba?\(|\bhsla?\(|\boklch\(|\bcolor\()/.test(value.toLowerCase()) || /color|background|foreground|surface|text|border|fill|stroke|accent/.test(haystack)) return "color";
-  if (/font|type|line-height|letter|tracking/.test(haystack)) return "typography";
+  const normalizedName = String(name).toLowerCase();
+  const normalizedValue = String(value).toLowerCase();
+  const haystack = `${normalizedName} ${normalizedValue}`;
   if (/radius|rounded|corner/.test(haystack)) return "radius";
-  if (/shadow|elevation/.test(haystack)) return "shadow";
+  if (/font|type|line-height|letter|tracking/.test(haystack)) return "typography";
+  if (/shadow|elevation/.test(normalizedName)) return "shadow";
+  if (/(?:opacity|scrim|backdrop|blur|filter)/.test(normalizedName)) return "depth";
   if (/duration|easing|motion|transition|spring|damping|stiffness/.test(haystack)) return "motion";
   if (/z-index|layer|overlay/.test(haystack)) return "layer";
+  if (/(?:border|stroke|outline|divider|ring)-(?:width|style|size)|(?:width|style)-(?:border|stroke|outline|divider|ring)|(?:^|-)(?:focus-ring|hairline)(?:-|$)/.test(normalizedName) || /(?:^|\s)(?:solid|dashed|dotted|double)(?:\s|$)/.test(normalizedValue)) return "stroke";
+  if (/(?:#(?:[0-9a-f]{3,8})\b|\brgba?\(|\bhsla?\(|\boklch\(|\bcolor\()/.test(normalizedValue) || /var\(\s*--(?:color|background|foreground|surface|text|fill|accent)/.test(normalizedValue)) return "color";
+  if (/color|background|foreground|surface|(?:^|-)text(?:-|$)|(?:^|-)fill(?:-|$)|accent/.test(normalizedName)) return "color";
+  if (/(?:border|stroke|outline|divider|ring)(?:-|$)|(?:^|-)(?:border|stroke|outline|divider|ring)/.test(normalizedName)) return "stroke";
   if (/space|spacing|gap|margin|padding|inset|width|height|size/.test(haystack)) return "spacing";
   return "other";
 }

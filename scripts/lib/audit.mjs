@@ -4,6 +4,7 @@ import { classifyAudit, classifyLane } from "./classify.mjs";
 import { discoverRepository } from "./discover.mjs";
 import { evaluateRules, POLICY_HASH, RULESET_VERSION } from "./rules.mjs";
 import { scanSources } from "./scan.mjs";
+import { buildSystemReview } from "./system-review.mjs";
 import { collectFiles, generatedAt, sha, stableSort } from "./utils.mjs";
 
 function buildHotspots(findings) {
@@ -23,7 +24,7 @@ function buildHotspots(findings) {
 
 function nextActions(lane, conflicts) {
   const actions = [];
-  if (conflicts.length) actions.push("Review Token conflict groups in token-review.html and export a decision draft");
+  if (conflicts.length) actions.push("Review the standard system matrix and its categorized decision cards in token-review.html, then export a decision draft");
   if (lane === "Bootstrap") actions.push("Confirm brand, theme, responsive scope, and the first public primitives before creating a foundation");
   if (lane === "Migrate") actions.push("Confirm canonical Token and component owners, then select one vertical migration slice");
   if (lane === "Hybrid") actions.push("Confirm the existing foundation and prioritize adoption gaps without replacing working owners");
@@ -147,11 +148,13 @@ export async function auditRepository(repo) {
   const classification = classifyAudit(scan);
   const findings = evaluateRules(scan, classification);
   const maturity = classifyLane(scan, classification, findings.length);
+  const systemReview = buildSystemReview(scan, classification, findings);
   const repoId = sha(repoProfile.repoIdSeed, 24);
   const reportId = sha([
     repoId,
     POLICY_HASH,
     ...scan.tokenDefinitions.map((item) => item.id).sort(),
+    ...scan.iconAssets.map((item) => item.id).sort(),
     ...classification.relationships.map((item) => item.id).sort(),
     ...findings.map((item) => item.fingerprint).sort(),
   ].join("|"), 24);
@@ -184,7 +187,9 @@ export async function auditRepository(repo) {
     relationships: classification.relationships,
     conflicts: classification.conflicts,
     componentCandidates: stableSort(scan.componentCandidates, (item) => item.file),
+    iconAssets: stableSort(scan.iconAssets, (item) => `${item.file}:${String(item.line ?? 0).padStart(8, "0")}:${item.source}`),
     duplicatedPrimitives: classification.duplicatedPrimitives,
+    systemReview,
     componentBlueprint: buildComponentBlueprint(scan),
     findings,
     hotspots: buildHotspots(findings),

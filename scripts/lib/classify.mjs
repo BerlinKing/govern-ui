@@ -2,7 +2,7 @@ import { sha, stableSort } from "./utils.mjs";
 
 const THEME_SELECTOR = /(?:\.dark\b|\.light\b|data-theme|data-brand|prefers-color-scheme|theme-)/i;
 const GLOBAL_SELECTOR = /^(?::root|html|body|unknown)$/i;
-const OVERLAY_PRIMITIVES = new Set(["dialog", "sheet", "popover", "dropdown", "toast", "tooltip"]);
+const OVERLAY_PRIMITIVES = new Set(["dialog", "modal", "drawer", "sheet", "popover", "menu", "dropdown", "toast", "tooltip"]);
 
 function groupBy(items, selector) {
   const groups = new Map();

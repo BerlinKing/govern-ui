@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { normalizeReviewBrief } from "./brief.mjs";
 
 function countBy(items, selector) {
   const counts = {};
@@ -52,11 +53,19 @@ export function markdownReport(report) {
     "",
     ...(report.conflicts.length ? report.conflicts.map((item) => `- **${item.type}** \`${item.id}\`: ${item.reason}`) : ["- None detected by the Lite scanner."]),
     "",
-    "## UI library blueprint",
+    "## System-first review matrix",
     "",
-    `- Status: **${report.componentBlueprint.status}**`,
-    ...report.componentBlueprint.staticLayers.map((layer) => `- ${layer.label}: ${layer.items.filter((item) => item.status !== "not-detected").map((item) => item.primitive).join(", ") || "no source candidate detected"}`),
-    `- Dynamic contracts: ${report.componentBlueprint.dynamicContracts.map((item) => item.surface).join(", ")}`,
+    `- Model: **${report.systemReview.model}**`,
+    "- Static system:",
+    ...report.systemReview.staticLayers.flatMap((layer) => [
+      `  - ${layer.label} (${layer.status})`,
+      ...layer.categories.map((category) => `    - ${category.id}: ${category.status}`),
+    ]),
+    "- Dynamic system:",
+    ...report.systemReview.dynamicLayers.flatMap((layer) => [
+      `  - ${layer.label} (${layer.status})`,
+      ...layer.categories.map((category) => `    - ${category.id}: ${category.status}`),
+    ]),
     "",
     "## Top hotspots",
     "",
@@ -90,7 +99,7 @@ export function terminalSummary(report) {
   ].join("\n");
 }
 
-function htmlPresentationReport(report) {
+function htmlPresentationReport(report, reviewBrief) {
   const severityOrder = { high: 0, medium: 1, low: 2 };
   const findings = [...report.findings]
     .sort((left, right) => (severityOrder[left.severity] - severityOrder[right.severity]) || (right.confidence - left.confidence) || left.file.localeCompare(right.file))
@@ -110,20 +119,23 @@ function htmlPresentationReport(report) {
     componentOwners: report.componentOwners,
     componentAdapters: report.componentAdapters,
     conflicts: report.conflicts,
+    systemReview: report.systemReview,
     componentBlueprint: report.componentBlueprint,
     findings,
     maturity: report.maturity,
     recommendedLane: report.recommendedLane,
     nextActions: report.nextActions,
+    reviewBrief,
   };
 }
 
-export async function writeReportArtifacts(report, outputDirectory) {
+export async function writeReportArtifacts(report, outputDirectory, options = {}) {
   const output = path.resolve(outputDirectory);
   await mkdir(output, { recursive: true });
   const templatePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../assets/report-template.html");
   const template = await readFile(templatePath, "utf8");
-  const presentationReport = htmlPresentationReport(report);
+  const reviewBrief = normalizeReviewBrief(options.reviewBrief, report);
+  const presentationReport = htmlPresentationReport(report, reviewBrief);
   const html = template
     .replaceAll("{{REPORT_TITLE}}", escapeHtml(`GovernUI — ${report.repoProfile.rootName}`))
     .replace("{{REPORT_JSON}}", safeScriptJson(presentationReport));

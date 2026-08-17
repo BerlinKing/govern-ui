@@ -60,6 +60,9 @@ Lite rules include:
 - `token.raw-color`
 - `token.raw-length`
 - `token.raw-typography`
+- `token.raw-stroke`
+- `token.raw-shadow`
+- `token.raw-depth-effect`
 - `token.raw-motion`
 - `token.undefined-reference`
 - `token.semantic-conflict`
@@ -72,7 +75,7 @@ Lite rules include:
 - `overlay.raw-z-index`
 - `overlay.layer-contract-missing`
 
-Raw length, typography, and motion findings are Medium or Low by default because many literal values are legitimate geometry or one-off media constraints.
+Raw length, typography, stroke, shadow, depth-effect, and motion findings are Low by default because many literal values are legitimate geometry, illustration details, or one-off media constraints. Ordinary Tailwind utilities are inventoried in the relevant foundation workbench but do not each become a finding; arbitrary values remain `token.semantic-layer-bypass` observations.
 
 ## Components and overlays
 
