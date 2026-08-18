@@ -110,6 +110,7 @@ Specimens are structured visual data, never arbitrary HTML. Supported `type` val
 - `rule`: show a plain-language target rule when an exact visual value would be dishonest.
 
 Every specimen requires a localized `label`. A localized `detail` is optional.
+Use an optional localized `display` when the dominant visual needs designer-facing copy while `value` preserves the source or contract value.
 
 The HTML groups specimens into designer-facing comparison matrices. Author enough structured specimens to expose the real comparison axes for the category—for example role and theme for Color, hierarchy/size/state/content for Button, input type/state/content for Input, and size/mode/content/action layout for Dialog. Do not replace these matrices with totals when source evidence can produce real examples. If a mode or state is not evidenced, label it unverified instead of fabricating a preview.
 
@@ -119,8 +120,9 @@ The HTML groups specimens into designer-facing comparison matrices. Author enoug
 - Write the visible report from the user's decision perspective. Name the product-facing system or role first; keep source syntax, file paths, rule IDs, and code as secondary or collapsed evidence.
 - Group raw conflicts into the smallest set of product decisions a user can reasonably make inside one system category. Do not create one card per scanner finding.
 - Show every taxonomy category in the system matrix even when its status is `not-detected` or `unverified`. A missing scanner finding is not proof that the category is healthy.
-- For every decision card, explain the standard contract, current state, target result, recommendation, consequences, and user choices in that order.
-- Make the visible category read like a component-library specification sheet: category and purpose, current visual/state matrix, target contract, convergence recommendation, then decision.
+- For every decision card, make the element itself the dominant surface: current specimens, target specimens, one question, one recommendation, then choices. Keep standard-contract explanation, limitations, and evidence collapsed.
+- Make the visible category read like a component-library comparison sheet, not a prose report. Never reduce the element to a small badge while explanatory text dominates the card.
+- State each idea once. Do not restate one diagnosis across the title, question, current summary, target summary, recommendation, and disclaimer.
 - Use real current values in `current.specimens`.
 - Use concrete proposed values or component appearances in `target.specimens` only when source/runtime evidence supports them.
 - When the exact target cannot be inferred, show the target structural rule with a `rule` specimen and state the missing verification in `recommendation.limitation`.

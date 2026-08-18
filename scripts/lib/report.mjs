@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeReviewBrief } from "./brief.mjs";
+import { buildUIKitBlueprint } from "./uikit-blueprint.mjs";
 
 function countBy(items, selector) {
   const counts = {};
@@ -99,7 +100,24 @@ export function terminalSummary(report) {
   ].join("\n");
 }
 
-function htmlPresentationReport(report, reviewBrief) {
+function htmlPresentationReport(report, reviewBrief, options = {}) {
+  const uikitBlueprint = options.styleLibrary && options.tokenContract
+    ? buildUIKitBlueprint(report, options.styleLibrary, options.tokenContract, reviewBrief)
+    : null;
+  if (uikitBlueprint) {
+    const { lifecycle: _lifecycle, ...presentationTokenContract } = options.tokenContract;
+    return {
+      schemaVersion: report.schemaVersion,
+      rulesetVersion: report.rulesetVersion,
+      reportId: report.reportId,
+      repoId: report.repoId,
+      generatedAt: report.generatedAt,
+      repoProfile: report.repoProfile,
+      reviewBrief,
+      uikitBlueprint,
+      tokenContract: presentationTokenContract,
+    };
+  }
   const severityOrder = { high: 0, medium: 1, low: 2 };
   const findings = [...report.findings]
     .sort((left, right) => (severityOrder[left.severity] - severityOrder[right.severity]) || (right.confidence - left.confidence) || left.file.localeCompare(right.file))
@@ -126,6 +144,12 @@ function htmlPresentationReport(report, reviewBrief) {
     recommendedLane: report.recommendedLane,
     nextActions: report.nextActions,
     reviewBrief,
+    uikitBlueprint,
+    tokenContract: options.tokenContract ?? null,
+    usageInventory: options.styleLibrary ? {
+      tokens: options.styleLibrary.tokens.map(({ id, name, category, group, file, line, usage }) => ({ id, name, category, group, file, line, usage })),
+      directStyles: options.styleLibrary.directStyles.map(({ id, category, property, value, occurrences, files, usage }) => ({ id, category, property, value, occurrences, files, usage })),
+    } : null,
   };
 }
 
@@ -135,19 +159,21 @@ export async function writeReportArtifacts(report, outputDirectory, options = {}
   const templatePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../assets/report-template.html");
   const template = await readFile(templatePath, "utf8");
   const reviewBrief = normalizeReviewBrief(options.reviewBrief, report);
-  const presentationReport = htmlPresentationReport(report, reviewBrief);
+  const presentationReport = htmlPresentationReport(report, reviewBrief, options);
   const html = template
     .replaceAll("{{REPORT_TITLE}}", escapeHtml(`GovernUI — ${report.repoProfile.rootName}`))
     .replace("{{REPORT_JSON}}", safeScriptJson(presentationReport));
   const files = {
     json: path.join(output, "audit.json"),
     markdown: path.join(output, "audit.md"),
-    html: path.join(output, "token-review.html"),
+    html: path.join(output, "design-review.html"),
+    ...(options.tokenContract ? { tokenContract: path.join(output, "govern-ui-token-contract.json") } : {}),
   };
   await Promise.all([
     writeFile(files.json, `${JSON.stringify(report, null, 2)}\n`, "utf8"),
     writeFile(files.markdown, markdownReport(report), "utf8"),
     writeFile(files.html, html, "utf8"),
+    ...(options.tokenContract ? [writeFile(files.tokenContract, `${JSON.stringify(options.tokenContract, null, 2)}\n`, "utf8")] : []),
   ]);
   return files;
 }

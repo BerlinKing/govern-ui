@@ -21,7 +21,7 @@ const PRIMITIVES = [
   "dialog", "modal", "drawer", "sheet", "popover", "menu", "alert", "toast", "banner", "emptystate", "form", "filter", "editor",
 ];
 const OVERLAYS = new Set(["dialog", "modal", "drawer", "sheet", "popover", "menu", "dropdown", "toast", "tooltip"]);
-const ICON_LIBRARY = /^(?:lucide-react|react-icons(?:\/[^"']+)?|@heroicons\/[^"']+|@phosphor-icons\/[^"']+|@radix-ui\/react-icons|@iconify\/[^"']+|@ant-design\/icons|@fortawesome\/[^"']+)$/i;
+const ICON_LIBRARY = /^(?:lucide-react|react-icons(?:\/[^"']+)?|@heroicons\/[^"']+|@phosphor-icons\/[^"']+|@radix-ui\/react-icons|@iconify\/[^"']+|@ant-design\/icons|@fortawesome\/[^"']+|@[^/]+\/(?:react-)?icons?|(?:react-)?icons?)$/i;
 
 function approximateSelector(content, index) {
   const open = content.lastIndexOf("{", index);
@@ -154,7 +154,7 @@ function scanRawValues(content, file, extension, definitionSource) {
       rawValues.push({
         id: `raw-${sha(`${file}:${match.index}:${kind}:${match[0]}`)}`,
         kind,
-        value: normalizeEvidence(match[0]),
+        value: normalizeEvidence(kind === "arbitrary-tailwind" ? match[0].replace(/^["'`\s]+/, "") : match[0]),
         file,
         line: lineNumberAt(content, match.index),
         ...(STYLE_EXTENSIONS.has(extension) ? { selector: approximateSelector(content, match.index) } : {}),
@@ -250,7 +250,7 @@ function scanIconAssets(content, file, extension) {
     add({ type: isLibrary ? "icon-library" : "svg-import", source, line: lineNumberAt(content, match.index), names, count: Math.max(1, names.length) }, match.index);
   }
 
-  const svgPattern = /<svg\b([^>]*)>/gi;
+  const svgPattern = /<svg\b([^>]*)>([\s\S]{0,20000}?)<\/svg>/gi;
   while ((match = svgPattern.exec(content)) && assets.length < 1000) {
     const attributes = match[1];
     add({
@@ -263,10 +263,56 @@ function scanIconAssets(content, file, extension) {
       strokeWidth: attributeValue(attributes, "stroke-width") ?? attributeValue(attributes, "strokeWidth"),
       fill: attributeValue(attributes, "fill"),
       stroke: attributeValue(attributes, "stroke"),
+      markup: match[0],
       count: 1,
     }, match.index);
   }
   return assets;
+}
+
+function scanAssetReferences(content, file, extension) {
+  if (extension === ".svg") return [];
+  const references = [];
+  const pattern = /(?:["'`]([^"'`\n]*?\.svg(?:\?[^"'`\n]*)?)["'`]|url\(\s*["']?([^"')\n]*?\.svg(?:\?[^"')\n]*)?)["']?\s*\))/gi;
+  let match;
+  while ((match = pattern.exec(content)) && references.length < 2000) {
+    const source = match[1] ?? match[2];
+    if (!source || /^(?:data:|https?:|\/\/)/i.test(source)) continue;
+    references.push({
+      id: `asset-ref-${sha(`${file}:${match.index}:${source}`)}`,
+      source,
+      file,
+      line: lineNumberAt(content, match.index),
+      evidence: normalizeEvidence(content.slice(Math.max(0, match.index - 80), match.index + 160)),
+    });
+  }
+  return references;
+}
+
+function scanDynamicAssetReferences(content, file, extension) {
+  if (extension === ".svg") return [];
+  const references = [];
+  const patterns = [
+    ["import-meta-glob", /import\.meta\.glob(?:Eager)?\(\s*["'`]([^"'`\n]+)["'`]/g],
+    ["require-context", /require\.context\(\s*["'`]([^"'`\n]+)["'`]/g],
+    ["dynamic-template", /["'`]([^"'`\n]*\$\{[^}\n]+\}[^"'`\n]*\.svg(?:\?[^"'`\n]*)?)["'`]/g],
+  ];
+  for (const [kind, pattern] of patterns) {
+    let match;
+    while ((match = pattern.exec(content)) && references.length < 500) {
+      const source = match[1];
+      if (!source || !/(?:svg|assets?|icons?|images?|\*|\$\{)/i.test(source)) continue;
+      references.push({
+        id: `dynamic-asset-ref-${sha(`${file}:${match.index}:${kind}:${source}`)}`,
+        kind,
+        source,
+        file,
+        line: lineNumberAt(content, match.index),
+        evidence: normalizeEvidence(content.slice(Math.max(0, match.index - 80), match.index + 180)),
+      });
+    }
+  }
+  return references;
 }
 
 function componentCandidate(relative, content) {
@@ -297,6 +343,8 @@ export async function scanSources(collected) {
   const rawValues = [];
   const componentCandidates = [];
   const iconAssets = [];
+  const assetReferences = [];
+  const dynamicAssetReferences = [];
   const nativeControls = [];
   const styleSignals = new Set();
   const unassessedAreas = new Set(collected.unassessedAreas);
@@ -333,6 +381,8 @@ export async function scanSources(collected) {
     rawValues.push(...scanRawValues(content, file.relative, file.extension, definitionSource));
     rawValues.push(...scanTailwindUtilities(content, file.relative, file.extension));
     iconAssets.push(...scanIconAssets(content, file.relative, file.extension));
+    assetReferences.push(...scanAssetReferences(content, file.relative, file.extension));
+    dynamicAssetReferences.push(...scanDynamicAssetReferences(content, file.relative, file.extension));
 
     if (SCRIPT_EXTENSIONS.has(file.extension)) {
       const candidate = componentCandidate(file.relative, content);
@@ -365,6 +415,8 @@ export async function scanSources(collected) {
     rawValues,
     componentCandidates,
     iconAssets,
+    assetReferences,
+    dynamicAssetReferences,
     nativeControls,
     styleSignals: [...styleSignals].sort(),
     unassessedAreas: [...unassessedAreas].sort(),

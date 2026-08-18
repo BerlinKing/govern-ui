@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-CN" data-locale="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{{LIBRARY_TITLE}}</title>
+  <style>
+    :root {
+      --ink: #111111;
+      --muted: #6b6b68;
+      --line: #deded9;
+      --line-strong: #b9b9b2;
+      --paper: #ffffff;
+      --wash: #f6f6f3;
+      --soft: #ecece7;
+      --accent: #1f5eff;
+      --accent-soft: #edf2ff;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 24px;
+      --page: min(1720px, calc(100vw - 48px));
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.5 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    [hidden] { display: none !important; }
+    .topbar { position: sticky; top: 0; z-index: 50; height: 60px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.94); backdrop-filter: blur(16px); }
+    .topbar-inner { width: var(--page); height: 100%; margin: auto; display: flex; align-items: center; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 720; letter-spacing: -.02em; }
+    .brand-mark { width: 22px; height: 22px; display: grid; place-items: center; color: white; background: var(--ink); border-radius: 6px; font-size: 11px; }
+    .topbar-spacer { flex: 1; }
+    .search { width: min(380px, 38vw); height: 36px; border: 1px solid var(--line); border-radius: 9px; padding: 0 12px; background: var(--wash); outline: none; }
+    .search:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(17,17,17,.08); }
+    .button { height: 36px; border: 1px solid var(--line-strong); border-radius: 9px; padding: 0 12px; background: white; cursor: pointer; }
+    .button:hover { border-color: var(--ink); }
+    .locale { display: flex; padding: 3px; border: 1px solid var(--line); background: var(--wash); border-radius: 9px; }
+    .locale button { height: 28px; min-width: 36px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; color: var(--muted); }
+    .locale button.active { color: var(--ink); background: white; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .hero { width: var(--page); margin: 0 auto; padding: 72px 0 42px; border-bottom: 1px solid var(--ink); }
+    .eyebrow { margin: 0 0 14px; color: var(--accent); font-size: 12px; font-weight: 760; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; max-width: 920px; font-size: clamp(42px, 6vw, 84px); line-height: .96; letter-spacing: -.065em; font-weight: 760; }
+    .hero-copy { display: flex; justify-content: space-between; gap: 48px; align-items: end; margin-top: 30px; }
+    .hero-copy > p { max-width: 690px; margin: 0; color: var(--muted); font-size: 17px; }
+    .meta { text-align: right; color: var(--muted); white-space: nowrap; font-size: 12px; }
+    .metrics { width: var(--page); margin: 0 auto; padding: 22px 0; display: grid; grid-template-columns: repeat(6, 1fr); border-bottom: 1px solid var(--line); }
+    .metric { padding: 5px 18px; border-left: 1px solid var(--line); }
+    .metric:first-child { border-left: 0; padding-left: 0; }
+    .metric strong { display: block; font-size: 24px; line-height: 1.1; letter-spacing: -.04em; }
+    .metric span { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .shell { width: var(--page); margin: 0 auto; display: grid; grid-template-columns: 210px minmax(0,1fr); gap: 54px; }
+    .sidebar { position: sticky; top: 86px; align-self: start; padding: 32px 0 64px; }
+    .sidebar-label { margin: 0 0 12px; color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .nav { display: grid; gap: 2px; }
+    .nav a { display: flex; align-items: center; justify-content: space-between; min-height: 34px; color: var(--muted); text-decoration: none; border-radius: 7px; padding: 0 9px; }
+    .nav a:hover { color: var(--ink); background: var(--wash); }
+    .nav a span:last-child { font-size: 11px; }
+    main { min-width: 0; padding-bottom: 120px; }
+    .library-section { padding: 62px 0 20px; border-bottom: 1px solid var(--line); scroll-margin-top: 66px; }
+    .section-head { display: grid; grid-template-columns: 80px minmax(0,1fr) auto; gap: 24px; align-items: start; margin-bottom: 34px; }
+    .section-index { font: 12px/1.3 "SFMono-Regular", Consolas, monospace; color: var(--muted); }
+    .section-title h2 { margin: 0; font-size: clamp(30px, 4vw, 52px); line-height: 1; letter-spacing: -.05em; }
+    .section-title p { max-width: 720px; margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+    .section-counts { display: flex; gap: 8px; }
+    .pill { min-height: 28px; display: inline-flex; align-items: center; padding: 0 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--wash); font-size: 11px; }
+    .group { margin: 36px 0 56px; }
+    .group-head { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .group-head h3 { margin: 0; font-size: 20px; letter-spacing: -.025em; }
+    .group-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .token-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-top: 16px; }
+    .token-card { position: relative; min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; background: white; }
+    .token-card:hover { border-color: var(--line-strong); }
+    .preview { min-height: 154px; display: grid; place-items: center; padding: 22px; background: var(--wash); border-bottom: 1px solid var(--line); overflow: hidden; }
+    .token-info { padding: 15px 16px 16px; }
+    .token-name-row { display: flex; align-items: start; gap: 10px; }
+    .token-name { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; word-break: break-all; }
+    .copy { border: 0; background: transparent; color: var(--muted); padding: 0; cursor: pointer; font-size: 11px; }
+    .copy:hover { color: var(--ink); }
+    .resolved { margin-top: 7px; color: var(--muted); font: 11px/1.45 "SFMono-Regular", Consolas, monospace; word-break: break-all; }
+    .alias { margin-top: 9px; padding: 8px 9px; background: var(--accent-soft); border-radius: 7px; color: #23468d; font: 10px/1.45 "SFMono-Regular", Consolas, monospace; word-break: break-all; }
+    .token-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 11px; }
+    .tag { max-width: 100%; padding: 3px 6px; border-radius: 5px; background: var(--wash); color: var(--muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .source { margin-top: 10px; color: var(--muted); font: 10px/1.4 "SFMono-Regular", Consolas, monospace; word-break: break-all; }
+    .color-preview { width: 100%; min-height: 116px; border-radius: 10px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid rgba(0,0,0,.08); background-image: linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size: 14px 14px; background-position: 0 0,0 7px,7px -7px,-7px 0; }
+    .color-preview > span { min-height: 116px; display: grid; place-items: center; }
+    .color-preview .on-light { background: #fff; }
+    .color-preview .on-dark { background: #151515; }
+    .color-preview b { font-size: 28px; line-height: 1; }
+    .color-preview.background > span { background: var(--sample); color: color-mix(in srgb, var(--sample), white 72%); }
+    .color-preview.background > span:last-child { filter: brightness(.93); }
+    .color-preview.text b { color: var(--sample); }
+    .color-preview.border i { width: 62px; height: 62px; border: 3px solid var(--sample); border-radius: 12px; }
+    .color-preview.icon-fill b { color: var(--sample); }
+    .color-preview.swatch { display: block; background: var(--sample); }
+    .type-preview { width: 100%; color: var(--ink); }
+    .type-preview strong { display: block; font-size: 36px; line-height: 1.1; letter-spacing: -.035em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .type-preview span { display: block; margin-top: 12px; color: var(--muted); font-size: 13px; }
+    .shadow-stage { width: 72%; height: 78px; border-radius: 12px; background: white; box-shadow: var(--sample); }
+    .stroke-stage { width: 74%; height: 76px; border: var(--sample); border-radius: 8px; background: white; }
+    .radius-stage { width: 76%; height: 78px; border-radius: var(--sample); border: 1px solid var(--line-strong); background: white; }
+    .spacing-stage { width: 100%; display: flex; align-items: center; gap: 12px; }
+    .spacing-stage i { display: block; flex: 0 1 var(--sample-px); height: 18px; width: var(--sample-px); max-width: calc(100% - 72px); min-width: 2px; border-radius: 3px; background: var(--ink); }
+    .spacing-stage span { color: var(--muted); font: 11px "SFMono-Regular", Consolas, monospace; }
+    .opacity-stage, .blur-stage { width: 76%; height: 82px; position: relative; border-radius: 12px; overflow: hidden; background: repeating-linear-gradient(45deg,#ddd 0 10px,#fff 10px 20px); }
+    .opacity-stage::after { content: ""; position: absolute; inset: 0; background: #111; opacity: var(--sample); }
+    .blur-stage::after { content: "Aa"; position: absolute; inset: 10px; display: grid; place-items: center; border-radius: 8px; background: rgba(255,255,255,.45); backdrop-filter: var(--sample); font-size: 25px; font-weight: 700; }
+    .layer-stage { width: 140px; height: 92px; position: relative; }
+    .layer-stage i { position: absolute; width: 82px; height: 50px; border: 1px solid var(--line-strong); border-radius: 7px; background: white; box-shadow: 0 4px 10px rgba(0,0,0,.08); }
+    .layer-stage i:nth-child(1) { left: 0; top: 32px; }
+    .layer-stage i:nth-child(2) { left: 28px; top: 16px; }
+    .layer-stage i:nth-child(3) { left: 56px; top: 0; background: var(--ink); }
+    .motion-stage { width: 100%; height: 50px; position: relative; border-bottom: 1px solid var(--line-strong); }
+    .motion-stage i { position: absolute; left: 0; bottom: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); animation: travel var(--sample-duration,1s) var(--sample-easing,ease) infinite alternate; }
+    @keyframes travel { to { transform: translateX(min(300px, 56vw)); } }
+    @media (prefers-reduced-motion: reduce) { .motion-stage i { animation: none; left: 50%; } }
+    .generic-stage { width: 100%; padding: 18px; border: 1px dashed var(--line-strong); border-radius: 10px; background: white; text-align: center; font: 12px "SFMono-Regular", Consolas, monospace; word-break: break-all; }
+    .icon-sources { display: grid; gap: 46px; }
+    .icon-source-head { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+    .icon-source-head h3 { min-width: 0; margin: 0; font-size: 18px; overflow-wrap: anywhere; }
+    .icon-grid { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+    .icon-card { min-width: 0; min-height: 126px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; padding: 13px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: white; }
+    .icon-card img { width: 28px; height: 28px; object-fit: contain; }
+    .icon-generic { width: 28px; height: 28px; display: grid; place-items: center; font-size: 25px; }
+    .icon-card code { max-width: 100%; color: var(--muted); font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .direct-values { margin: 28px 0 52px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .direct-values summary { min-height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; cursor: pointer; background: var(--wash); font-weight: 650; }
+    .direct-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .direct-row { min-width: 0; padding: 12px 14px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); }
+    .direct-row:nth-child(even) { border-right: 0; }
+    .direct-row code { display: block; word-break: break-all; font-size: 11px; }
+    .direct-row small { display: block; margin-top: 5px; color: var(--muted); }
+    .usage { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .usage strong { display: block; margin-bottom: 5px; font-size: 11px; }
+    .usage-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .usage-list span { max-width: 100%; padding: 3px 7px; border-radius: 999px; background: var(--accent-soft); color: #1745b8; font-size: 10px; overflow-wrap: anywhere; }
+    .usage-evidence { margin-top: 6px; color: var(--muted); font-size: 10px; }
+    .map-tools { display: flex; gap: 8px; align-items: center; margin: 18px 0; }
+    .map-tools select { height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; background: white; }
+    .table-wrap { border: 1px solid var(--line); border-radius: 12px; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { position: sticky; top: 0; z-index: 1; padding: 11px 12px; background: var(--wash); color: var(--muted); text-align: left; font-weight: 650; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tbody tr:last-child td { border-bottom: 0; }
+    td code { word-break: break-all; }
+    .empty { padding: 36px; color: var(--muted); border: 1px dashed var(--line-strong); border-radius: 12px; text-align: center; }
+    .footer { width: var(--page); margin: 0 auto; padding: 28px 0 60px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 1100px) {
+      .metrics { grid-template-columns: repeat(3,1fr); gap: 16px 0; }
+      .metric:nth-child(4) { border-left: 0; padding-left: 0; }
+      .token-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .icon-grid { grid-template-columns: repeat(5,minmax(0,1fr)); }
+    }
+    @media (max-width: 760px) {
+      :root { --page: calc(100vw - 28px); }
+      .topbar { height: auto; }
+      .topbar-inner { min-height: 60px; flex-wrap: wrap; padding: 10px 0; }
+      .search { order: 5; width: 100%; }
+      .button.export { display: none; }
+      .hero { padding: 46px 0 30px; }
+      h1 { font-size: 45px; }
+      .hero-copy { display: block; }
+      .meta { margin-top: 24px; text-align: left; }
+      .metrics { grid-template-columns: repeat(2,1fr); }
+      .metric:nth-child(odd) { border-left: 0; padding-left: 0; }
+      .metric:nth-child(4) { border-left: 1px solid var(--line); padding-left: 18px; }
+      .shell { display: block; }
+      .sidebar { position: static; width: 100%; max-width: calc(100vw - 28px); padding: 18px 0 0; overflow-x: auto; overflow-y: hidden; }
+      .sidebar-label { display: none; }
+      .nav { display: flex; width: max-content; min-width: 0; }
+      .nav a { gap: 8px; }
+      .section-head { grid-template-columns: 48px 1fr; }
+      .section-counts { grid-column: 2; }
+      .token-grid { grid-template-columns: 1fr; }
+      .icon-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+      .direct-list { grid-template-columns: 1fr; }
+      .direct-row { border-right: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark">GU</span><span>GovernUI</span></div>
+      <div class="topbar-spacer"></div>
+      <input class="search" id="global-search" type="search" data-placeholder-zh="搜索 Token、值或文件" data-placeholder-en="Search tokens, values, or files">
+      <button class="button export" id="export-json" type="button" data-zh="导出 Token 映射" data-en="Export token map"></button>
+      <div class="locale"><button type="button" data-set-locale="zh">中</button><button type="button" data-set-locale="en">EN</button></div>
+    </div>
+  </header>
+  <section class="hero">
+    <p class="eyebrow" data-zh="源码生成的设计资产" data-en="Source-derived design assets"></p>
+    <h1 data-zh="原子样式库" data-en="Atomic style library"></h1>
+    <div class="hero-copy">
+      <p data-zh="从项目真实源码中提取视觉基础样式，并把颜色、字体、图标、投影、描边与其他 CSS Token 直接画出来。这里不做诊断，也不生成目标方案。" data-en="Visual foundations extracted from the real source code. Colors, typography, icons, shadows, strokes, and every CSS token are rendered directly. No diagnosis or target proposal is included."></p>
+      <div class="meta"><strong id="project-name"></strong><br><span id="generated-at"></span></div>
+    </div>
+  </section>
+  <section class="metrics" id="metrics"></section>
+  <div class="shell">
+    <aside class="sidebar"><p class="sidebar-label" data-zh="目录" data-en="Contents"></p><nav class="nav" id="nav"></nav></aside>
+    <main id="library"></main>
+  </div>
+  <footer class="footer"><span data-zh="单文件、离线可用。数据来自源码静态提取，不会修改项目。" data-en="Single-file and offline-ready. Data is statically extracted from source and does not modify the project."></span></footer>
+  <script id="library-data" type="application/json">{{LIBRARY_JSON}}</script>
+  <script>
+    (() => {
+      const data = JSON.parse(document.getElementById("library-data").textContent);
+      const state = { locale: localStorage.getItem("govern-ui:locale") || (navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en"), query: "", category: "all" };
+      const categoryText = {
+        color: ["颜色", "Colors", "按背景色、文本色、描边色、图标色、品牌操作色、反馈色和数据色分组展示真实 Token。", "Real tokens grouped as backgrounds, text, borders, icon fills, brand/action, feedback, and data colors."],
+        typography: ["字体与排版", "Typography", "展示字体家族、字号、字重、行高、字距和复合排版 Token。", "Font families, sizes, weights, line heights, tracking, and composite type tokens."],
+        icons: ["图标", "Icons", "列出源码中的图标库引用、本地图标文件和内联 SVG；可读取的 SVG 会显示真实图形。", "Icon-library imports, local assets, and inline SVGs. Readable SVG sources render their real shape."],
+        shadow: ["投影", "Shadows", "在真实卡片表面上展示 box-shadow、text-shadow 与 elevation Token。", "Box-shadow, text-shadow, and elevation tokens rendered on real surfaces."],
+        stroke: ["描边", "Strokes", "展示描边宽度、样式、分割线与轮廓 Token；描边颜色归入颜色章节。", "Stroke widths, styles, dividers, and outline tokens. Stroke colors live in Colors."],
+        radius: ["圆角", "Radius", "把每个圆角 Token 直接应用到同尺寸样本上，方便比较曲率。", "Every radius token applied to equal-size specimens for direct curvature comparison."],
+        spacing: ["间距与尺寸", "Spacing & sizing", "把间距、内边距、间隙和尺寸 Token 转换为可比较的长度标尺。", "Spacing, inset, gap, and size tokens converted into comparable length rulers."],
+        opacity: ["透明度", "Opacity", "在棋盘底上展示透明度、遮罩与 scrim Token。", "Opacity, mask, and scrim tokens rendered over a checkerboard."],
+        blur: ["模糊", "Blur", "可视化 blur、filter 与 backdrop-filter Token。", "Blur, filter, and backdrop-filter tokens rendered visually."],
+        layer: ["层级", "Layers", "列出 z-index 与语义层级 Token，并用叠层关系表示。", "Z-index and semantic layer tokens represented as stacked surfaces."],
+        motion: ["动效参数", "Motion parameters", "展示时长、缓动和过渡 Token；系统减少动态效果时会停止动画。", "Duration, easing, and transition tokens; animation stops when reduced motion is enabled."],
+        other: ["其他 Token", "Other tokens", "保留无法安全归入上述类别的 Token，确保映射不丢失。", "Tokens that cannot be safely classified above are retained so the map stays complete."],
+        map: ["完整 Token 映射", "Complete token map", "逐条列出 Token、源码值、解析值、作用域、引用次数和来源位置。", "Every token with source value, resolved value, scope, usage count, and source location."],
+      };
+      const groupText = {
+        background: ["背景色", "Backgrounds"], text: ["文本色", "Text"], border: ["描边色", "Borders"], "icon-fill": ["图标与填充色", "Icon & fill"], "brand-action": ["品牌与操作色", "Brand & action"], feedback: ["反馈色", "Feedback"], "data-visualization": ["数据可视化", "Data visualization"], other: ["其他颜色", "Other colors"], default: ["Token", "Tokens"]
+      };
+      const tr = (pair) => pair[state.locale === "zh" ? 0 : 1];
+      const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[char]));
+      const safe = (value) => { const text = String(value ?? "").trim(); return text.length <= 240 && !/[;{}<>]/.test(text) ? text : ""; };
+      const visualColor = (value) => { const text = safe(value); return /^-?[\d.]+(?:deg)?\s+-?[\d.]+%\s+-?[\d.]+%(?:\s*\/\s*[\d.]+%?)?$/i.test(text) ? `hsl(${text})` : text; };
+      const cssNumber = (value, fallback = 16) => { const number = Number.parseFloat(String(value)); return Number.isFinite(number) ? number : fallback; };
+      const visible = (item) => !state.query || [item.name,item.value,item.resolvedValue,item.file,item.source,item.usage?.summary,...(item.usage?.features||[]),...(item.usage?.components||[]),...(item.usage?.pages||[])].join(" ").toLowerCase().includes(state.query);
+
+      function specimen(token) {
+        const value = token.category === "color" ? visualColor(token.resolvedValue) : safe(token.resolvedValue);
+        if (token.category === "color") {
+          const type = ["background","text","border","icon-fill"].includes(token.group) ? token.group : "swatch";
+          const inner = type === "background" ? "<span>Surface</span><span>Surface</span>" : type === "text" || type === "icon-fill" ? "<span class=\"on-light\"><b>Aa</b></span><span class=\"on-dark\"><b>Aa</b></span>" : type === "border" ? "<span class=\"on-light\"><i></i></span><span class=\"on-dark\"><i></i></span>" : "";
+          return `<div class="color-preview ${type}" style="--sample:${esc(value)}">${inner}</div>`;
+        }
+        if (token.category === "typography") {
+          let style = ""; const name = token.normalizedName;
+          if (/font-family|typeface/.test(name)) style = `font-family:${value}`;
+          else if (/font-size|text-size|type-size/.test(name)) style = `font-size:${value}`;
+          else if (/font-weight|weight/.test(name)) style = `font-weight:${value}`;
+          else if (/line-height|leading/.test(name)) style = `line-height:${value}`;
+          else if (/letter|tracking/.test(name)) style = `letter-spacing:${value}`;
+          return `<div class="type-preview" style="${esc(style)}"><strong>Aa 设计系统</strong><span>Ag 0123456789 · The quick brown fox</span></div>`;
+        }
+        if (token.category === "shadow") return `<div class="shadow-stage" style="--sample:${esc(value)}"></div>`;
+        if (token.category === "stroke") { const border = /\b(?:solid|dashed|dotted|double|none)\b/.test(value) ? value : `${value} solid #111`; return `<div class="stroke-stage" style="--sample:${esc(border)}"></div>`; }
+        if (token.category === "radius") return `<div class="radius-stage" style="--sample:${esc(value)}"></div>`;
+        if (token.category === "spacing") { const px = Math.max(2, Math.min(420, /rem/.test(value) ? cssNumber(value)*16 : cssNumber(value))); return `<div class="spacing-stage" style="--sample-px:${px}px"><i></i><span>${esc(value)}</span></div>`; }
+        if (token.category === "opacity") { const opacity = /%/.test(value) ? cssNumber(value)/100 : cssNumber(value,1); return `<div class="opacity-stage" style="--sample:${Math.max(0,Math.min(1,opacity))}"></div>`; }
+        if (token.category === "blur") return `<div class="blur-stage" style="--sample:${esc(value)}"></div>`;
+        if (token.category === "layer") return `<div class="layer-stage"><i></i><i></i><i></i></div>`;
+        if (token.category === "motion") { const duration = /(?:ms|s)\b/.test(value) ? value.match(/[\d.]+(?:ms|s)/)?.[0] : "1s"; const easing = /(?:cubic-bezier|steps|linear|ease)/.test(value) ? value.match(/(?:cubic-bezier\([^)]*\)|steps\([^)]*\)|linear|ease(?:-in|-out|-in-out)?)/)?.[0] : "ease"; return `<div class="motion-stage" style="--sample-duration:${esc(duration)};--sample-easing:${esc(easing)}"><i></i></div>`; }
+        return `<div class="generic-stage">${esc(value)}</div>`;
+      }
+
+      function tokenCard(token) {
+        if (!visible(token)) return "";
+        const alias = token.aliasChain.length ? `<div class="alias">${esc(token.name)} → ${token.aliasChain.map(esc).join(" → ")}</div>` : "";
+        const locations = [...(token.usage?.features || []), ...(token.usage?.components || []), ...(token.usage?.pages || [])].filter((item,index,array)=>array.indexOf(item)===index).slice(0,6);
+        const usage = `<div class="usage"><strong>${state.locale === "zh" ? "功能位置" : "Used in"}</strong>${locations.length ? `<div class="usage-list">${locations.map(item=>`<span>${esc(item)}</span>`).join("")}</div>` : `<div class="usage-evidence">${state.locale === "zh" ? "扫描范围内未找到引用；运行时仍需确认" : "No in-scope reference found; runtime verification required"}</div>`}<div class="usage-evidence">${esc((token.usage?.evidenceLevels || []).join(" · ") || "source definition only")}</div></div>`;
+        return `<article class="token-card searchable" data-category="${esc(token.category)}">
+          <div class="preview">${specimen(token)}</div>
+          <div class="token-info"><div class="token-name-row"><code class="token-name">${esc(token.name)}</code><button class="copy" type="button" data-copy="${esc(token.name)}">${state.locale === "zh" ? "复制" : "Copy"}</button></div>
+          <div class="resolved">${esc(token.value)}${token.value !== token.resolvedValue ? `<br>→ ${esc(token.resolvedValue)}` : ""}</div>${alias}
+          <div class="token-meta"><span class="tag">${esc(token.scope)}</span><span class="tag">${esc(token.sourceType)}</span><span class="tag">${token.usageCount} ${state.locale === "zh" ? "处引用" : "uses"}</span></div>
+          ${usage}<div class="source">${esc(token.file)}:${token.line}</div></div></article>`;
+      }
+
+      function directValues(items) {
+        const filtered = items.filter(visible);
+        if (!filtered.length) return "";
+        return `<details class="direct-values"><summary><span>${state.locale === "zh" ? "源码中的直接样式值" : "Direct style values in source"}</span><small>${filtered.length}</small></summary><div class="direct-list">${filtered.map(item => { const locations=[...(item.usage?.features||[]),...(item.usage?.components||[]),...(item.usage?.pages||[])].filter((entry,index,array)=>array.indexOf(entry)===index).slice(0,6); return `<div class="direct-row"><code>${esc(item.value)}</code><small>${esc(item.property || item.category)} · ${item.occurrences} ${state.locale === "zh" ? "处" : "occurrences"} · ${item.files.length} ${state.locale === "zh" ? "个文件" : "files"}</small><div class="usage"><strong>${state.locale === "zh" ? "归属功能" : "Product location"}</strong><div class="usage-list">${locations.length?locations.map(entry=>`<span>${esc(entry)}</span>`).join(""):`<span>${state.locale === "zh" ? "未识别" : "Unassigned"}</span>`}</div><div class="usage-evidence">${esc((item.usage?.evidenceLevels||[]).join(" · "))}</div></div></div>`; }).join("")}</div></details>`;
+      }
+
+      function sectionHead(id, index, tokenCount, directCount) {
+        const text = categoryText[id];
+        return `<header class="section-head"><span class="section-index">${String(index+1).padStart(2,"0")}</span><div class="section-title"><h2>${esc(tr(text))}</h2><p>${esc(text[state.locale === "zh" ? 2 : 3])}</p></div><div class="section-counts"><span class="pill">${tokenCount} ${state.locale === "zh" ? "个 Token" : "tokens"}</span>${directCount ? `<span class="pill">${directCount} ${state.locale === "zh" ? "种直接值" : "direct values"}</span>` : ""}</div></header>`;
+      }
+
+      function iconSection(index) {
+        const icons = data.icons.filter(visible); const sources = [...new Set(icons.map(item => item.collection || item.source))];
+        const groups = sources.map(source => { const items = icons.filter(item => (item.collection || item.source) === source); return `<section><div class="icon-source-head"><h3>${esc(source)}</h3><span class="pill">${items.length}</span></div><div class="icon-grid">${items.map(item => `<article class="icon-card" title="${esc(item.file)}:${item.line}\n${esc(item.source)}">${item.preview ? `<img src="${esc(item.preview)}" alt="">` : `<span class="icon-generic" aria-hidden="true">◇</span>`}<code>${esc(item.name)}</code></article>`).join("")}</div></section>`; }).join("");
+        return `<section class="library-section" id="icons">${sectionHead("icons",index,data.icons.length,0)}<div class="icon-sources">${groups || `<div class="empty">${state.locale === "zh" ? "源码中未找到图标资产" : "No icon assets found in source"}</div>`}</div></section>`;
+      }
+
+      function categorySection(category, index) {
+        if (category.id === "icons") return iconSection(index);
+        const groupBlocks = category.groups.map(group => {
+          const cards = group.tokens.map(tokenCard).join(""); const direct = directValues(group.directStyles);
+          if (!cards && !direct && state.query) return "";
+          const label = groupText[group.id] || groupText.default;
+          return `<div class="group"><div class="group-head"><h3>${esc(tr(label))}</h3><p>${group.tokens.length} Token</p></div>${cards ? `<div class="token-grid">${cards}</div>` : `<div class="empty">${state.locale === "zh" ? "没有可展示的 Token" : "No tokens to display"}</div>`}${direct}</div>`;
+        }).join("");
+        return `<section class="library-section" id="${esc(category.id)}">${sectionHead(category.id,index,category.tokenCount,category.directValueCount)}${groupBlocks}</section>`;
+      }
+
+      function mapSection(index) {
+        const tokens = data.tokens.filter(token => visible(token) && (state.category === "all" || token.category === state.category));
+        const rows = tokens.map(token => `<tr><td><code>${esc(token.name)}</code></td><td>${esc(tr(categoryText[token.category]))}</td><td><code>${esc(token.value)}</code></td><td><code>${esc(token.resolvedValue)}</code></td><td>${esc(token.scope)}</td><td>${token.usageCount}</td><td>${esc(token.usage?.summary||"—")}</td><td><code>${esc(token.file)}:${token.line}</code></td></tr>`).join("");
+        return `<section class="library-section" id="token-map">${sectionHead("map",index,data.tokens.length,0)}<div class="map-tools"><select id="map-category"><option value="all">${state.locale === "zh" ? "全部类别" : "All categories"}</option>${data.categories.filter(item=>item.id!=="icons").map(item=>`<option value="${esc(item.id)}" ${state.category===item.id?"selected":""}>${esc(tr(categoryText[item.id]))}</option>`).join("")}</select><span class="pill">${tokens.length}</span></div><div class="table-wrap"><table><thead><tr><th>Token</th><th>${state.locale === "zh" ? "类别" : "Category"}</th><th>${state.locale === "zh" ? "源码值" : "Source value"}</th><th>${state.locale === "zh" ? "解析值" : "Resolved value"}</th><th>${state.locale === "zh" ? "作用域" : "Scope"}</th><th>${state.locale === "zh" ? "引用" : "Uses"}</th><th>${state.locale === "zh" ? "功能位置" : "Used in"}</th><th>${state.locale === "zh" ? "来源" : "Source"}</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+      }
+
+      function renderChrome() {
+        document.documentElement.lang = state.locale === "zh" ? "zh-CN" : "en"; document.documentElement.dataset.locale = state.locale;
+        document.querySelectorAll("[data-zh][data-en]").forEach(node => node.textContent = node.dataset[state.locale]);
+        document.querySelectorAll("[data-placeholder-zh]").forEach(node => node.placeholder = node.dataset[`placeholder${state.locale === "zh" ? "Zh" : "En"}`]);
+        document.querySelectorAll("[data-set-locale]").forEach(node => node.classList.toggle("active",node.dataset.setLocale===state.locale));
+        document.getElementById("project-name").textContent = data.project.name;
+        document.getElementById("generated-at").textContent = new Date(data.generatedAt).toLocaleString(state.locale === "zh" ? "zh-CN" : "en-US");
+        const metrics = [[data.summary.tokens,"Token"],[data.summary.cssVariables,"CSS Variables"],[data.summary.resolvedAliases,state.locale === "zh"?"别名映射":"Aliases"],[data.summary.icons,state.locale === "zh"?"图标":"Icons"],[data.summary.directValues,state.locale === "zh"?"直接样式值":"Direct values"],[data.summary.sourceFiles,state.locale === "zh"?"来源文件":"Source files"]];
+        document.getElementById("metrics").innerHTML = metrics.map(([value,label])=>`<article class="metric"><strong>${value}</strong><span>${esc(label)}</span></article>`).join("");
+        const navItems = [...data.categories.map((item,index)=>({id:item.id,label:tr(categoryText[item.id]),count:item.id==="icons"?data.icons.length:item.tokenCount,index})),{id:"token-map",label:tr(categoryText.map),count:data.tokens.length}];
+        document.getElementById("nav").innerHTML = navItems.map(item=>`<a href="#${esc(item.id)}"><span>${esc(item.label)}</span><span>${item.count}</span></a>`).join("");
+      }
+
+      function render() {
+        renderChrome();
+        document.getElementById("library").innerHTML = data.categories.map(categorySection).join("") + mapSection(data.categories.length);
+      }
+
+      document.querySelector(".locale").addEventListener("click", event => { const button=event.target.closest("[data-set-locale]"); if(!button)return; state.locale=button.dataset.setLocale; localStorage.setItem("govern-ui:locale",state.locale); render(); });
+      let searchTimer;
+      document.getElementById("global-search").addEventListener("input", event => { const value=event.target.value; clearTimeout(searchTimer); searchTimer=setTimeout(()=>{ state.query=value.trim().toLowerCase(); render(); document.getElementById("global-search").value=value; document.getElementById("global-search").focus(); },180); });
+      document.getElementById("library").addEventListener("change", event => { if(event.target.id!=="map-category")return; state.category=event.target.value; render(); location.hash="token-map"; });
+      document.getElementById("library").addEventListener("click", async event => { const button=event.target.closest("[data-copy]"); if(!button)return; try { await navigator.clipboard.writeText(button.dataset.copy); button.textContent=state.locale==="zh"?"已复制":"Copied"; } catch {} });
+      document.getElementById("export-json").addEventListener("click", () => { const payload={schemaVersion:1,project:data.project,tokens:data.tokens.map(({id,name,value,resolvedValue,aliasChain,category,group,scope,usageCount,usage,file,line,selector,sourceType})=>({id,name,value,resolvedValue,aliasChain,category,group,scope,usageCount,usage,file,line,selector,sourceType})),directStyles:data.directStyles}; const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const link=document.createElement("a"); link.href=url; link.download="govern-ui-token-map.json"; link.click(); URL.revokeObjectURL(url); });
+      render();
+    })();
+  </script>
+</body>
+</html>

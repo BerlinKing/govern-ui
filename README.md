@@ -1,85 +1,60 @@
 # GovernUI
 
-> **Every frontend has a design system. Most have several.**
+> **See the real design library. Review what it should become.**
 
-GovernUI is an open-source Codex Skill that reverse-engineers the design systems hiding inside your frontend codebase.
+GovernUI is an open-source Codex Skill with three deliberately separate surfaces:
 
-It traces tokens from source to consumer, uncovers competing owners, duplicated primitives, hardcoded values, overlay chaos, and invisible design debt—then turns the evidence into an interactive decision room.
+- `style-library.html` redraws the repository's real atomic styles and CSS Token mappings.
+- `design-review.html` compares that evidence with a standard static and dynamic design-system structure, then shows current state, target contract, explicit keep/migrate/merge/delete asset batches, deletion gates, and the small grouped set blocked by external evidence.
+- `visual-regression.html` compares real pages and states before and after approved cleanup, including a difference view and coverage ledger.
 
-Choose a Bootstrap, Migrate, or Hybrid path. Freeze today's debt as a baseline. Block only what gets worse.
+`library` and `review` are read-only. Source changes require the separate `implement --write` authority, and GitHub delivery requires the separate `submit --create` authority. Recommendations never appear inside the atomic library.
 
-**No blind rewrites. No vibe-based cleanup. Give every pixel an owner.**
+## Atomic library
 
-## What GovernUI does
+- A single `style-library.html` that works offline.
+- White canvas, black information hierarchy, responsive layout.
+- Chinese and English switching.
+- Search across Token names, values, and source files.
+- One-click Token copying and JSON mapping export.
+- Recursive CSS Variable alias resolution, including the written value and resolved value.
+- Separate color groups for backgrounds, text, borders, icon fills, brand/action, feedback, and data visualization.
+- Visual specimens for typography, shadows, strokes, radii, spacing, opacity, blur, layers, and motion.
+- Real previews for repository-owned and readable inline SVGs.
+- Imported icon names and package sources when package geometry is not present in the repository.
+- Direct CSS values shown as neutral inventory—not as errors.
+- Token and hardcoded-value attribution to product functions, components, pages, and states, with honest evidence labels.
 
-- Maps CSS variables, Tailwind themes, JSON tokens, and JS/TS theme objects.
-- Connects token definitions, aliases, consumers, and likely source owners.
-- Distinguishes adapters and scoped overrides from duplicates and semantic conflicts.
-- Finds raw-value bypasses, duplicated UI primitives, and unclear overlay ownership.
-- Produces evidence-backed JSON, Markdown, and a standalone offline HTML system review.
-- Lets readers switch the offline decision room between Chinese and English, with the preference saved locally.
-- Reviews every repository against a complete static five-layer and dynamic four-layer design-system model.
-- Translates scanner evidence into visual decision cards: standard contract, current state, target result, recommendation, consequence, and user choice.
-- Establishes a historical baseline and gates only new high-confidence design debt.
-- Recommends a `Bootstrap`, `Migrate`, or `Hybrid` governance path.
+## Design review
 
-## v0.7: Complete foundation workbenches
+- A separate bilingual, offline `design-review.html`, including a complete UI Icon and graphic-asset catalog with app-source, dynamic-loading, public-contract, deletion-qualification, and runtime-verification status.
+- A target-UIKit-first skeleton covering foundations, atoms, molecules, components, and product patterns.
+- Standard nodes remain visible even when the current repository has not implemented them.
+- Target visual specimens and component contracts appear before current-source mappings.
+- Component anatomy, variants, sizes, states, behavior, and responsive/accessibility contracts.
+- A machine-readable `primitive -> semantic -> component` target contract with light/dark mode mappings.
+- Old-Token lifecycle decisions limited to migrate, merge, or delete; aliases are treated only as rollout mechanisms.
+- Routine migration, merge, and deletion work stays in an execution ledger; only genuine ambiguity enters the designer decision center.
+- Implementation slices tied to affected product functions, pages, and visual-regression states.
+- Exportable `govern-ui-decisions.json` draft; the HTML never authorizes source changes.
+- Exportable `govern-ui-token-contract.json` for approved implementation.
+- Exported, approved direct-color mappings carry exact source evidence into implementation; unsupported Tailwind, script, generated, or stale evidence remains visibly partial or blocked.
 
-GovernUI v0.7 gives every major visual foundation the same designer-readable treatment as Color:
+## Approved implementation and delivery
 
-- Typography separates font sources and compares display, body, label, numeric, metric, and responsive roles with real text specimens.
-- Spacing and density visualizes base scales, component inset/gap, layout spacing, control sizing, density modes, and bypassing utility classes.
-- Shape and stroke draws detected corners, borders, dividers, and focus-ring contracts.
-- Depth and layer visualizes shadows, opacity/scrims, blur, and semantic layer values without confusing visual elevation with runtime stacking ownership.
-- Icons and assets inventories libraries, repository-owned SVG collections, imports, inline SVGs, grids, stroke widths, fills, and shared Icon/Image/Avatar components.
+- `implement` previews approved Token and direct-style changes without touching source.
+- `implement --write` applies only source-safe mappings, writes before/after snapshots, and records every complete, partial, or blocked item in an implementation ledger.
+- `submit` validates the ledger and prepares a repository-scoped Draft PR body without changing Git.
+- `submit --create` explicitly creates a branch, stages only ledger-owned files, commits, pushes, and opens a Draft PR after remote and GitHub authentication checks.
+- Missing component systems are proposed in Review, but component source is blocked until owner path, anatomy, variants, states, and accessibility contracts are approved.
 
-Each workbench now answers the same product questions: what exists today, how many independent sources compete, which standard roles are covered, what bypasses the system, what should be kept or merged, and what the governed target becomes. Raw code remains in collapsed engineer evidence.
+## Visual regression
 
-## v0.6: Designer-facing specification sheets
-
-GovernUI v0.6 makes the review read like a real UI Kit instead of an engineering dashboard:
-
-- Every foundation, atom, molecule, component, pattern, and dynamic contract opens as its own specification sheet.
-- Current product styles are shown as visual samples and comparison matrices across roles, hierarchy, variants, sizes, states, themes, and modes when evidence exists.
-- The current implementation, standard target, and convergence recommendation follow one consistent reading order.
-- Missing or runtime-only states stay visibly unverified; the report never invents a polished target from static code.
-- Scanner totals, paths, syntax, and raw source stay in the optional engineer appendix.
-
-The visual language stays deliberately neutral—white canvas, black information, restrained semantic color—so the audited product's own palettes and components remain the evidence.
-
-## v0.5: User-first color decision workbench
-
-GovernUI v0.5 turns the Color category from a scanner dashboard into a guided product decision:
-
-- States whether the repository has a real primitive palette, a semantic layer, component colors, and one governed global contract.
-- Groups canonical definitions into independent color sources; CSS Variables, Tailwind, and JS/TS adapters are no longer mistaken for separate design systems.
-- Draws every detected source as a real palette lane and compares brand, action, surface, content, border, feedback, interaction, and data-visualization roles side by side.
-- Groups hardcoded values by visible color and shows a safe existing-token mapping only when evidence supports it.
-- Says what to keep, merge, alias, deprecate, or preserve as a scoped exception.
-- Renders the proposed target as one semantic contract with controlled theme, brand, product, and data-visualization mappings—not one flat list of hex values.
-
-Source filenames remain available for traceability, but the report now names systems first as global candidates, theme or brand colors, likely legacy colors, and unconfirmed sources.
-
-## v0.4: System-first design review
-
-GovernUI v0.4 no longer uses scanner conflicts as the report outline. The scanner remains the evidence engine, while the review follows a complete design-system taxonomy:
-
-- Static: Foundation → Atoms → Molecules → Components → Patterns.
-- Dynamic: Interaction foundation → Component behavior → Cross-component orchestration → Flow and lifecycle.
-
-Every category stays visible as source found, partial, fragmented, missing, not detected, or runtime unverified. Opening a category shows its standard definition, current inventory, target model, and recommendation. The Color review distinguishes definition files, canonical definitions, unique values, references, declared primary/secondary/tertiary roles, hardcodes, selectors, naming collisions, conflicts, and theme scopes.
-
-Decision cards now live inside this taxonomy. Raw conflict groups, findings, owners, file paths, and code remain traceable in collapsed engineer details, but no longer dictate what users see first.
-
-## v0.3: Visual decision review
-
-GovernUI v0.3 is deliberately read-only by default. It keeps deterministic source evidence underneath, then adds a Codex-authored visual brief that groups raw findings into a small set of product decisions. Each decision shows the current state, target result, recommendation, consequences, and a draft choice.
-
-The decision room follows the browser language on first open and includes an always-visible `中文 / EN` switch. Interface copy changes in place without discarding saved review choices. The default view uses product language and visual comparisons; scanner counts, paths, and code stay in collapsed engineer details for traceability.
-
-The report also draws a source-derived UI-library blueprint: static Foundation → Atoms → Molecules → Components, followed by separate dynamic contracts for state, Portal, layer, keyboard, focus, dismissal, scroll, and motion. Missing items stay visibly unconfirmed.
-
-Static analysis cannot prove runtime behavior, accessibility, responsive rendering, or visual parity. GovernUI reports those surfaces as unassessed unless they were separately run and inspected.
+- A separate bilingual, offline `visual-regression.html`.
+- Before, after, and difference views tied to real feature/page/state/viewport/theme coordinates.
+- Source comparison for Tokens and direct style values.
+- Coverage matrix and explicit unverified states.
+- Exportable `govern-ui-visual-decisions.json`.
 
 ## Install
 
@@ -96,56 +71,44 @@ Restart Codex if the Skill does not appear immediately, then invoke it as `$gove
 Ask Codex:
 
 ```text
-Use $govern-ui to audit this frontend repository and show me which token and component systems are competing.
+Use $govern-ui to extract this frontend's atomic style library and CSS Token map.
+Use $govern-ui to review this frontend's design system and show me the decisions visually.
 ```
 
-Or run the deterministic scanner directly:
+Or run it directly:
 
 ```bash
-node scripts/govern.mjs audit /path/to/frontend
+node scripts/govern.mjs library /path/to/frontend --out /tmp/govern-ui
+node scripts/govern.mjs review /path/to/frontend --out /tmp/govern-ui
+node scripts/govern.mjs implement /path/to/frontend --decisions /tmp/govern-ui/govern-ui-decisions.json --contract /tmp/govern-ui/govern-ui-token-contract.json --out /tmp/govern-ui/implementation
+# After reviewing the dry-run plan and explicitly authorizing source changes:
+node scripts/govern.mjs implement /path/to/frontend --decisions /tmp/govern-ui/govern-ui-decisions.json --contract /tmp/govern-ui/govern-ui-token-contract.json --out /tmp/govern-ui/implementation --write
+node scripts/govern.mjs submit /path/to/frontend --ledger /tmp/govern-ui/implementation/govern-ui-implementation-ledger.json --out /tmp/govern-ui/submission
+# After tests and Product C, and only with explicit Git/GitHub authorization:
+node scripts/govern.mjs submit /path/to/frontend --ledger /tmp/govern-ui/implementation/govern-ui-implementation-ledger.json --out /tmp/govern-ui/submission --create
+node scripts/govern.mjs snapshot /path/to/frontend --out /tmp/govern-ui/before.json
+# Capture the same page-state manifest before and after approved cleanup.
+node scripts/govern.mjs snapshot /path/to/frontend --out /tmp/govern-ui/after.json
+node scripts/govern.mjs regression --before /tmp/govern-ui/before.json --after /tmp/govern-ui/after.json --manifest /tmp/govern-ui/visual-manifest.json --out /tmp/govern-ui
 ```
 
-Generate the offline decision room:
-
-```bash
-node scripts/govern.mjs report /path/to/frontend --out /tmp/govern-ui-report
-```
-
-Create and enforce a baseline:
-
-```bash
-node scripts/govern.mjs baseline accept /path/to/frontend --out govern-ui-baseline.json
-node scripts/govern.mjs check /path/to/frontend --baseline govern-ui-baseline.json
-```
-
-## Commands
+Open either:
 
 ```text
-audit <repo> [--json]
-report <repo> --out <directory>
-baseline accept <repo> --out <baseline.json>
-baseline status <repo> --baseline <baseline.json> [--json]
-check <repo> --baseline <baseline.json> [--json]
-decisions validate <token-decisions.json>
+/tmp/govern-ui/style-library.html
+/tmp/govern-ui/design-review.html
+/tmp/govern-ui/visual-regression.html
 ```
 
-## Design principles
-
-1. Evidence before migration.
-2. Ownership before consolidation.
-3. Equal values do not imply equal meaning.
-4. Historical debt stays visible, but only new high-confidence debt blocks the build.
-5. Ambiguity becomes an explicit decision—not an invented answer.
+`report` remains a compatibility alias for `library`; use `review` for recommendations.
 
 ## Development
 
-Run the fixture suite:
-
 ```bash
-node scripts/tests/run-tests.mjs
+node --test scripts/tests/run-tests.mjs scripts/tests/implementation.test.mjs
 ```
 
-The suite covers all three recommendation lanes, scope-noise regression, canonical/adapter precision, exact primitive ownership, stable fingerprints, baseline behavior, offline report generation, and a new-debt gate.
+The fixture suite verifies read-only extraction, Token aliases, category coverage, SVG embedding, the target UIKit skeleton, lifecycle separation, direct-style decision export, safe implementation, Draft PR preparation, offline HTML generation, and script parsing.
 
 ## License
 

@@ -826,7 +826,7 @@ export function buildSystemReview(scan, classification, findings) {
   }));
 
   return {
-    modelVersion: "0.7",
+    modelVersion: "1.3",
     model: "static-five-dynamic-four",
     status: "source-derived-system-review",
     disclaimer: "The taxonomy is complete, but source scanning cannot verify rendered appearance or runtime behavior. Detected means source evidence exists; it does not mean the category is healthy.",

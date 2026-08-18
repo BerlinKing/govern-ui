@@ -42,11 +42,11 @@ function conflictCopy(type) {
       category: "token",
       visualizer: "token-comparison",
       title: text("同一个样式名称，现在会显示成不同结果", "One style name currently produces different results"),
-      question: text("这些差异是产品有意保留，还是历史遗留？", "Are these differences intentional product behavior or historical drift?"),
+      question: text("这些值是同一语义，还是不同角色？", "Do these values share one meaning or represent different roles?"),
       current: text("同一个名称对应多个值。最终显示可能取决于页面范围、加载顺序或引用位置。", "The same name maps to multiple values. The result may depend on scope, load order, or where it is referenced."),
       target: text("一个名称只表达一种视觉含义；确有差异的场景使用清楚的新名称或范围规则。", "One name expresses one visual meaning; intentional differences use explicit names or scope rules."),
       decision: "keep-separate",
-      recommendation: text("先按真实产品意图拆清语义，不要直接覆盖成同一个值。", "Separate the intended meanings first instead of overwriting every value with one value."),
+      recommendation: text("为差异单独命名；相同语义再合并。", "Name real differences; merge only shared semantics."),
       reason: text("直接合并可能改变现有页面；先命名差异，之后才能安全迁移。", "A direct merge may change existing screens. Naming the difference first makes later migration safer."),
     };
   }
@@ -55,11 +55,11 @@ function conflictCopy(type) {
       category: "ownership",
       visualizer: "ownership-flow",
       title: text("现在有多个样式总入口，团队不知道谁说了算", "Several styling entry points currently appear authoritative"),
-      question: text("未来修改公共样式时，应该从哪个入口开始？", "Which entry point should own future shared-style changes?"),
+      question: text("哪个入口负责全局共享样式？", "Which entry point should own shared styles?"),
       current: text("多个文件都在定义基础规则，但它们之间没有清楚的引用或上下级关系。", "Several files define foundational rules without a clear reference or hierarchy."),
       target: text("指定一个共享入口；产品或页面差异只通过明确的范围覆盖连接到它。", "Designate one shared entry point and connect product or page differences through explicit scoped overrides."),
       decision: "migrate",
-      recommendation: text("选择覆盖范围最完整、被真实产品使用的入口作为主来源，其他入口改为引用或范围覆盖。", "Choose the most complete, actively used entry point as the owner; turn the others into consumers or scoped overrides."),
+      recommendation: text("选一个主入口；其他位置只引用或做范围覆盖。", "Choose one owner; make other locations consumers or scoped overrides."),
       reason: text("明确归属后，修改、评审和回滚都有唯一落点。", "Clear ownership gives changes, reviews, and rollbacks one dependable starting point."),
     };
   }
@@ -67,11 +67,11 @@ function conflictCopy(type) {
     category: "token",
     visualizer: "token-comparison",
     title: text("同一套样式规则被重复保存", "The same style rule is stored in multiple places"),
-    question: text("这些位置应该继续各自维护，还是改为共享一个来源？", "Should these locations remain independent or share one source?"),
+    question: text("共享一个来源，还是保留为独立语义？", "Share one source or keep distinct semantics?"),
     current: text("多个位置保存了相同或相近的规则。修改其中一处时，其他位置不会自动同步。", "Several locations store the same or similar rules. Updating one does not automatically update the others."),
     target: text("共享规则只有一个来源；确有差异的部分通过明确名称保留。", "Shared rules have one source; intentional differences remain under explicit names."),
     decision: "canonical",
-    recommendation: text("把共享部分收回一个入口，并为产品差异保留清楚的范围。", "Consolidate the shared portion into one entry point while preserving clearly scoped product differences."),
+    recommendation: text("合并为一个共享 Token；产品差异单独命名。", "Merge into one shared Token; name product differences separately."),
     reason: text("这能减少样式漂移，同时避免把合理差异误删。", "This reduces visual drift without erasing legitimate differences."),
   };
 }
@@ -128,23 +128,23 @@ function ownerSpecimen(owner) {
   };
 }
 
-function choice(decision, zh, en, consequenceZh, consequenceEn) {
-  return { decision, label: text(zh, en), consequence: text(consequenceZh, consequenceEn) };
+function choice(decision, resolutionAction, zh, en, consequenceZh, consequenceEn) {
+  return { decision, resolutionAction, label: text(zh, en), consequence: text(consequenceZh, consequenceEn) };
 }
 
 function fallbackChoices(recommended) {
   const recommendedChoice = {
-    canonical: choice("canonical", "统一到一个来源", "Use one source", "后续修改只需要维护一处。", "Future changes are maintained in one place."),
-    migrate: choice("migrate", "按建议逐步迁移", "Migrate in stages", "保留现有页面可用，再逐步收回分散规则。", "Keep current screens working while consolidating rules in stages."),
-    "keep-separate": choice("keep-separate", "明确保留不同规则", "Keep them intentionally separate", "为差异命名并写清适用范围。", "Name the differences and document where each applies."),
-  }[recommended] || choice(recommended, "采用建议", "Use the recommendation", "按本报告的建议继续。", "Continue with the report recommendation.");
+    canonical: choice("canonical", "merge", "统一来源", "Use one source", "合并重复来源。", "Merge duplicate sources."),
+    migrate: choice("migrate", "migrate", "迁移到主入口", "Migrate to owner", "分批迁移现有引用。", "Migrate current usage in batches."),
+    "keep-separate": choice("keep-separate", "migrate", "保留独立语义", "Keep separate", "为真实差异单独命名。", "Name intentional differences."),
+  }[recommended] || choice(recommended, null, "采用建议", "Use recommendation", "按建议处理。", "Apply the recommendation.");
   const alternative = recommended === "keep-separate"
-    ? choice("canonical", "改为完全统一", "Fully consolidate", "页面会更一致，但可能改变已有产品差异。", "Screens become more consistent, but existing product differences may change.")
-    : choice("keep-separate", "继续分开维护", "Keep separate", "短期改动较少，但需要明确每套规则的责任范围。", "This changes less now, but every rule set needs an explicit responsibility boundary.");
+    ? choice("canonical", "merge", "完全统一", "Fully consolidate", "合并为一个目标 Token。", "Merge into one target Token.")
+    : choice("keep-separate", "migrate", "保留独立语义", "Keep separate", "为差异建立独立 Token。", "Create distinct Tokens for real differences.");
   return [
     recommendedChoice,
     alternative,
-    choice("defer", "暂时不决定", "Decide later", "保留问题，等补齐页面或业务信息后再判断。", "Keep the issue open until screen or product context is available."),
+    choice("defer", null, "暂不处理", "Decide later", "不进入本次清扫。", "Exclude from this cleanup."),
   ];
 }
 
@@ -160,8 +160,8 @@ export function createFallbackReviewBrief(report) {
       ? conflictOwners.slice(0, 4).map(ownerSpecimen)
       : conflictDefinitions.slice(0, 4).map(definitionSpecimen);
     const targetSpecimen = copy.visualizer === "ownership-flow"
-      ? [{ type: "ownership", label: text("一个主入口", "One primary entry point"), value: "canonical-owner", detail: text("其他位置只引用或做明确覆盖", "Other locations consume it or provide explicit overrides") }]
-      : [{ type: "rule", label: text("目标规则", "Target rule"), value: conflict.type === "semantic-conflict" ? "one meaning → one name" : "one shared rule → one owner", detail: copy.target }];
+      ? [{ type: "ownership", label: text("一个主入口", "One primary entry point"), display: text("一个主入口", "One primary entry point"), value: "canonical-owner", detail: text("其他位置只引用或做明确覆盖", "Other locations consume it or provide explicit overrides") }]
+      : [{ type: "rule", label: text("目标规则", "Target rule"), display: conflict.type === "semantic-conflict" ? text("一个语义，一个名称", "One meaning, one name") : text("一条共享规则，一个来源", "One shared rule, one owner"), value: conflict.type === "semantic-conflict" ? "one meaning → one name" : "one shared rule → one owner", detail: copy.target }];
     const systemPath = systemPathForConflict(conflict, conflictDefinitions);
     return {
       id: `review-${String(index + 1).padStart(2, "0")}-${conflict.id}`,
@@ -176,6 +176,7 @@ export function createFallbackReviewBrief(report) {
       target: { summary: copy.target, specimens: targetSpecimen },
       recommendation: {
         decision: copy.decision,
+        resolutionAction: copy.decision === "canonical" ? "merge" : "migrate",
         canonicalOwnerId: copy.decision === "migrate" || copy.decision === "canonical" ? conflictOwners[0]?.id || null : null,
         summary: copy.recommendation,
         reasons: [copy.reason],
@@ -258,6 +259,7 @@ export function validateReviewBrief(value, report = null) {
       }
     }
     if (!DECISIONS.has(item?.recommendation?.decision)) errors.push(`${prefix}.recommendation.decision is invalid`);
+    if (item?.recommendation?.resolutionAction != null && !["migrate", "merge", "delete"].includes(item.recommendation.resolutionAction)) errors.push(`${prefix}.recommendation.resolutionAction is invalid`);
     if (!isLocalizedText(item?.recommendation?.summary)) errors.push(`${prefix}.recommendation.summary must contain zh and en text`);
     if (!Array.isArray(item?.recommendation?.reasons) || !item.recommendation.reasons.every(isLocalizedText)) errors.push(`${prefix}.recommendation.reasons must be localized text`);
     if (typeof item?.recommendation?.confidence !== "number" || item.recommendation.confidence < 0 || item.recommendation.confidence > 1) errors.push(`${prefix}.recommendation.confidence must be between 0 and 1`);
@@ -265,6 +267,7 @@ export function validateReviewBrief(value, report = null) {
     if (!Array.isArray(item?.choices) || item.choices.length < 2 || item.choices.length > 4) errors.push(`${prefix}.choices must contain 2 to 4 choices`);
     for (const [choiceIndex, itemChoice] of (item?.choices ?? []).entries()) {
       if (!DECISIONS.has(itemChoice?.decision)) errors.push(`${prefix}.choices[${choiceIndex}].decision is invalid`);
+      if (itemChoice?.resolutionAction != null && !["migrate", "merge", "delete"].includes(itemChoice.resolutionAction)) errors.push(`${prefix}.choices[${choiceIndex}].resolutionAction is invalid`);
       if (!isLocalizedText(itemChoice?.label)) errors.push(`${prefix}.choices[${choiceIndex}].label must contain zh and en text`);
       if (!isLocalizedText(itemChoice?.consequence)) errors.push(`${prefix}.choices[${choiceIndex}].consequence must contain zh and en text`);
     }
