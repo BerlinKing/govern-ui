@@ -24,7 +24,7 @@ function buildHotspots(findings) {
 
 function nextActions(lane, conflicts) {
   const actions = [];
-  if (conflicts.length) actions.push("Review the standard system matrix and its categorized decision cards in token-review.html, then export a decision draft");
+  if (conflicts.length) actions.push("Review the standard system matrix, target Token contract, and categorized decision cards in design-review.html, then export a decision draft");
   if (lane === "Bootstrap") actions.push("Confirm brand, theme, responsive scope, and the first public primitives before creating a foundation");
   if (lane === "Migrate") actions.push("Confirm canonical Token and component owners, then select one vertical migration slice");
   if (lane === "Hybrid") actions.push("Confirm the existing foundation and prioritize adoption gaps without replacing working owners");
@@ -137,12 +137,12 @@ function buildComponentBlueprint(scan) {
   };
 }
 
-export async function auditRepository(repo) {
+export async function auditRepository(repo, options = {}) {
   const root = path.resolve(repo);
   const rootStat = await stat(root);
   if (!rootStat.isDirectory()) throw new Error(`Repository path is not a directory: ${root}`);
 
-  const collected = await collectFiles(root);
+  const collected = await collectFiles(root, options.collectOptions);
   const repoProfile = await discoverRepository(root, collected);
   const scan = await scanSources(collected);
   const classification = classifyAudit(scan);
@@ -155,6 +155,8 @@ export async function auditRepository(repo) {
     POLICY_HASH,
     ...scan.tokenDefinitions.map((item) => item.id).sort(),
     ...scan.iconAssets.map((item) => item.id).sort(),
+    ...scan.assetReferences.map((item) => item.id).sort(),
+    ...scan.dynamicAssetReferences.map((item) => item.id).sort(),
     ...classification.relationships.map((item) => item.id).sort(),
     ...findings.map((item) => item.fingerprint).sort(),
   ].join("|"), 24);
@@ -180,6 +182,7 @@ export async function auditRepository(repo) {
     styleSystems: [...new Set([...repoProfile.styleSystems, ...scan.styleSignals])].sort(),
     tokenDefinitions: stableSort(scan.tokenDefinitions, (item) => `${item.file}:${String(item.line).padStart(8, "0")}:${item.normalizedName}`),
     tokenReferences: stableSort(scan.tokenReferences, (item) => `${item.file}:${String(item.line).padStart(8, "0")}:${item.normalizedName}`),
+    ...(options.includeRawValues ? { rawValues: stableSort(scan.rawValues, (item) => `${item.file}:${String(item.line).padStart(8, "0")}:${item.kind}:${item.value}`) } : {}),
     tokenOwners: classification.tokenOwners,
     componentOwners: classification.componentOwners,
     overlayOwners: classification.overlayOwners,
@@ -188,6 +191,8 @@ export async function auditRepository(repo) {
     conflicts: classification.conflicts,
     componentCandidates: stableSort(scan.componentCandidates, (item) => item.file),
     iconAssets: stableSort(scan.iconAssets, (item) => `${item.file}:${String(item.line ?? 0).padStart(8, "0")}:${item.source}`),
+    assetReferences: stableSort(scan.assetReferences, (item) => `${item.file}:${String(item.line ?? 0).padStart(8, "0")}:${item.source}`),
+    dynamicAssetReferences: stableSort(scan.dynamicAssetReferences, (item) => `${item.file}:${String(item.line ?? 0).padStart(8, "0")}:${item.source}`),
     duplicatedPrimitives: classification.duplicatedPrimitives,
     systemReview,
     componentBlueprint: buildComponentBlueprint(scan),

@@ -5,15 +5,26 @@ import path from "node:path";
 import { auditRepository } from "./lib/audit.mjs";
 import { compareBaseline, createBaseline } from "./lib/baseline.mjs";
 import { validateReviewBrief } from "./lib/brief.mjs";
+import { submitGovernance } from "./lib/delivery.mjs";
+import { implementGovernance } from "./lib/implementation.mjs";
+import { extractStyleLibrary, styleLibraryFromReport } from "./lib/library.mjs";
+import { librarySummary, writeStyleLibrary } from "./lib/library-report.mjs";
+import { createGovernanceSnapshot } from "./lib/governance-snapshot.mjs";
+import { createVisualRegression, writeVisualRegression } from "./lib/regression.mjs";
 import { terminalSummary, writeReportArtifacts } from "./lib/report.mjs";
+import { buildTokenContract } from "./lib/token-contract.mjs";
 import { readJson } from "./lib/utils.mjs";
-
-const DECISIONS = new Set(["canonical", "keep-separate", "alias", "migrate", "exception", "not-conflict", "defer"]);
 
 function usage() {
   return `Usage:
+  govern.mjs library <repo> --out <directory>
+  govern.mjs review <repo> --out <directory>
+  govern.mjs snapshot <repo> --out <snapshot.json>
+  govern.mjs implement <repo> --decisions <decisions.json> --contract <token-contract.json> --out <directory> [--write] [--allow-runtime-delete] [--allow-cross-file-merge]
+  govern.mjs regression --before <snapshot.json> --after <snapshot.json> --manifest <visual-manifest.json> --out <directory>
+  govern.mjs submit <repo> --ledger <implementation-ledger.json> --out <directory> [--base <branch>] [--branch <branch>] [--create]
   govern.mjs audit <repo> [--json]
-  govern.mjs report <repo> --out <directory> [--brief <review-brief.json>]
+  govern.mjs report <repo> --out <directory>  # alias of library
   govern.mjs baseline accept <repo> --out <baseline.json>
   govern.mjs baseline status <repo> --baseline <baseline.json> [--json]
   govern.mjs check <repo> --baseline <baseline.json> [--json]
@@ -35,15 +46,20 @@ function printJson(value) {
 
 function validateDecisions(value) {
   const errors = [];
-  if (value?.schemaVersion !== 1) errors.push("schemaVersion must be 1");
+  if (value?.schemaVersion !== 4) errors.push("schemaVersion must be 4");
   if (typeof value?.reportId !== "string" || !value.reportId) errors.push("reportId is required");
   if (typeof value?.repoId !== "string" || !value.repoId) errors.push("repoId is required");
-  if (value?.status !== "draft") errors.push("status must remain draft in Lite mode");
-  if (!Array.isArray(value?.decisions)) errors.push("decisions must be an array");
-  for (const [index, decision] of (value?.decisions ?? []).entries()) {
-    if (typeof decision.conflictId !== "string" || !decision.conflictId) errors.push(`decisions[${index}].conflictId is required`);
-    if (!DECISIONS.has(decision.decision)) errors.push(`decisions[${index}].decision is invalid`);
-    if (decision.note != null && typeof decision.note !== "string") errors.push(`decisions[${index}].note must be a string`);
+  if (value?.status !== "draft") errors.push("status must remain draft until the user explicitly authorizes implementation");
+  if (!Array.isArray(value?.batchApprovals)) errors.push("batchApprovals must be an array");
+  if (!Array.isArray(value?.tokenLifecycleDecisions)) errors.push("tokenLifecycleDecisions must be an array");
+  if (value?.directStyleDecisions != null && !Array.isArray(value.directStyleDecisions)) errors.push("directStyleDecisions must be an array when present");
+  for (const [index, decision] of (value?.tokenLifecycleDecisions ?? []).entries()) {
+    if (typeof decision.lifecycleId !== "string" || !decision.lifecycleId) errors.push(`tokenLifecycleDecisions[${index}].lifecycleId is required`);
+    if (!new Set(["migrate", "merge", "delete"]).has(decision.action)) errors.push(`tokenLifecycleDecisions[${index}].action is invalid`);
+  }
+  for (const [index, decision] of (value?.directStyleDecisions ?? []).entries()) {
+    if (typeof decision.directStyleId !== "string" || !decision.directStyleId) errors.push(`directStyleDecisions[${index}].directStyleId is required`);
+    if (!new Set(["migrate", "scope", "create", "verify"]).has(decision.action)) errors.push(`directStyleDecisions[${index}].action is invalid`);
   }
   return { valid: errors.length === 0, errors };
 }
@@ -64,16 +80,89 @@ async function main() {
     return;
   }
 
-  if (command === "report") {
-    if (!subcommand) throw new Error("report requires a repository path");
+  if (command === "library" || command === "report") {
+    if (!subcommand) throw new Error(`${command} requires a repository path`);
     const output = option(args, "--out");
-    if (!output) throw new Error("report requires --out <directory>");
-    const report = await auditRepository(subcommand);
-    const briefPath = option(args, "--brief");
-    const reviewBrief = briefPath ? await readJson(path.resolve(briefPath)) : null;
-    const files = await writeReportArtifacts(report, output, { reviewBrief });
+    if (!output) throw new Error(`${command} requires --out <directory>`);
+    const library = await extractStyleLibrary(subcommand);
+    const files = await writeStyleLibrary(library, output);
+    process.stdout.write(`${librarySummary(library)}\n`);
+    printJson(files);
+    return;
+  }
+
+  if (command === "review") {
+    if (!subcommand) throw new Error("review requires a repository path");
+    const output = option(args, "--out");
+    if (!output) throw new Error("review requires --out <directory>");
+    const repoRoot = path.resolve(subcommand);
+    const report = await auditRepository(repoRoot, { collectOptions: { includeAssetDirectories: true }, includeRawValues: true });
+    const library = await styleLibraryFromReport(report, repoRoot);
+    const tokenContract = buildTokenContract(library);
+    const files = await writeReportArtifacts(report, output, { tokenContract, styleLibrary: library });
     process.stdout.write(`${terminalSummary(report)}\n`);
     printJson(files);
+    return;
+  }
+
+  if (command === "snapshot") {
+    if (!subcommand) throw new Error("snapshot requires a repository path");
+    const output = option(args, "--out");
+    if (!output) throw new Error("snapshot requires --out <snapshot.json>");
+    const snapshot = createGovernanceSnapshot(await extractStyleLibrary(subcommand));
+    const absolute = path.resolve(output);
+    await mkdir(path.dirname(absolute), { recursive: true });
+    await writeFile(absolute, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+    process.stdout.write(`Governance snapshot written to ${absolute}\n`);
+    return;
+  }
+
+  if (command === "implement") {
+    if (!subcommand) throw new Error("implement requires a repository path");
+    const decisionsFile = option(args, "--decisions");
+    const contractFile = option(args, "--contract");
+    const output = option(args, "--out");
+    if (!decisionsFile || !contractFile || !output) throw new Error("implement requires --decisions <decisions.json> --contract <token-contract.json> --out <directory>");
+    printJson(await implementGovernance({
+      repoRoot: subcommand,
+      decisionsFile,
+      contractFile,
+      outputDir: output,
+      write: args.includes("--write"),
+      allowDirty: args.includes("--allow-dirty"),
+      allowRuntimeDelete: args.includes("--allow-runtime-delete"),
+      allowCrossFileMerge: args.includes("--allow-cross-file-merge"),
+    }));
+    return;
+  }
+
+  if (command === "regression") {
+    const beforePath = option(args, "--before");
+    const afterPath = option(args, "--after");
+    const manifestPath = option(args, "--manifest");
+    const output = option(args, "--out");
+    if (!beforePath || !afterPath || !manifestPath || !output) throw new Error("regression requires --before <snapshot.json> --after <snapshot.json> --manifest <visual-manifest.json> --out <directory>");
+    const [before, after, manifest] = await Promise.all([readJson(path.resolve(beforePath)), readJson(path.resolve(afterPath)), readJson(path.resolve(manifestPath))]);
+    const regression = await createVisualRegression(before, after, manifest, path.dirname(path.resolve(manifestPath)));
+    printJson(await writeVisualRegression(regression, output));
+    return;
+  }
+
+  if (command === "submit") {
+    if (!subcommand) throw new Error("submit requires a repository path");
+    const ledgerFile = option(args, "--ledger");
+    const output = option(args, "--out");
+    if (!ledgerFile || !output) throw new Error("submit requires --ledger <implementation-ledger.json> --out <directory>");
+    printJson(await submitGovernance({
+      repoRoot: subcommand,
+      ledgerFile,
+      outputDir: output,
+      base: option(args, "--base") || "main",
+      branch: option(args, "--branch"),
+      title: option(args, "--title"),
+      commitMessage: option(args, "--commit-message"),
+      create: args.includes("--create"),
+    }));
     return;
   }
 

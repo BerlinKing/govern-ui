@@ -1,6 +1,6 @@
 import { normalizeEvidence, sha, stableSort } from "./utils.mjs";
 
-export const RULESET_VERSION = "lite-0.7.0";
+export const RULESET_VERSION = "full-1.3.0";
 export const POLICY_HASH = sha(`govern-ui:${RULESET_VERSION}`, 24);
 
 function findingFactory() {

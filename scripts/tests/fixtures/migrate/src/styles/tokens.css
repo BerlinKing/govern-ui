@@ -1,6 +1,7 @@
 :root {
   --color-primary: #176d5a;
   --color-surface: #ffffff;
+  --bg-body: var(--color-surface);
   --color-text: #20211f;
   --font-family-ui: Inter, sans-serif;
   --font-size-display: 32px;

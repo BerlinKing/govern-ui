@@ -87,6 +87,7 @@ export async function readJson(file) {
 export async function collectFiles(root, options = {}) {
   const maxFiles = options.maxFiles ?? 20_000;
   const maxFileBytes = options.maxFileBytes ?? 1_500_000;
+  const includeAssetDirectories = options.includeAssetDirectories === true;
   const files = [];
   const skipped = [];
   const unassessedAreas = new Set();
@@ -106,7 +107,8 @@ export async function collectFiles(root, options = {}) {
       const relative = relativePath(rootReal, absolute);
 
       if (entry.isDirectory()) {
-        if (IGNORED_DIRECTORIES.has(entry.name)) {
+        const assetDirectory = entry.name === "public" || entry.name === "static";
+        if (IGNORED_DIRECTORIES.has(entry.name) && !(includeAssetDirectories && assetDirectory)) {
           skipped.push({ file: relative, reason: "scope-excluded" });
           continue;
         }

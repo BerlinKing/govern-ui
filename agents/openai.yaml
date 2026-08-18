@@ -1,4 +1,4 @@
 interface:
   display_name: "GovernUI"
-  short_description: "Turn frontend source into user-facing design decisions"
-  default_prompt: "Use $govern-ui to audit this frontend as a complete static and dynamic design system, then create a bilingual designer-facing specification-sheet review with real current specimens or state matrices, target contracts, convergence recommendations, and product decisions in plain language."
+  short_description: "Review, implement, verify, and submit UIKit governance"
+  default_prompt: "Use $govern-ui to extract the atomic library, build and approve the target UIKit, implement safe migrate/merge/delete batches, visually verify the result, and prepare a repository-scoped Draft PR."
