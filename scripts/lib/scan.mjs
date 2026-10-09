@@ -50,6 +50,23 @@ function makeDefinition({ name, value, sourceType, file, line, selector = "unkno
   };
 }
 
+function propertyAt(content, index) {
+  const lineStart = content.lastIndexOf("\n", index) + 1;
+  const prefix = content.slice(lineStart, index);
+  const css = prefix.match(/([a-zA-Z-]+)\s*:\s*[^:;{}]*$/)?.[1] ?? null;
+  if (css) return css.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).toLowerCase();
+  const script = prefix.match(/([a-zA-Z]+)\s*(?::|=)\s*[^;{}]*$/)?.[1] ?? null;
+  if (!script) return null;
+  if (/^[A-Z][A-Z0-9_]*$/.test(script)) return script.toLowerCase().replaceAll("_", "-");
+  return script.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/-style$/, "").toLowerCase();
+}
+
+function referenceKind(property, isAdapter = false) {
+  if (property?.startsWith("--")) return "alias-definition";
+  if (isAdapter) return "adapter-definition";
+  return "consumer";
+}
+
 function scanCssDefinitions(content, file) {
   const definitions = [];
   const references = [];
@@ -57,6 +74,8 @@ function scanCssDefinitions(content, file) {
   const referencePattern = /var\(\s*(--[a-zA-Z0-9_-]+)\s*(?:,[^)]+)?\)/g;
   let match;
   while ((match = definitionPattern.exec(content))) {
+    const candidateValue = match[2].trim();
+    if (/\{\s*$/.test(candidateValue) || /^(?:hover|focus|active|before|after|disabled)\s*\{/i.test(candidateValue)) continue;
     definitions.push(makeDefinition({
       name: match[1],
       value: match[2],
@@ -67,6 +86,7 @@ function scanCssDefinitions(content, file) {
     }));
   }
   while ((match = referencePattern.exec(content))) {
+    const property = propertyAt(content, match.index);
     references.push({
       id: `ref-${sha(`${file}:${match.index}:${match[1]}`)}`,
       name: match[1],
@@ -74,10 +94,83 @@ function scanCssDefinitions(content, file) {
       file,
       line: lineNumberAt(content, match.index),
       selector: approximateSelector(content, match.index),
-      context: normalizeEvidence(content.slice(Math.max(0, match.index - 80), match.index + 140)),
+      property: property?.startsWith("--") ? null : property,
+      kind: referenceKind(property),
+      context: normalizeEvidence(content.slice(Math.max(0, match.index - 140), match.index + 220)),
     });
   }
   return { definitions, references };
+}
+
+function scanScriptTokenReferences(content, file, isTailwind) {
+  const references = [];
+  const seen = new Set();
+  const add = (name, index, property, kind = "consumer", context = null) => {
+    const key = `${index}:${name}:${kind}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    references.push({
+      id: `ref-${sha(`${file}:${index}:${name}:${kind}`)}`,
+      name,
+      normalizedName: normalizedTokenName(name),
+      file,
+      line: lineNumberAt(content, index),
+      selector: "unknown",
+      property,
+      kind,
+      context: normalizeEvidence(context ?? content.slice(Math.max(0, index - 180), index + 260)),
+    });
+  };
+
+  const variablePattern = /var\(\s*(--[a-zA-Z0-9_-]+)\s*(?:,[^)]+)?\)/g;
+  let match;
+  while ((match = variablePattern.exec(content))) {
+    const property = propertyAt(content, match.index);
+    const lineStart = content.lastIndexOf("\n", match.index) + 1;
+    const prefix = content.slice(lineStart, match.index);
+    const adapterDefinition = isTailwind && /^[\s"']*[A-Za-z_$][\w$.-]*["']?\s*:/.test(prefix);
+    add(match[1], match.index, property, referenceKind(property, adapterDefinition));
+  }
+
+  const cssVariableArgument = /(?:hslVarAlpha|cssVar|tokenValue)\(\s*["'](--[a-zA-Z0-9_-]+)["']/g;
+  while ((match = cssVariableArgument.exec(content))) add(match[1], match.index, propertyAt(content, match.index));
+
+  const attributePattern = /(?:class|className)\s*=\s*(?:\{\s*)?["'`]([^"'`]{1,2400})["'`](?:\s*\})?/g;
+  while ((match = attributePattern.exec(content))) {
+    const attribute = match[1];
+    const start = match.index + match[0].indexOf(attribute);
+    const tagStart = content.lastIndexOf("<", match.index);
+    const tagEnd = content.indexOf(">", match.index + match[0].length);
+    const elementContext = tagStart >= 0 && tagEnd >= 0 && tagEnd - tagStart <= 1200
+      ? content.slice(tagStart, tagEnd + 1)
+      : match[0];
+    for (const tokenMatch of attribute.matchAll(/[^\s]+/g)) {
+      const utility = tokenMatch[0].replace(/^["'`{}]+|["'`{},]+$/g, "");
+      const base = utility.split(":").at(-1);
+      const parsed = base.match(/^(bg|text|border|ring|outline|fill|stroke)-([a-z][a-z0-9-]*(?:\/[\d.]+)?)$/i);
+      if (!parsed || /^(?:black|white|transparent|current|inherit|none|[a-z]+-\d{2,3})(?:\/|$)/.test(parsed[2])) continue;
+      if (parsed[1].toLowerCase() === "text" && /^(?:xs|sm|base|lg|xl|[2-9]xl|left|center|right|justify|wrap|nowrap|balance|pretty|ellipsis|clip)$/.test(parsed[2])) continue;
+      const property = { bg: "background", text: "color", border: "border-color", ring: "outline-color", outline: "outline-color", fill: "fill", stroke: "stroke" }[parsed[1].toLowerCase()];
+      const name = parsed[2].replace(/\/[\d.]+$/, "");
+      add(name, start + (tokenMatch.index ?? 0), property, "theme-utility", elementContext);
+    }
+  }
+
+  const shadowAttributePattern = /(?:class|className)\s*=\s*(?:\{\s*)?["'`]([^"'`]{1,2400})["'`](?:\s*\})?/g;
+  while ((match = shadowAttributePattern.exec(content))) {
+    const attribute = match[1];
+    const start = match.index + match[0].indexOf(attribute);
+    const tagStart = content.lastIndexOf("<", match.index);
+    const tagEnd = content.indexOf(">", match.index + match[0].length);
+    const elementContext = tagStart >= 0 && tagEnd >= 0 && tagEnd - tagStart <= 1200 ? content.slice(tagStart, tagEnd + 1) : match[0];
+    for (const tokenMatch of attribute.matchAll(/[^\s]+/g)) {
+      const utility = tokenMatch[0].replace(/^["'`{}]+|["'`{},]+$/g, "");
+      const name = utility.split(":").at(-1).match(/^shadow-([a-z][a-z0-9-]*)$/i)?.[1];
+      if (!name || /^(?:sm|md|lg|xl|2xl|inner|none)$/.test(name)) continue;
+      add(name, start + (tokenMatch.index ?? 0), "box-shadow", "theme-utility", elementContext);
+    }
+  }
+  return references;
 }
 
 function flattenJson(value, prefix = [], output = []) {
@@ -127,7 +220,7 @@ function scanScriptDefinitions(content, file, isTailwind) {
     if (/^(?:name|version|private|scripts|dependencies|devDependencies|peerDependencies)$/.test(match[2])) continue;
     const visualName = /(?:color|background|foreground|surface|text|border|fill|stroke|accent|brand|primary|secondary|font|type|lineheight|letter|radius|rounded|shadow|elevation|duration|easing|motion|transition|spring|layer|zindex|space|spacing|gap|margin|padding|inset|width|height|size)/i.test(match[2]);
     const visualValue = /(?:var\(|#(?:[0-9a-f]{3,8})\b|rgba?\(|hsla?\(|oklch\(|-?\d*\.?\d+(?:px|rem|em|vw|vh|%|ms|s)\b)/i.test(rawValue);
-    if (!isTailwind && !visualName && !visualValue) continue;
+    if (!visualName && !visualValue) continue;
     const role = isTailwind ? (/var\(/i.test(rawValue) ? "adapter" : "local") : "canonical";
     definitions.push(makeDefinition({
       name: match[2],
@@ -246,8 +339,21 @@ function scanIconAssets(content, file, extension) {
     const isLibrary = ICON_LIBRARY.test(source);
     const isLocalSvg = /\.svg(?:\?[^"']*)?$/i.test(source);
     if (!isLibrary && !isLocalSvg) continue;
-    const names = match[1].replace(/[{}]/g, "").split(",").map((name) => name.trim().split(/\s+as\s+/i).at(-1)).filter(Boolean).slice(0, 80);
-    add({ type: isLibrary ? "icon-library" : "svg-import", source, line: lineNumberAt(content, match.index), names, count: Math.max(1, names.length) }, match.index);
+    const symbols = match[1]
+      .replace(/^type\s+/, "")
+      .replace(/[{}]/g, "")
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter((entry) => entry && !/^type\b/.test(entry))
+      .map((entry) => {
+        const [imported, local = imported] = entry.split(/\s+as\s+/i).map((part) => part.trim());
+        return { imported, local };
+      })
+      .filter((entry) => entry.imported && !/^(?:LucideIcon|IconNode|LucideProps)$/.test(entry.imported))
+      .slice(0, 80);
+    const names = symbols.map((entry) => entry.local);
+    if (isLibrary && !symbols.length) continue;
+    add({ type: isLibrary ? "icon-library" : "svg-import", source, line: lineNumberAt(content, match.index), names, symbols, count: Math.max(1, names.length) }, match.index);
   }
 
   const svgPattern = /<svg\b([^>]*)>([\s\S]{0,20000}?)<\/svg>/gi;
@@ -378,6 +484,8 @@ export async function scanSources(collected) {
       styleSignals.add(isTailwind ? "Tailwind Theme" : "JS/TS Theme");
     }
 
+    if (SCRIPT_EXTENSIONS.has(file.extension)) tokenReferences.push(...scanScriptTokenReferences(content, file.relative, isTailwind));
+
     rawValues.push(...scanRawValues(content, file.relative, file.extension, definitionSource));
     rawValues.push(...scanTailwindUtilities(content, file.relative, file.extension));
     iconAssets.push(...scanIconAssets(content, file.relative, file.extension));
@@ -402,7 +510,8 @@ export async function scanSources(collected) {
   }
 
   const definedNames = new Set(tokenDefinitions.map((item) => item.normalizedName));
-  const unresolvedReferences = tokenReferences.filter((item) => !definedNames.has(item.normalizedName));
+  const knownReferences = tokenReferences.filter((item) => item.kind !== "theme-utility" || definedNames.has(item.normalizedName));
+  const unresolvedReferences = knownReferences.filter((item) => !definedNames.has(item.normalizedName));
 
   if (styleSignals.has("JS/TS Theme")) unassessedAreas.add("Runtime-computed JS/TS theme values and conditional object spreads");
   unassessedAreas.add("Rendered CSS cascade, pseudo-state behavior, and browser-computed styles");
@@ -410,7 +519,7 @@ export async function scanSources(collected) {
 
   return {
     tokenDefinitions,
-    tokenReferences,
+    tokenReferences: knownReferences,
     unresolvedReferences,
     rawValues,
     componentCandidates,

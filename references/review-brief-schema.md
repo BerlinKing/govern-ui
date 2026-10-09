@@ -92,7 +92,7 @@ Each package must answer four questions in order:
 
 Every package must reference at least one audit item. Use `conflictIds` for relationship groups and `findingFingerprints` for actionable findings such as an undefined reference, duplicated primitive, or raw overlay layer. A package may reference both. Findings-only packages remain available in `packageDecisions`; the compatibility `decisions` array only flattens relationship conflicts.
 
-`systemPath` is mandatory in schema version 2. It places every decision inside the standard static-five-layer or dynamic-four-layer review model. Do not create an unclassified decision card. `standard` must explain the healthy design-system contract before discussing repository evidence.
+`systemPath` is mandatory in schema version 2. For Product C, group decisions by module and link the matching confirmed Product B atomic role. The static-five/dynamic-four model is available only for a separately requested extended component or behavior review. Do not create an unclassified decision card when a specific category is known. `standard` must explain the healthy design-system contract before discussing repository evidence.
 
 ## Specimens
 
@@ -116,10 +116,10 @@ The HTML groups specimens into designer-facing comparison matrices. Author enoug
 
 ## Authoring rules
 
-- Start from the complete standard system taxonomy in [system-review-taxonomy.md](system-review-taxonomy.md), then place repository evidence into the relevant category. Never let scanner rule names become the report outline.
+- Use Product B atomic roles inside Product C module groups; consult [system-review-taxonomy.md](system-review-taxonomy.md) for Foundation details or an explicitly requested extended review. Place repository evidence into the relevant category. Never let scanner rule names become the report outline.
 - Write the visible report from the user's decision perspective. Name the product-facing system or role first; keep source syntax, file paths, rule IDs, and code as secondary or collapsed evidence.
 - Group raw conflicts into the smallest set of product decisions a user can reasonably make inside one system category. Do not create one card per scanner finding.
-- Show every taxonomy category in the system matrix even when its status is `not-detected` or `unverified`. A missing scanner finding is not proof that the category is healthy.
+- Keep the complete taxonomy in Product B; Product C initially shows only groups needing attention. A missing scanner finding is not proof that the category is healthy.
 - For every decision card, make the element itself the dominant surface: current specimens, target specimens, one question, one recommendation, then choices. Keep standard-contract explanation, limitations, and evidence collapsed.
 - Make the visible category read like a component-library comparison sheet, not a prose report. Never reduce the element to a small badge while explanatory text dominates the card.
 - State each idea once. Do not restate one diagnosis across the title, question, current summary, target summary, recommendation, and disclaimer.

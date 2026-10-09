@@ -1,0 +1,2 @@
+:root { --font-ui-current: system-ui; --type-12-size: 12px; --type-12-line: 16px; --icon-primary: 0 0% 0%; }
+.dark { --icon-primary: 0 0% 100%; }

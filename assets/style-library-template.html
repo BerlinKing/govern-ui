@@ -123,8 +123,9 @@
     .icon-grid { display: grid; grid-template-columns: repeat(8,minmax(0,1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
     .icon-card { min-width: 0; min-height: 126px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; padding: 13px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: white; }
     .icon-card img { width: 28px; height: 28px; object-fit: contain; }
-    .icon-generic { width: 28px; height: 28px; display: grid; place-items: center; font-size: 25px; }
+    .icon-unresolved { display: inline-flex; align-items: center; min-height: 28px; padding: 4px 7px; border: 1px dashed var(--strong); border-radius: 6px; color: var(--muted); font-size: 9px; }
     .icon-card code { max-width: 100%; color: var(--muted); font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .icon-card small { max-width: 100%; color: var(--muted); font-size: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .direct-values { margin: 28px 0 52px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
     .direct-values summary { min-height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; cursor: pointer; background: var(--wash); font-weight: 650; }
     .direct-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -221,7 +222,7 @@
         blur: ["模糊", "Blur", "可视化 blur、filter 与 backdrop-filter Token。", "Blur, filter, and backdrop-filter tokens rendered visually."],
         layer: ["层级", "Layers", "列出 z-index 与语义层级 Token，并用叠层关系表示。", "Z-index and semantic layer tokens represented as stacked surfaces."],
         motion: ["动效参数", "Motion parameters", "展示时长、缓动和过渡 Token；系统减少动态效果时会停止动画。", "Duration, easing, and transition tokens; animation stops when reduced motion is enabled."],
-        other: ["其他 Token", "Other tokens", "保留无法安全归入上述类别的 Token，确保映射不丢失。", "Tokens that cannot be safely classified above are retained so the map stays complete."],
+        other: ["尚未归类", "Unclassified", "这里只保留上下文不足、无法安全归入字体、间距、描边、图标、动效等标准类别的定义，并明确保留源码位置。", "Only definitions lacking enough context to enter typography, spacing, stroke, icon, motion, or another standard category remain here, with their source locations preserved."],
         map: ["完整 Token 映射", "Complete token map", "逐条列出 Token、源码值、解析值、作用域、引用次数和来源位置。", "Every token with source value, resolved value, scope, usage count, and source location."],
       };
       const groupText = {
@@ -287,7 +288,7 @@
 
       function iconSection(index) {
         const icons = data.icons.filter(visible); const sources = [...new Set(icons.map(item => item.collection || item.source))];
-        const groups = sources.map(source => { const items = icons.filter(item => (item.collection || item.source) === source); return `<section><div class="icon-source-head"><h3>${esc(source)}</h3><span class="pill">${items.length}</span></div><div class="icon-grid">${items.map(item => `<article class="icon-card" title="${esc(item.file)}:${item.line}\n${esc(item.source)}">${item.preview ? `<img src="${esc(item.preview)}" alt="">` : `<span class="icon-generic" aria-hidden="true">◇</span>`}<code>${esc(item.name)}</code></article>`).join("")}</div></section>`; }).join("");
+        const groups = sources.map(source => { const items = icons.filter(item => (item.collection || item.source) === source); return `<section><div class="icon-source-head"><h3>${esc(source)}</h3><span class="pill">${items.length}</span></div><div class="icon-grid">${items.map(item => `<article class="icon-card" title="${esc(item.file)}:${item.line}\n${esc(item.source)}">${item.preview ? `<img src="${esc(item.preview)}" alt="">` : `<span class="icon-unresolved">${state.locale === "zh" ? "预览未解析" : "Preview unresolved"}</span>`}<code>${esc(item.importedName || item.name)}</code>${item.localName && item.localName !== item.importedName ? `<small>${state.locale === "zh" ? "本地别名" : "Local alias"}: ${esc(item.localName)}</small>` : ""}</article>`).join("")}</div></section>`; }).join("");
         return `<section class="library-section" id="icons">${sectionHead("icons",index,data.icons.length,0)}<div class="icon-sources">${groups || `<div class="empty">${state.locale === "zh" ? "源码中未找到图标资产" : "No icon assets found in source"}</div>`}</div></section>`;
       }
 

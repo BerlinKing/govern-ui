@@ -11,7 +11,7 @@ const FOUNDATION = [
   { id: "typography", label: text("字体与排版", "Typography"), description: text("字体家族、字号层级、字重、行高、字距与文本角色。", "Families, scale, weight, line height, tracking, and text roles."), categories: ["typography"], specimen: "typography" },
   { id: "iconography", label: text("图标", "Iconography"), description: text("图标来源、尺寸网格、线宽、填充与产品专用例外。", "Sources, size grid, stroke, fill, and product-specific exceptions."), categories: ["icons"], specimen: "icons" },
   { id: "spacing-density", label: text("间距与密度", "Spacing & density"), description: text("基础间距刻度、组件内距、布局间距与密度模式。", "Base scale, component insets, layout gaps, and density modes."), categories: ["spacing"], specimen: "spacing" },
-  { id: "grid-layout", label: text("栅格与布局", "Grid & layout"), description: text("页面容器、列网格、断点、对齐与响应式规则。", "Containers, column grids, breakpoints, alignment, and responsive rules."), categories: ["other"], specimen: "grid" },
+  { id: "grid-layout", label: text("栅格与布局", "Grid & layout"), description: text("页面容器、列网格、断点、对齐与响应式规则。", "Containers, column grids, breakpoints, alignment, and responsive rules."), categories: [], specimen: "grid" },
   { id: "size-control", label: text("尺寸与控件高度", "Size & control height"), description: text("图标、控件、触控目标与常用容器尺寸。", "Icon, control, touch-target, and common container sizes."), categories: ["spacing"], specimen: "size" },
   { id: "radius", label: text("圆角", "Radius"), description: text("容器、控件、浮层与胶囊形态的圆角层级。", "Radius hierarchy for containers, controls, floating surfaces, and pills."), categories: ["radius"], specimen: "radius" },
   { id: "stroke", label: text("描边", "Stroke"), description: text("边框宽度、样式、分隔线与键盘焦点环。", "Border widths, styles, dividers, and keyboard focus rings."), categories: ["stroke"], specimen: "stroke" },
@@ -86,6 +86,9 @@ function compactUsage(usage) {
     features: usage.features ?? [],
     components: usage.components ?? [],
     pages: usage.pages ?? [],
+    scopes: usage.scopes ?? [],
+    states: usage.states ?? [],
+    examples: usage.examples ?? [],
   } : null;
 }
 
@@ -100,6 +103,7 @@ function compactToken(token) {
     file: token.file,
     line: token.line,
     usage: compactUsage(token.usage),
+    semantic: token.semantic ?? null,
   };
 }
 
@@ -120,6 +124,7 @@ function compactDirectStyle(item) {
     contexts: item.contexts ?? [],
     examples: item.examples ?? [],
     usage: compactUsage(item.usage),
+    semantic: item.semantic ?? null,
   };
 }
 
@@ -127,11 +132,14 @@ function compactGraphicAsset(asset) {
   return {
     id: asset.id,
     name: asset.name,
+    importedName: asset.importedName ?? asset.name,
+    localName: asset.localName ?? asset.name,
     source: asset.source,
     collection: asset.collection,
     type: asset.type,
     kind: asset.kind,
     preview: asset.preview,
+    previewStatus: asset.previewStatus ?? (asset.preview ? "resolved" : "unresolved"),
     viewBox: asset.viewBox,
     width: asset.width,
     height: asset.height,
@@ -256,20 +264,20 @@ function actionSummary(actions) {
 }
 
 function tokenBelongsToFoundation(definition, token) {
-  if (!definition.categories.includes(token.category)) return false;
   const name = `${token.name} ${token.normalizedName}`;
+  if (definition.id === "grid-layout") return /(?:grid|layout|column|row|container|breakpoint|screen|viewport)/i.test(name);
+  if (!definition.categories.includes(token.category)) return false;
   if (definition.id === "spacing-density") return !/(?:width|height|size|control)/i.test(name);
   if (definition.id === "size-control") return /(?:width|height|size|control)/i.test(name);
-  if (definition.id === "grid-layout") return /(?:grid|layout|column|row|container|breakpoint|screen|viewport)/i.test(name);
   return true;
 }
 
 function directStyleBelongsToFoundation(definition, item) {
-  if (!definition.categories.includes(item.category)) return false;
   const name = `${item.property ?? ""} ${item.value}`;
+  if (definition.id === "grid-layout") return /(?:grid|layout|column|row|container|breakpoint|screen|viewport)/i.test(name);
+  if (!definition.categories.includes(item.category)) return false;
   if (definition.id === "spacing-density") return !/(?:width|height)/i.test(name);
   if (definition.id === "size-control") return /(?:width|height)/i.test(name);
-  if (definition.id === "grid-layout") return /(?:grid|column|row|container|breakpoint|screen|viewport)/i.test(name);
   return true;
 }
 
@@ -393,7 +401,7 @@ export function buildUIKitBlueprint(report, library, tokenContract, reviewBrief)
   const proposedComponents = componentLayers.flatMap((item) => item.nodes).filter((item) => item.proposal);
   return {
     schemaVersion: 1,
-    model: "target-uikit-first",
+    model: "current-to-target-governance",
     foundation,
     componentLayers,
     componentSetup: {

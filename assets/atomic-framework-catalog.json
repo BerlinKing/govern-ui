@@ -1,0 +1,1358 @@
+{
+  "schema": "governui.atomic-catalog/1",
+  "categories": [
+    {
+      "id": "color",
+      "label": [
+        "颜色",
+        "Color"
+      ],
+      "description": [
+        "定义颜色承担的界面角色及主题映射。",
+        "Define UI color roles and theme mappings."
+      ],
+      "rule": [
+        "相同色值可以承担不同语义；按用途定义。图标色、描边色归入颜色。",
+        "Equal values may carry different meanings. Define by purpose; icon and border colors belong here."
+      ],
+      "fields": [
+        {
+          "id": "light",
+          "label": [
+            "浅色主题",
+            "Light theme"
+          ],
+          "kind": "color",
+          "example": "#FFFFFF"
+        },
+        {
+          "id": "dark",
+          "label": [
+            "深色主题",
+            "Dark theme"
+          ],
+          "kind": "color",
+          "example": "#121212"
+        }
+      ],
+      "roles": [
+        {
+          "id": "surface",
+          "name": "--bg-surface",
+          "label": [
+            "容器背景",
+            "Container surface"
+          ],
+          "meaning": [
+            "承载一组内容的基础表面。",
+            "Base surface for a group of content."
+          ],
+          "location": [
+            "卡片、面板、控件底板",
+            "Cards, panels and control surfaces"
+          ]
+        },
+        {
+          "id": "body",
+          "name": "--bg-body",
+          "label": [
+            "页面背景",
+            "Page background"
+          ],
+          "meaning": [
+            "页面最底层的背景。",
+            "Background of the page shell."
+          ],
+          "location": [
+            "页面根容器",
+            "Page shell"
+          ]
+        },
+        {
+          "id": "tooltip",
+          "name": "--bg-tooltip",
+          "label": [
+            "提示背景",
+            "Tooltip surface"
+          ],
+          "meaning": [
+            "短暂提示信息的承载表面。",
+            "Surface for transient contextual help."
+          ],
+          "location": [
+            "提示气泡",
+            "Tooltips"
+          ]
+        },
+        {
+          "id": "text",
+          "name": "--text-primary",
+          "label": [
+            "主要文字",
+            "Primary text"
+          ],
+          "meaning": [
+            "首要阅读内容。",
+            "Primary reading content."
+          ],
+          "location": [
+            "正文、表单内容",
+            "Body copy and form content"
+          ]
+        },
+        {
+          "id": "text-secondary",
+          "name": "--text-secondary",
+          "label": [
+            "次要文字",
+            "Secondary text"
+          ],
+          "meaning": [
+            "说明性和次要信息。",
+            "Supporting and secondary information."
+          ],
+          "location": [
+            "说明、元信息",
+            "Descriptions and metadata"
+          ]
+        },
+        {
+          "id": "text-disabled",
+          "name": "--text-disabled",
+          "label": [
+            "禁用文字",
+            "Disabled text"
+          ],
+          "meaning": [
+            "不可操作内容的文字。",
+            "Text for unavailable content."
+          ],
+          "location": [
+            "禁用控件",
+            "Disabled controls"
+          ]
+        },
+        {
+          "id": "text-inverted",
+          "name": "--text-inverted",
+          "label": [
+            "反色文字",
+            "Inverse text"
+          ],
+          "meaning": [
+            "反色表面上的阅读内容。",
+            "Content on inverse surfaces."
+          ],
+          "location": [
+            "反色提示或横幅",
+            "Inverse tooltips or banners"
+          ]
+        },
+        {
+          "id": "action",
+          "name": "--action-primary",
+          "label": [
+            "主要操作",
+            "Primary action"
+          ],
+          "meaning": [
+            "突出主要交互入口。",
+            "Emphasize the primary interactive action."
+          ],
+          "location": [
+            "主要按钮、操作入口",
+            "Primary buttons and actions"
+          ]
+        },
+        {
+          "id": "icon",
+          "name": "--icon-primary",
+          "label": [
+            "主要图标色",
+            "Primary icon color"
+          ],
+          "meaning": [
+            "功能图标的主要颜色。",
+            "Primary color of functional icons."
+          ],
+          "location": [
+            "工具栏、导航图标",
+            "Toolbar and navigation icons"
+          ]
+        },
+        {
+          "id": "icon-disabled",
+          "name": "--icon-disabled",
+          "label": [
+            "禁用图标色",
+            "Disabled icon color"
+          ],
+          "meaning": [
+            "不可操作图标的颜色。",
+            "Color of unavailable icons."
+          ],
+          "location": [
+            "禁用图标",
+            "Disabled icons"
+          ]
+        },
+        {
+          "id": "stroke",
+          "name": "--stroke-primary",
+          "label": [
+            "边界颜色",
+            "Border color"
+          ],
+          "meaning": [
+            "区分相邻表面或控件边界。",
+            "Separate adjacent surfaces or control boundaries."
+          ],
+          "location": [
+            "边框、分隔线",
+            "Borders and dividers"
+          ]
+        },
+        {
+          "id": "brand",
+          "name": "--brand-primary",
+          "label": [
+            "品牌颜色",
+            "Brand color"
+          ],
+          "meaning": [
+            "表达品牌识别。",
+            "Express brand identity."
+          ],
+          "location": [
+            "品牌强调区域",
+            "Brand accents"
+          ]
+        },
+        {
+          "id": "feedback",
+          "name": "--feedback-info",
+          "label": [
+            "反馈颜色",
+            "Feedback color"
+          ],
+          "meaning": [
+            "表达反馈语义；按需要细分成功、警告和错误。",
+            "Express feedback; define success, warning and error roles as needed."
+          ],
+          "location": [
+            "状态提示",
+            "Status feedback"
+          ]
+        },
+        {
+          "id": "media",
+          "name": "--on-media-content",
+          "label": [
+            "媒体上的内容",
+            "On-media content"
+          ],
+          "meaning": [
+            "保证内容在图片或视频上可读。",
+            "Keep content readable on images or video."
+          ],
+          "location": [
+            "媒体覆盖层",
+            "Media overlays"
+          ]
+        },
+        {
+          "id": "data",
+          "name": "--data-series-primary",
+          "label": [
+            "数据颜色",
+            "Data color"
+          ],
+          "meaning": [
+            "区分有数据含义的序列。",
+            "Distinguish meaningful data series."
+          ],
+          "location": [
+            "图表与数据视图",
+            "Charts and data views"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "typography",
+      "label": [
+        "字体排版",
+        "Typography"
+      ],
+      "description": [
+        "定义文字角色与完整排版组合。",
+        "Define text roles and complete typography composites."
+      ],
+      "rule": [
+        "字体、字号、字重、行高和字距一起确认；标题与正文不因字号相同而合并。",
+        "Confirm family, size, weight, line height and tracking together. Equal sizes do not make headings and body text equivalent."
+      ],
+      "fields": [
+        {
+          "id": "family",
+          "label": [
+            "字体与回退",
+            "Family and fallback"
+          ],
+          "kind": "text",
+          "example": "system-ui, sans-serif"
+        },
+        {
+          "id": "size",
+          "label": [
+            "字号",
+            "Font size"
+          ],
+          "kind": "length",
+          "example": "14px"
+        },
+        {
+          "id": "weight",
+          "label": [
+            "字重",
+            "Weight"
+          ],
+          "kind": "text",
+          "example": "500"
+        },
+        {
+          "id": "lineHeight",
+          "label": [
+            "行高",
+            "Line height"
+          ],
+          "kind": "text",
+          "example": "1.5"
+        },
+        {
+          "id": "tracking",
+          "label": [
+            "字距",
+            "Letter spacing"
+          ],
+          "kind": "length",
+          "example": "0px"
+        }
+      ],
+      "roles": [
+        {
+          "id": "heading",
+          "name": "--type-heading",
+          "label": [
+            "标题",
+            "Heading"
+          ],
+          "meaning": [
+            "建立内容阅读层级。",
+            "Establish content hierarchy."
+          ],
+          "location": [
+            "页面与区域标题",
+            "Page and section headings"
+          ]
+        },
+        {
+          "id": "body",
+          "name": "--type-body",
+          "label": [
+            "正文",
+            "Body"
+          ],
+          "meaning": [
+            "支持连续阅读。",
+            "Support continuous reading."
+          ],
+          "location": [
+            "段落和主要内容",
+            "Paragraphs and main content"
+          ]
+        },
+        {
+          "id": "label",
+          "name": "--type-label",
+          "label": [
+            "控件标签",
+            "Control label"
+          ],
+          "meaning": [
+            "识别操作和输入内容。",
+            "Identify actions and inputs."
+          ],
+          "location": [
+            "按钮与表单标签",
+            "Buttons and form labels"
+          ]
+        },
+        {
+          "id": "caption",
+          "name": "--type-caption",
+          "label": [
+            "辅助说明",
+            "Caption"
+          ],
+          "meaning": [
+            "补充主要信息。",
+            "Supplement primary content."
+          ],
+          "location": [
+            "说明与元信息",
+            "Captions and metadata"
+          ]
+        },
+        {
+          "id": "code",
+          "name": "--type-code",
+          "label": [
+            "代码与等宽内容",
+            "Code"
+          ],
+          "meaning": [
+            "表达需要等宽对齐的内容。",
+            "Present content needing monospace alignment."
+          ],
+          "location": [
+            "代码或结构化文本",
+            "Code and structured text"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "icons",
+      "label": [
+        "图标",
+        "Icons"
+      ],
+      "description": [
+        "定义图标来源、语义和几何规则。",
+        "Define icon sources, semantics and geometry."
+      ],
+      "rule": [
+        "保持同一视觉家族；图标尺寸与点击区域分开。图标颜色引用颜色框架。",
+        "Keep a consistent visual family. Separate icon geometry from the hit target; use Color roles for color."
+      ],
+      "fields": [
+        {
+          "id": "source",
+          "label": [
+            "图标库或资源",
+            "Package or asset"
+          ],
+          "kind": "text",
+          "example": "package/export or asset.svg"
+        },
+        {
+          "id": "size",
+          "label": [
+            "标称尺寸",
+            "Nominal size"
+          ],
+          "kind": "length",
+          "example": "16px"
+        },
+        {
+          "id": "stroke",
+          "label": [
+            "笔画规则",
+            "Stroke rule"
+          ],
+          "kind": "text",
+          "example": "1.5px / filled"
+        }
+      ],
+      "roles": [
+        {
+          "id": "navigation",
+          "name": "--icon-navigation",
+          "label": [
+            "导航图标",
+            "Navigation icon"
+          ],
+          "meaning": [
+            "帮助识别导航目的地。",
+            "Identify navigation destinations."
+          ],
+          "location": [
+            "导航栏与菜单",
+            "Navigation and menus"
+          ]
+        },
+        {
+          "id": "action",
+          "name": "--icon-action",
+          "label": [
+            "操作图标",
+            "Action icon"
+          ],
+          "meaning": [
+            "表达具体操作含义。",
+            "Express an action."
+          ],
+          "location": [
+            "工具栏和图标按钮",
+            "Toolbars and icon buttons"
+          ]
+        },
+        {
+          "id": "status",
+          "name": "--icon-status",
+          "label": [
+            "状态图标",
+            "Status icon"
+          ],
+          "meaning": [
+            "辅助区分反馈状态。",
+            "Help distinguish feedback states."
+          ],
+          "location": [
+            "成功、警告、错误提示",
+            "Success, warning and error feedback"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shadow",
+      "label": [
+        "投影",
+        "Shadow"
+      ],
+      "description": [
+        "定义表面深度与浮起关系。",
+        "Define surface depth and elevation."
+      ],
+      "rule": [
+        "保存完整的偏移、模糊、扩散和颜色表达式；无投影也是明确选择。",
+        "Keep complete offsets, blur, spread and color expressions. No shadow is an explicit choice."
+      ],
+      "fields": [
+        {
+          "id": "value",
+          "label": [
+            "完整投影",
+            "Complete shadow"
+          ],
+          "kind": "css",
+          "example": "0 4px 14px rgb(0 0 0 / 0.22)"
+        }
+      ],
+      "roles": [
+        {
+          "id": "none",
+          "name": "--shadow-none",
+          "label": [
+            "无投影",
+            "No shadow"
+          ],
+          "meaning": [
+            "表面无需额外深度提示。",
+            "A surface needs no depth cue."
+          ],
+          "location": [
+            "平面容器",
+            "Flat containers"
+          ]
+        },
+        {
+          "id": "floating",
+          "name": "--shadow-floating",
+          "label": [
+            "浮动表面",
+            "Floating surface"
+          ],
+          "meaning": [
+            "区分浮动内容与下方表面。",
+            "Separate floating content from the surface below."
+          ],
+          "location": [
+            "菜单与提示",
+            "Menus and tooltips"
+          ]
+        },
+        {
+          "id": "modal",
+          "name": "--shadow-modal",
+          "label": [
+            "模态表面",
+            "Modal surface"
+          ],
+          "meaning": [
+            "强调独立的模态内容。",
+            "Emphasize modal content."
+          ],
+          "location": [
+            "对话框",
+            "Dialogs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stroke",
+      "label": [
+        "描边",
+        "Stroke"
+      ],
+      "description": [
+        "定义边界线宽、线型与焦点轮廓。",
+        "Define boundary width, style and focus outlines."
+      ],
+      "rule": [
+        "边框和焦点轮廓分别定义；颜色通过颜色角色绑定。",
+        "Define borders and focus outlines separately; bind colors through Color roles."
+      ],
+      "fields": [
+        {
+          "id": "width",
+          "label": [
+            "线宽",
+            "Width"
+          ],
+          "kind": "length",
+          "example": "1px"
+        },
+        {
+          "id": "style",
+          "label": [
+            "线型",
+            "Style"
+          ],
+          "kind": "text",
+          "example": "solid"
+        },
+        {
+          "id": "offset",
+          "label": [
+            "轮廓偏移",
+            "Outline offset"
+          ],
+          "kind": "length",
+          "example": "0px"
+        }
+      ],
+      "roles": [
+        {
+          "id": "border",
+          "name": "--stroke-width-default",
+          "label": [
+            "常规边框",
+            "Default border"
+          ],
+          "meaning": [
+            "界定普通表面边界。",
+            "Define ordinary surface boundaries."
+          ],
+          "location": [
+            "输入框与面板",
+            "Inputs and panels"
+          ]
+        },
+        {
+          "id": "divider",
+          "name": "--stroke-width-divider",
+          "label": [
+            "分隔线",
+            "Divider"
+          ],
+          "meaning": [
+            "划分相邻内容。",
+            "Divide adjacent content."
+          ],
+          "location": [
+            "列表和区域分隔",
+            "Lists and section dividers"
+          ]
+        },
+        {
+          "id": "focus",
+          "name": "--stroke-focus",
+          "label": [
+            "焦点轮廓",
+            "Focus outline"
+          ],
+          "meaning": [
+            "让键盘焦点可识别。",
+            "Make keyboard focus identifiable."
+          ],
+          "location": [
+            "可聚焦控件",
+            "Focusable controls"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "radius",
+      "label": [
+        "圆角",
+        "Radius"
+      ],
+      "description": [
+        "定义形状转角的角色。",
+        "Define corner-shape roles."
+      ],
+      "rule": [
+        "按控件、容器和全圆角色复用；保留方角选项。",
+        "Reuse control, container and pill roles; retain a square option."
+      ],
+      "fields": [
+        {
+          "id": "value",
+          "label": [
+            "圆角值",
+            "Radius"
+          ],
+          "kind": "length",
+          "example": "8px"
+        }
+      ],
+      "roles": [
+        {
+          "id": "square",
+          "name": "--radius-square",
+          "label": [
+            "方角",
+            "Square"
+          ],
+          "meaning": [
+            "明确的直角外形。",
+            "An explicitly square shape."
+          ],
+          "location": [
+            "方形表面",
+            "Square surfaces"
+          ]
+        },
+        {
+          "id": "control",
+          "name": "--radius-control",
+          "label": [
+            "控件圆角",
+            "Control radius"
+          ],
+          "meaning": [
+            "统一交互控件的转角。",
+            "Unify corners of interactive controls."
+          ],
+          "location": [
+            "按钮与输入框",
+            "Buttons and inputs"
+          ]
+        },
+        {
+          "id": "container",
+          "name": "--radius-container",
+          "label": [
+            "容器圆角",
+            "Container radius"
+          ],
+          "meaning": [
+            "定义内容容器转角。",
+            "Define content-container corners."
+          ],
+          "location": [
+            "卡片与面板",
+            "Cards and panels"
+          ]
+        },
+        {
+          "id": "pill",
+          "name": "--radius-pill",
+          "label": [
+            "全圆",
+            "Pill"
+          ],
+          "meaning": [
+            "胶囊或圆形轮廓。",
+            "A pill or circular outline."
+          ],
+          "location": [
+            "标签与圆形控件",
+            "Tags and circular controls"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spacing",
+      "label": [
+        "间距与尺寸",
+        "Spacing & sizing"
+      ],
+      "description": [
+        "定义内边距、元素间隔和控件尺寸。",
+        "Define insets, gaps and control dimensions."
+      ],
+      "rule": [
+        "区分间隔、内部留白与交互尺寸；动态画布坐标不作为共享间距。",
+        "Separate gaps, insets and interaction dimensions. Dynamic canvas coordinates are not shared spacing."
+      ],
+      "fields": [
+        {
+          "id": "value",
+          "label": [
+            "长度",
+            "Length"
+          ],
+          "kind": "length",
+          "example": "8px"
+        }
+      ],
+      "roles": [
+        {
+          "id": "gap",
+          "name": "--space-inline",
+          "label": [
+            "元素间隔",
+            "Element gap"
+          ],
+          "meaning": [
+            "组织相关元素之间的距离。",
+            "Space related elements."
+          ],
+          "location": [
+            "图标与文字、操作组",
+            "Icons with text and action groups"
+          ]
+        },
+        {
+          "id": "inset",
+          "name": "--space-inset",
+          "label": [
+            "容器内边距",
+            "Container inset"
+          ],
+          "meaning": [
+            "内容与容器边缘之间的留白。",
+            "Space between content and container edges."
+          ],
+          "location": [
+            "卡片与面板内部",
+            "Card and panel content"
+          ]
+        },
+        {
+          "id": "section",
+          "name": "--space-section",
+          "label": [
+            "区域间距",
+            "Section spacing"
+          ],
+          "meaning": [
+            "区分不同内容区域。",
+            "Separate content sections."
+          ],
+          "location": [
+            "页面区域之间",
+            "Between page sections"
+          ]
+        },
+        {
+          "id": "control",
+          "name": "--size-control",
+          "label": [
+            "控件高度",
+            "Control height"
+          ],
+          "meaning": [
+            "定义常规交互控件高度。",
+            "Define ordinary control height."
+          ],
+          "location": [
+            "按钮与输入框",
+            "Buttons and inputs"
+          ]
+        },
+        {
+          "id": "target",
+          "name": "--size-hit-target",
+          "label": [
+            "交互区域",
+            "Hit target"
+          ],
+          "meaning": [
+            "定义可点击或触摸区域的尺寸。",
+            "Define clickable or touchable dimensions."
+          ],
+          "location": [
+            "图标按钮与触摸控件",
+            "Icon buttons and touch controls"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "opacity",
+      "label": [
+        "透明度",
+        "Opacity"
+      ],
+      "description": [
+        "定义透明层和弱化效果。",
+        "Define transparent layers and de-emphasis."
+      ],
+      "rule": [
+        "整体透明度会影响子元素；避免与颜色 alpha 重复叠加。",
+        "Whole-element opacity affects children. Avoid accidental double application with color alpha."
+      ],
+      "fields": [
+        {
+          "id": "value",
+          "label": [
+            "透明度 0–1",
+            "Opacity 0–1"
+          ],
+          "kind": "opacity",
+          "example": "0.4"
+        }
+      ],
+      "roles": [
+        {
+          "id": "disabled",
+          "name": "--opacity-disabled",
+          "label": [
+            "禁用弱化",
+            "Disabled treatment"
+          ],
+          "meaning": [
+            "弱化不可交互的内容。",
+            "De-emphasize unavailable content."
+          ],
+          "location": [
+            "禁用图形或控件",
+            "Disabled graphics or controls"
+          ]
+        },
+        {
+          "id": "scrim",
+          "name": "--opacity-scrim",
+          "label": [
+            "遮罩透明度",
+            "Scrim opacity"
+          ],
+          "meaning": [
+            "控制遮罩的遮挡程度。",
+            "Control how much a scrim obscures."
+          ],
+          "location": [
+            "模态遮罩",
+            "Modal backdrops"
+          ]
+        },
+        {
+          "id": "decorative",
+          "name": "--opacity-decorative",
+          "label": [
+            "装饰透明度",
+            "Decorative opacity"
+          ],
+          "meaning": [
+            "控制装饰图层的存在感。",
+            "Control decorative prominence."
+          ],
+          "location": [
+            "背景装饰层",
+            "Decorative backgrounds"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blur",
+      "label": [
+        "模糊与滤镜",
+        "Blur & filters"
+      ],
+      "description": [
+        "定义背景与内容的滤镜效果。",
+        "Define backdrop and content filters."
+      ],
+      "rule": [
+        "分别记录 backdrop-filter 和 filter；无效果可保留为正式选择。",
+        "Record backdrop-filter and filter separately; no effect is a valid choice."
+      ],
+      "fields": [
+        {
+          "id": "property",
+          "label": [
+            "作用属性",
+            "Property"
+          ],
+          "kind": "text",
+          "example": "backdrop-filter / filter"
+        },
+        {
+          "id": "value",
+          "label": [
+            "滤镜表达式",
+            "Filter expression"
+          ],
+          "kind": "css",
+          "example": "blur(12px)"
+        }
+      ],
+      "roles": [
+        {
+          "id": "none",
+          "name": "--filter-none",
+          "label": [
+            "无滤镜",
+            "No filter"
+          ],
+          "meaning": [
+            "保留清晰的原始表面。",
+            "Keep a clear original surface."
+          ],
+          "location": [
+            "无需滤镜的表面",
+            "Surfaces without filters"
+          ]
+        },
+        {
+          "id": "backdrop",
+          "name": "--blur-backdrop",
+          "label": [
+            "背景模糊",
+            "Backdrop blur"
+          ],
+          "meaning": [
+            "弱化表面后方的内容。",
+            "Soften content behind a surface."
+          ],
+          "location": [
+            "半透明浮层",
+            "Translucent overlays"
+          ]
+        },
+        {
+          "id": "content",
+          "name": "--blur-content",
+          "label": [
+            "内容模糊",
+            "Content blur"
+          ],
+          "meaning": [
+            "对内容自身应用模糊。",
+            "Blur the content itself."
+          ],
+          "location": [
+            "按产品需求启用的内容效果",
+            "Content effects when needed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layer",
+      "label": [
+        "层级",
+        "Layers"
+      ],
+      "description": [
+        "定义叠放顺序和层叠上下文。",
+        "Define stacking order and stacking contexts."
+      ],
+      "rule": [
+        "z-index 必须与所属上下文和 Portal 容器一起确认。",
+        "Confirm z-index together with its stacking context and portal owner."
+      ],
+      "fields": [
+        {
+          "id": "value",
+          "label": [
+            "层级值",
+            "Layer value"
+          ],
+          "kind": "integer",
+          "example": "100"
+        },
+        {
+          "id": "context",
+          "label": [
+            "层叠上下文 / 容器",
+            "Stacking context / container"
+          ],
+          "kind": "text",
+          "example": "page root / overlay portal"
+        }
+      ],
+      "roles": [
+        {
+          "id": "base",
+          "name": "--layer-base",
+          "label": [
+            "基础内容",
+            "Base content"
+          ],
+          "meaning": [
+            "普通内容的叠放层级。",
+            "Stacking level for ordinary content."
+          ],
+          "location": [
+            "页面内容",
+            "Page content"
+          ]
+        },
+        {
+          "id": "sticky",
+          "name": "--layer-sticky",
+          "label": [
+            "吸附内容",
+            "Sticky content"
+          ],
+          "meaning": [
+            "固定或吸附导航的层级。",
+            "Level for fixed or sticky navigation."
+          ],
+          "location": [
+            "页头与吸附栏",
+            "Headers and sticky bars"
+          ]
+        },
+        {
+          "id": "floating",
+          "name": "--layer-floating",
+          "label": [
+            "浮动内容",
+            "Floating content"
+          ],
+          "meaning": [
+            "非模态浮层的层级。",
+            "Level for non-modal overlays."
+          ],
+          "location": [
+            "菜单与提示",
+            "Menus and tooltips"
+          ]
+        },
+        {
+          "id": "modal",
+          "name": "--layer-modal",
+          "label": [
+            "模态内容",
+            "Modal content"
+          ],
+          "meaning": [
+            "模态表面与遮罩的层级关系。",
+            "Relationship of modal surfaces and backdrops."
+          ],
+          "location": [
+            "对话框与遮罩",
+            "Dialogs and backdrops"
+          ]
+        },
+        {
+          "id": "notification",
+          "name": "--layer-notification",
+          "label": [
+            "全局通知",
+            "Global notification"
+          ],
+          "meaning": [
+            "全局消息的叠放层级。",
+            "Stacking level for global messages."
+          ],
+          "location": [
+            "通知与轻提示",
+            "Notifications and toasts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "motion",
+      "label": [
+        "动效",
+        "Motion"
+      ],
+      "description": [
+        "定义交互节奏和减少动态效果的行为。",
+        "Define interaction timing and reduced-motion behavior."
+      ],
+      "rule": [
+        "时长、曲线与用途一起定义；必须给出减少动态效果时的处理。",
+        "Define duration, easing and purpose together; include reduced-motion behavior."
+      ],
+      "fields": [
+        {
+          "id": "duration",
+          "label": [
+            "时长",
+            "Duration"
+          ],
+          "kind": "duration",
+          "example": "160ms"
+        },
+        {
+          "id": "easing",
+          "label": [
+            "缓动曲线",
+            "Easing"
+          ],
+          "kind": "text",
+          "example": "ease-out"
+        },
+        {
+          "id": "property",
+          "label": [
+            "动画属性",
+            "Animated properties"
+          ],
+          "kind": "text",
+          "example": "opacity, transform"
+        },
+        {
+          "id": "reduced",
+          "label": [
+            "减少动态效果",
+            "Reduced motion"
+          ],
+          "kind": "text",
+          "example": "disable transform; instant opacity"
+        }
+      ],
+      "roles": [
+        {
+          "id": "feedback",
+          "name": "--motion-feedback",
+          "label": [
+            "交互反馈",
+            "Interaction feedback"
+          ],
+          "meaning": [
+            "即时响应状态变化。",
+            "Respond to state changes."
+          ],
+          "location": [
+            "悬停、按压与选中",
+            "Hover, press and selection"
+          ]
+        },
+        {
+          "id": "enter",
+          "name": "--motion-enter",
+          "label": [
+            "进入与退出",
+            "Entry and exit"
+          ],
+          "meaning": [
+            "帮助理解内容出现与消失。",
+            "Explain content appearing and leaving."
+          ],
+          "location": [
+            "面板和浮层",
+            "Panels and overlays"
+          ]
+        },
+        {
+          "id": "loading",
+          "name": "--motion-loading",
+          "label": [
+            "加载反馈",
+            "Loading feedback"
+          ],
+          "meaning": [
+            "表达等待过程。",
+            "Express waiting."
+          ],
+          "location": [
+            "进度和加载提示",
+            "Progress and loading indicators"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "label": [
+        "响应式布局",
+        "Responsive layout"
+      ],
+      "description": [
+        "定义断点、内容宽度与栅格规则。",
+        "Define breakpoints, content widths and grid rules."
+      ],
+      "rule": [
+        "按内容需要选择断点；区分固定最大宽度和可伸缩布局。",
+        "Choose breakpoints by content needs; distinguish maximum widths from fluid layout."
+      ],
+      "fields": [
+        {
+          "id": "breakpoint",
+          "label": [
+            "适用宽度条件",
+            "Viewport condition"
+          ],
+          "kind": "text",
+          "example": "all / min-width: 768px"
+        },
+        {
+          "id": "maxWidth",
+          "label": [
+            "内容最大宽度",
+            "Content maximum width"
+          ],
+          "kind": "length",
+          "example": "1200px"
+        },
+        {
+          "id": "gutter",
+          "label": [
+            "页面边距",
+            "Page gutter"
+          ],
+          "kind": "length",
+          "example": "24px"
+        },
+        {
+          "id": "columns",
+          "label": [
+            "栅格列规则",
+            "Grid columns"
+          ],
+          "kind": "text",
+          "example": "12 / auto-fit"
+        }
+      ],
+      "roles": [
+        {
+          "id": "compact",
+          "name": "--layout-compact",
+          "label": [
+            "紧凑布局",
+            "Compact layout"
+          ],
+          "meaning": [
+            "窄视口下的内容组织。",
+            "Organize content in narrow viewports."
+          ],
+          "location": [
+            "移动与紧凑窗口",
+            "Mobile and compact windows"
+          ]
+        },
+        {
+          "id": "wide",
+          "name": "--layout-wide",
+          "label": [
+            "宽屏布局",
+            "Wide layout"
+          ],
+          "meaning": [
+            "宽视口下的内容组织。",
+            "Organize content in wide viewports."
+          ],
+          "location": [
+            "桌面内容区域",
+            "Desktop content areas"
+          ]
+        }
+      ]
+    }
+  ]
+}
