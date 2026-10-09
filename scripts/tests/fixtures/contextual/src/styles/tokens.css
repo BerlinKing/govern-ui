@@ -1,0 +1,17 @@
+:root {
+  --primitive-neutral-0: #ffffff;
+  --page-background: var(--primitive-neutral-0);
+  --muted-background: var(--primitive-neutral-0);
+  --popover-surface: var(--primitive-neutral-0);
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --color-shadow-sm: rgba(0, 0, 0, 0.08);
+  --dialog-mask: rgba(0, 0, 0, 0.6);
+  --action-primary-bg: #176d5a;
+  --action-primary-content: var(--primitive-neutral-0);
+  --color-primary-light: #E8F4F1;
+}
+
+.dark {
+  --primitive-neutral-0: #1c1c1c;
+  --dialog-mask: rgba(0, 0, 0, 0.8);
+}

@@ -3,6 +3,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { auditRepository } from "./lib/audit.mjs";
+import { reconRepository, writeRecon } from "./lib/element-recon.mjs";
 import { compareBaseline, createBaseline } from "./lib/baseline.mjs";
 import { validateReviewBrief } from "./lib/brief.mjs";
 import { submitGovernance } from "./lib/delivery.mjs";
@@ -19,6 +20,7 @@ function usage() {
   return `Usage:
   govern.mjs library <repo> --out <directory>
   govern.mjs review <repo> --out <directory>
+  govern.mjs recon <repo> --scope <element-scope.json> --out <directory> [--typescript <typescript.js>]
   govern.mjs snapshot <repo> --out <snapshot.json>
   govern.mjs implement <repo> --decisions <decisions.json> --contract <token-contract.json> --out <directory> [--write] [--allow-runtime-delete] [--allow-cross-file-merge]
   govern.mjs regression --before <snapshot.json> --after <snapshot.json> --manifest <visual-manifest.json> --out <directory>
@@ -102,6 +104,15 @@ async function main() {
     const files = await writeReportArtifacts(report, output, { tokenContract, styleLibrary: library });
     process.stdout.write(`${terminalSummary(report)}\n`);
     printJson(files);
+    return;
+  }
+
+  if (command === "recon") {
+    const scope = option(args, "--scope");
+    const output = option(args, "--out");
+    if (!subcommand || !scope || !output) throw new Error("recon requires <repo> --scope <element-scope.json> --out <directory>");
+    const report = await reconRepository(path.resolve(subcommand), await readJson(scope), { typescript: option(args, "--typescript") });
+    printJson({ summary: report.summary, files: await writeRecon(report, output) });
     return;
   }
 

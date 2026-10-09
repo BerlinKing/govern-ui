@@ -1,8 +1,10 @@
 import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { auditRepository } from "./audit.mjs";
 import { generatedAt, sha } from "./utils.mjs";
 import { buildTokenUsage, inferProductLocation, usageForRawValue } from "./usage.mjs";
+import { inferDirectStyleSemantic, inferTokenSemanticFingerprint } from "./semantic-context.mjs";
 
 const CATEGORY_ORDER = [
   "color",
@@ -142,7 +144,9 @@ function makeDefinitionLookup(definitions) {
 
 function chooseDefinition(name, context, lookup) {
   const normalizedName = name.replace(/^--/, "").toLowerCase();
-  const candidates = (lookup.get(normalizedName) ?? []).filter((item) => item.id !== context.id);
+  const expectsCssVariable = name.startsWith("--");
+  const candidates = (lookup.get(normalizedName) ?? []).filter((item) => item.id !== context.id
+    && (expectsCssVariable ? item.name.startsWith("--") : !item.name.startsWith("--")));
   if (!candidates.length) return null;
   const sameFile = candidates.find((item) => item.file === context.file && item.selector === context.selector)
     ?? candidates.find((item) => item.file === context.file && item.selector === ":root")
@@ -178,6 +182,7 @@ function resolveDefinition(definition, lookup, stack = new Set()) {
 }
 
 function referenceProperty(reference) {
+  if (reference.property) return reference.property;
   const context = reference.context ?? "";
   const before = context.slice(0, Math.max(0, context.lastIndexOf("var(")));
   const property = before.match(/([a-z-]+)\s*:\s*[^:;{}]*$/i)?.[1]?.toLowerCase() ?? null;
@@ -213,20 +218,24 @@ function colorGroup(token) {
 }
 
 function tokenCategory(token) {
-  const haystack = `${token.normalizedName} ${token.resolvedValue}`.toLowerCase();
+  const properties = (token.properties ?? []).join(" ").toLowerCase();
+  const haystack = `${token.normalizedName} ${token.resolvedValue} ${properties}`.toLowerCase();
+  if (token.kind === "shadow" || /(?:^|-)(?:shadow|elevation)(?:-|$)/.test(token.normalizedName)) return "shadow";
   if (isColorToken(token)) return "color";
-  if (/(?:^|-)angle(?:-|$)/.test(token.normalizedName) && /(?:deg|grad|rad|turn)\b/.test(token.resolvedValue)) return "other";
-  if (token.kind === "typography") return "typography";
-  if (token.kind === "shadow" || /(?:^|-)(?:shadow|elevation)(?:-|$)/.test(haystack)) return "shadow";
-  if (token.kind === "radius") return "radius";
-  if (token.kind === "stroke") return "stroke";
-  if (token.kind === "spacing") return "spacing";
-  if (token.kind === "layer") return "layer";
-  if (token.kind === "motion") return "motion";
+  if (/url\([^)]*svg|(?:^|-)(?:icon|glyph|mask-image)(?:-|$)|-webkit-mask/.test(haystack)) return "icons";
+  if (token.kind === "typography" || /font|line-height|letter-spacing|tracking|leading|type-scale/.test(haystack)) return "typography";
+  if (/(?:^|-)(?:shadow|elevation)(?:-|$)/.test(haystack)) return "shadow";
+  if (token.kind === "radius" || /border-radius|rounded|corner-radius/.test(haystack)) return "radius";
+  if (token.kind === "stroke" || /border-width|border-style|outline-width|stroke-width|divider|separator|hairline/.test(haystack)) return "stroke";
+  if (token.kind === "layer" || /z-index|zindex|stack-order|overlay-layer/.test(haystack)) return "layer";
+  if (token.kind === "motion" || /(?:^|-)(?:duration|delay|easing|ease|motion|transition|animation|keyframe|enter|exit|fade|slide|sweep|breath|rotate|scale|lift|shift|transform|angle)(?:-|$)|\btransform\b|\b\d+(?:ms|s)\b|cubic-bezier\(/.test(haystack)) return "motion";
   if (token.kind === "depth") {
     if (/(?:blur|backdrop-filter|filter)/.test(haystack)) return "blur";
     return "opacity";
   }
+  if (/opacity|scrim|alpha/.test(haystack) && /^(?:\d*\.?\d+|\d+%)$/.test(String(token.resolvedValue).trim())) return "opacity";
+  if (token.kind === "spacing" || /\b(?:padding|margin|gap|inset|top|right|bottom|left|width|height|min-width|max-width|min-height|max-height)\b|(?:^|-)(?:space|spacing|gap|inset|offset|outset|safe|size|width|height|control)(?:-|$)/.test(haystack)) return "spacing";
+  if (/^-?(?:\d*\.)?\d+(?:px|rem|em|vw|vh|dvh|svh|lvh|%)$/.test(String(token.resolvedValue).trim())) return "spacing";
   return "other";
 }
 
@@ -311,7 +320,17 @@ function groupDirectStyles(rawValues) {
     const normalizedColor = category === "color" ? normalizeColorHex(raw.value) : null;
     const scene = category === "color" ? directColorScene(raw, property, usage) : "default";
     const valueKey = normalizedColor ?? normalizeValue(raw.value).toLowerCase();
-    const key = category === "color" ? `${category}:${scene}:${valueKey}` : `${category}:${property ?? ""}:${valueKey}`;
+    const semanticProbe = category === "color" ? inferDirectStyleSemantic({
+      ...raw,
+      category,
+      property,
+      normalizedColor,
+      examples: [{ file: raw.file, line: raw.line, selector: raw.selector ?? null, property, evidence: raw.evidence ?? null }],
+      usage,
+    }) : null;
+    const semanticCluster = semanticProbe?.targetName
+      ?? `${semanticProbe?.fingerprint?.family ?? scene}:${semanticProbe?.fingerprint?.role ?? "unresolved"}:${semanticProbe?.fingerprint?.state ?? "default"}:${usage.features[0] ?? usage.components[0] ?? "unknown"}`;
+    const key = category === "color" ? `${category}:${scene}:${semanticCluster}:${valueKey}` : `${category}:${property ?? ""}:${valueKey}`;
     if (!groups.has(key)) groups.set(key, {
       id: `direct-${sha(key)}`,
       category,
@@ -418,6 +437,7 @@ function buildTokens(report) {
     token.usage = usage.get(token.id);
     token.usageCount = token.usage.totalReferenceCount;
     token.usageFiles = unique(token.usage.examples.map((item) => item.file)).sort(naturalSort);
+    token.semantic = inferTokenSemanticFingerprint(token);
   }
   return tokens.sort((left, right) => CATEGORY_ORDER.indexOf(left.category) - CATEGORY_ORDER.indexOf(right.category)
     || (left.category === "color" ? COLOR_GROUP_ORDER.indexOf(left.group) - COLOR_GROUP_ORDER.indexOf(right.group) : 0)
@@ -576,6 +596,71 @@ async function svgPreview(repoRoot, asset) {
   }
 }
 
+function kebabIconName(value) {
+  return String(value ?? "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
+function lucideSvgData(content) {
+  const nodeBlock = content.match(/const __iconNode\s*=\s*(\[[\s\S]*?\]);\s*(?:const|export)/)?.[1];
+  if (!nodeBlock) return null;
+  const nodes = [];
+  const nodePattern = /\[\s*"([a-z][a-z0-9-]*)"\s*,\s*\{([\s\S]*?)\}\s*\]/gi;
+  let match;
+  while ((match = nodePattern.exec(nodeBlock))) {
+    const attributes = [];
+    const attributePattern = /([A-Za-z][\w]*)\s*:\s*(?:"([^"]*)"|'([^']*)'|(-?[\d.]+))/g;
+    let attribute;
+    while ((attribute = attributePattern.exec(match[2]))) {
+      if (attribute[1] === "key") continue;
+      const name = attribute[1].replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+      const value = attribute[2] ?? attribute[3] ?? attribute[4] ?? "";
+      attributes.push(`${name}="${String(value).replaceAll("&", "&amp;").replaceAll('"', "&quot;")}"`);
+    }
+    nodes.push(`<${match[1]} ${attributes.join(" ")}/>`);
+  }
+  if (!nodes.length) return null;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${nodes.join("")}</svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+async function packageIconPreview(repoRoot, asset, importedName) {
+  if (asset.source !== "lucide-react" || !importedName) return null;
+  try {
+    const resolver = createRequire(path.resolve(repoRoot, asset.file));
+    const entry = resolver.resolve(asset.source);
+    const packageRoot = entry.includes(`${path.sep}dist${path.sep}`)
+      ? entry.slice(0, entry.indexOf(`${path.sep}dist${path.sep}`))
+      : path.dirname(entry);
+    const exportsFile = path.join(packageRoot, "dist", "esm", "lucide-react.js");
+    let moduleName = kebabIconName(importedName);
+    try {
+      const exportsSource = await readFile(exportsFile, "utf8");
+      const escaped = String(importedName).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      moduleName = exportsSource.match(new RegExp(`default as ${escaped}[^\\n]*?from ['\"]\\./icons/([^'\"]+)\\.js`))?.[1] ?? moduleName;
+    } catch {
+      // The direct kebab-case module name is the normal Lucide layout.
+    }
+    const iconRoot = path.join(packageRoot, "dist", "esm", "icons");
+    let content = await readFile(path.join(iconRoot, `${moduleName}.js`), "utf8");
+    let preview = lucideSvgData(content);
+    if (!preview) {
+      const forwarded = content.match(/export\s*\{\s*default\s*\}\s*from\s*['"]\.\/([^'"]+)\.js['"]/i)?.[1];
+      if (forwarded) {
+        content = await readFile(path.join(iconRoot, `${forwarded}.js`), "utf8");
+        preview = lucideSvgData(content);
+      }
+    }
+    return preview;
+  } catch {
+    return null;
+  }
+}
+
 async function buildIcons(report, repoRoot) {
   const items = [];
   const internalPackages = await internalIconPackages(report, repoRoot);
@@ -583,16 +668,19 @@ async function buildIcons(report, repoRoot) {
   for (const asset of report.iconAssets ?? []) {
     if (asset.type === "icon-library") {
       if (internalPackageNames.has(asset.source)) continue;
-      const names = asset.names?.length ? asset.names : [asset.source];
-      for (const name of names) items.push({
-        id: `icon-${sha(`${asset.source}:${name}`)}`,
-        name,
+      const symbols = asset.symbols?.length ? asset.symbols : (asset.names?.length ? asset.names.map((name) => ({ imported: name, local: name })) : [{ imported: asset.source, local: asset.source }]);
+      for (const symbol of symbols) items.push({
+        id: `icon-${sha(`${asset.source}:${symbol.imported}`)}`,
+        name: symbol.imported,
+        importedName: symbol.imported,
+        localName: symbol.local,
         source: asset.source,
         collection: asset.source,
         type: asset.type,
         file: asset.file,
         line: asset.line,
-        preview: null,
+        preview: await packageIconPreview(repoRoot, asset, symbol.imported),
+        previewStatus: "resolved",
         viewBox: null,
         width: null,
         height: null,
@@ -651,7 +739,7 @@ async function buildIcons(report, repoRoot) {
 
   const merged = new Map();
   for (const item of items) {
-    const key = `${item.type}:${item.source}:${item.name}`;
+    const key = `${item.type}:${item.source}:${item.importedName ?? item.name}`;
     if (!merged.has(key)) merged.set(key, { ...item, occurrences: 0, files: new Set() });
     const target = merged.get(key);
     target.occurrences += 1;
@@ -673,6 +761,7 @@ async function buildIcons(report, repoRoot) {
       const dynamicReferences = dynamicReferencesFor(item, report.dynamicAssetReferences ?? []);
       return {
         ...item,
+        previewStatus: item.preview ? "resolved" : "unresolved",
         files: [...item.files].sort(naturalSort),
         kind,
         sourceStatus,
@@ -810,6 +899,7 @@ export async function styleLibraryFromReport(report, repoRoot) {
   const groupedDirectStyles = groupDirectStyles(report.rawValues ?? []);
   const assetInternalColors = groupedDirectStyles.filter((item) => item.category === "color" && item.scene === "asset-color");
   const directStyles = groupedDirectStyles.filter((item) => !(item.category === "color" && item.scene === "asset-color"));
+  for (const item of directStyles) if (item.category === "color") item.semantic = inferDirectStyleSemantic(item);
   const icons = await buildIcons(report, repoRoot);
   const graphicAssetKinds = Object.fromEntries(["ui-icon", "brand-mark", "illustration", "placeholder", "cursor", "graphic-asset"].map((kind) => [kind, icons.filter((item) => item.kind === kind).length]));
   const graphicAssetUsage = Object.fromEntries(["source-used", "test-or-build-only", "repository-only"].map((status) => [status, icons.filter((item) => item.sourceStatus === status).length]));
@@ -818,7 +908,7 @@ export async function styleLibraryFromReport(report, repoRoot) {
   const cssVariables = tokens.filter((item) => item.name.startsWith("--"));
   return {
     schemaVersion: 1,
-    libraryVersion: "2.2",
+    libraryVersion: "2.3",
     generatedAt: generatedAt(),
     project: {
       name: report.repoProfile.rootName,

@@ -1,0 +1,35 @@
+html,
+body {
+  background: var(--page-background);
+}
+
+.settings-card {
+  background: var(--muted-background);
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--dialog-mask);
+}
+
+.popover-content {
+  background: var(--popover-surface);
+}
+
+.primary-button {
+  background: var(--action-primary-bg);
+  color: var(--action-primary-content);
+}
+
+.legacy-page {
+  background: #ffffff;
+}
+
+.legacy-card {
+  background: #ffffff;
+}
+
+.promo-card {
+  background: var(--color-primary-light);
+}

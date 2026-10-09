@@ -2,13 +2,38 @@
 
 > **See the real design library. Review what it should become.**
 
-GovernUI is an open-source Codex Skill with three deliberately separate surfaces:
+GovernUI is an open-source Codex Skill with four distinct artifact responsibilities:
 
-- `style-library.html` redraws the repository's real atomic styles and CSS Token mappings.
-- `design-review.html` compares that evidence with a standard static and dynamic design-system structure, then shows current state, target contract, explicit keep/migrate/merge/delete asset batches, deletion gates, and the small grouped set blocked by external evidence.
-- `visual-regression.html` compares real pages and states before and after approved cleanup, including a difference view and coverage ledger.
+- **A · Scan report:** real atomic styles, module/subfunction/UI-element locations and factual problem clues. `library` emits `style-library.html`; `recon` supplies element-level detail.
+- **B · Atomic Token specification:** editable roles, typed underlying style bindings, themes/states and confirmed framework versions. The standalone editor currently emits `framework.html`; `token-spec.html` is the proposed presentation entry.
+- **C · Governance audit:** module-grouped decisions, collapsed equivalent occurrences, separately authorized batches and execution/verification history. `governance-audit.html` is the proposed entry, not a shipped command.
+- **D · Governance report:** final agreed-scope improvements, actual code changes, residuals and delivery index. `governance-report.html` is the proposed entry; existing `visual-regression.html` is supporting before/after/difference evidence, not the entire report.
+
+The four-artifact contract is defined in [artifact-workflow.md](references/artifact-workflow.md). The legacy `review` generator still emits the combined `design-review.html`; its interface is not yet split into B/C. Fixed offline HTML handles inspection, editing and export/import. Codex performs scanning, diagnosis, authorized code changes and verification; HTML does not launch Codex or create PRs. The newer local legacy-review layout is deliberately not included in this release.
 
 `library` and `review` are read-only. Source changes require the separate `implement --write` authority, and GitHub delivery requires the separate `submit --create` authority. Recommendations never appear inside the atomic library.
+
+## Element-level reconnaissance
+
+Before framework design, map **module → functional area → subfunction → UI element**. The read-only `recon` command produces `module-recon.html` and `element-recon.json`: detail supporting Product A, not another top-level product. It separates all elements from concrete issues and preserves source-backed opening steps, caller-dependent branches, shared-root deduplication and unverified runtime checks.
+
+```bash
+node scripts/govern.mjs recon /path/to/frontend --scope /path/to/element-scope.json --out /tmp/govern-ui-pilot
+```
+
+The scope is authored by Codex from inspected code, not automatically discovered. An existing TypeScript parser is required (optionally `--typescript /path/to/typescript.js`); the command does not install dependencies or execute project code. See [the contract and limitations](references/element-reconnaissance.md). Pilot one functional chain before scaling.
+
+The complete workflow is module discovery → global reconnaissance → confirmed framework/source bindings → authorized small batches → visual verification → durable delivery. The existing `review` contract schema 2 and `implement` schema 1 remain incompatible; do not pass an unconverted review export straight to implementation or change only its schema number.
+
+## Complete atomic framework
+
+The definition step always includes Color, Typography, Icons, Shadow, Stroke, Radius, Spacing/sizing, Opacity, Blur/filter, Layers, Motion and Responsive layout. Each category has editable role definitions and typed binding fields even when a scan reports no usage. Users delete unwanted proposed Tokens directly, with undo; category entries and the remaining definitions stay in the editor, exports and manual. There is no per-role adoption checkbox.
+
+```bash
+node scripts/framework.mjs --input /path/to/framework-input.json --out /path/to/framework
+```
+
+This produces a standalone `framework.html` with per-category decisions, immutable confirmed versions, full-framework JSON and design-manual exports. It also preserves earlier color-only browser drafts when a legacy storage key is supplied. See [the input and adoption contract](references/atomic-framework.md). The existing `review` output and implementation executor remain separate; framework confirmation does not change application source.
 
 ## Atomic library
 
@@ -25,13 +50,15 @@ GovernUI is an open-source Codex Skill with three deliberately separate surfaces
 - Direct CSS values shown as neutral inventory—not as errors.
 - Token and hardcoded-value attribution to product functions, components, pages, and states, with honest evidence labels.
 
-## Design review
+## Legacy review generator and diagnostic data
 
 - A separate bilingual, offline `design-review.html`, including a complete UI Icon and graphic-asset catalog with app-source, dynamic-loading, public-contract, deletion-qualification, and runtime-verification status.
-- A target-UIKit-first skeleton covering foundations, atoms, molecules, components, and product patterns.
-- Standard nodes remain visible even when the current repository has not implemented them.
-- Target visual specimens and component contracts appear before current-source mappings.
-- Component anatomy, variants, sizes, states, behavior, and responsive/accessibility contracts.
+- The committed legacy page remains available for compatibility; it does not implement the new separate B/C interaction contract. Use versioned framework and audit records rather than treating that page as execution authority.
+- Consumer-context diagnosis follows definitions through aliases and adapters into real properties, selectors, JSX elements, components, pages, states, modes, and product scopes.
+- Local consumer evidence outranks Token names and equal color values; same-value page, surface, action, and scrim roles remain separate.
+- Tailwind namespace collisions are kept separate, adapters never become target owners, and a shared primitive with incompatible consumers stays unresolved.
+- Background diagnosis distinguishes page, surface, elevated content, translucent scrim, interactive states, and scoped rendering effects.
+- Each target row exposes its source evidence and uses `source-confirmed`, `source-suggested`, or `manual-review` rather than presenting heuristic guesses as ready.
 - A machine-readable `primitive -> semantic -> component` target contract with light/dark mode mappings.
 - Old-Token lifecycle decisions limited to migrate, merge, or delete; aliases are treated only as rollout mechanisms.
 - Routine migration, merge, and deletion work stays in an execution ledger; only genuine ambiguity enters the designer decision center.

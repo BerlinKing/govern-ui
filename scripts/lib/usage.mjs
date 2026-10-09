@@ -75,6 +75,8 @@ function usageExample(item, evidence = "source-confirmed") {
     line: item.line,
     selector: item.selector ?? null,
     property: item.property ?? null,
+    referenceKind: item.kind ?? null,
+    context: item.context ?? item.evidence ?? null,
     feature: location.feature,
     component: location.component,
     page: location.page,
@@ -85,17 +87,55 @@ function usageExample(item, evidence = "source-confirmed") {
   };
 }
 
+function ownerScope(file) {
+  const normalized = String(file ?? "").replaceAll("\\", "/");
+  return normalized.match(/^(apps\/[^/]+|packages\/[^/]+|services\/[^/]+)/)?.[1]
+    ?? (normalized.startsWith("src/") ? "application" : normalized.split("/")[0] || "repository");
+}
+
+function consumerReference(reference) {
+  return !["alias-definition", "adapter-definition"].includes(reference.kind);
+}
+
+function compatibleReference(token, reference) {
+  const property = String(reference.property ?? "").toLowerCase();
+  if (!property) return true;
+  if (token.category === "color") return /^(?:background|color|caret-color|text-decoration-color|border-color|outline-color|fill|stroke)$/.test(property);
+  if (token.category === "shadow") return /^(?:box-shadow|text-shadow)$/.test(property);
+  if (token.category === "typography") return /^(?:font|font-family|font-size|font-weight|font-style|line-height|letter-spacing)$/.test(property);
+  if (token.category === "stroke") return /^(?:border-width|border-style|outline-width|outline-style|stroke-width)$/.test(property);
+  return true;
+}
+
 export function buildTokenUsage(tokens, references) {
   const refsByName = new Map();
   for (const reference of references ?? []) {
     if (!refsByName.has(reference.normalizedName)) refsByName.set(reference.normalizedName, []);
     refsByName.get(reference.normalizedName).push(reference);
   }
-  const tokenByName = new Map(tokens.map((token) => [token.normalizedName, token]));
+  const tokensByName = new Map();
+  for (const token of tokens) {
+    if (!tokensByName.has(token.normalizedName)) tokensByName.set(token.normalizedName, []);
+    tokensByName.get(token.normalizedName).push(token);
+  }
   return new Map(tokens.map((token) => {
-    const direct = refsByName.get(token.normalizedName) ?? [];
-    const downstreamTokens = tokens.filter((candidate) => candidate.id !== token.id && candidate.aliasChain.some((name) => name.replace(/^--/, "").toLowerCase() === token.normalizedName));
-    const downstream = downstreamTokens.flatMap((candidate) => refsByName.get(candidate.normalizedName) ?? []);
+    const tokenScope = ownerScope(token.file);
+    const sameNameDefinitions = tokensByName.get(token.normalizedName) ?? [];
+    const scopedReferences = (refsByName.get(token.normalizedName) ?? []).filter(consumerReference).filter((reference) => compatibleReference(token, reference));
+    const direct = sameNameDefinitions.length > 1
+      ? scopedReferences.filter((reference) => reference.file === token.file || ownerScope(reference.file) === tokenScope)
+      : scopedReferences;
+    const downstreamTokens = tokens.filter((candidate) => candidate.id !== token.id
+      && ownerScope(candidate.file) === tokenScope
+      && candidate.category === token.category
+      && candidate.aliasChain.some((name) => name.replace(/^--/, "").toLowerCase() === token.normalizedName));
+    const downstream = downstreamTokens.flatMap((candidate) => {
+      const candidateDefinitions = tokensByName.get(candidate.normalizedName) ?? [];
+      const candidateRefs = (refsByName.get(candidate.normalizedName) ?? []).filter(consumerReference).filter((reference) => compatibleReference(candidate, reference));
+      return candidateDefinitions.length > 1
+        ? candidateRefs.filter((reference) => reference.file === candidate.file || ownerScope(reference.file) === tokenScope)
+        : candidateRefs;
+    });
     const examples = [...direct.map((item) => usageExample(item)), ...downstream.map((item) => usageExample(item, "source-confirmed-via-alias"))];
     const definitionLocation = inferProductLocation(token.file, token.selector);
     const consumerFeatures = unique(examples.map((item) => item.feature));
@@ -120,7 +160,7 @@ export function buildTokenUsage(tokens, references) {
       summary: consumerFeatures.length
         ? consumerFeatures.slice(0, 3).join(", ")
         : `Defined in ${definitionLocation.feature || token.file}`,
-      externallyUnverified: !direct.length && !downstream.length && tokenByName.has(token.normalizedName),
+      externallyUnverified: !direct.length && !downstream.length,
     }];
   }));
 }

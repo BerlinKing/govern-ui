@@ -37,6 +37,14 @@ Use `duplicate` for repeated same-name/same-value canonical definitions across o
 
 Use `value-collision` when different canonical names share one rendered value. It is a non-blocking observation and never becomes a decision group by itself; equal values do not prove equal semantics.
 
+Never merge or target-map a value collision until consumer fingerprints agree on family, property, role, state, mode, scope, and owner. The same primitive may legitimately feed page, surface, action-content, and other semantic Tokens.
+
+### Consumer-context mapping
+
+Prefer the smallest local consumer context that explains the property: selector or JSX element, utility and pseudo-state, component/page, then owner scope. Do not classify every background used in a `Dialog` or `Dropdown` file as an elevated surface; interactive descendants remain Action and the content shell alone is Elevated. Do not classify a shadow or spacing Token as Color because another Tailwind namespace reuses the same key.
+
+Background layers are distinct: page body, content surface, elevated content, scrim, interaction state, and scoped rendering effect. Scrim targets require both layer evidence and a translucent candidate. Opaque colors are rejected as scrim mode values.
+
 ### Semantic conflict
 
 Use `semantic-conflict` for the same normalized name with different literal values outside an evidenced scope. Do not automatically choose a winner.

@@ -5,9 +5,10 @@
 1. Audit report
 2. Finding
 3. Token definition and relationship
-4. Baseline
-5. Visual review brief
-6. Decision export
+4. Consumer-context semantic diagnosis
+5. Baseline
+6. Visual review brief
+7. Decision export
 
 ## Audit report
 
@@ -50,7 +51,7 @@
 
 The report may contain `generatedAt`, but stable identifiers must not depend on time or absolute repository paths.
 
-`systemReview` is the primary user-facing information model. It always contains five static layers—Foundation, Atoms, Molecules, Components, and Patterns—and four dynamic layers—Interaction foundation, Component behavior, Cross-component orchestration, and Flow/lifecycle. Every category carries a status and metrics. `detected` means source evidence exists; it is not a health claim. Dynamic categories remain `unverified` until runtime behavior is actually inspected.
+`systemReview` is a broad internal audit model retained for compatibility. It contains five static layers—Foundation, Atoms, Molecules, Components, and Patterns—and four dynamic layers—Interaction foundation, Component behavior, Cross-component orchestration, and Flow/lifecycle. Default Product B presents only the atomic categories and their target-first gates; the other layers do not become page modules unless a later component/behavior review is explicitly requested. Every category carries a status and metrics. `detected` means source evidence exists; it is not a health claim. Dynamic categories remain `unverified` until runtime behavior is actually inspected.
 
 The Foundation/Color category also carries `colorWorkbench`. It groups canonical definitions into independent color sources, separates adapters from competing systems, classifies palette/semantic/component layers, compares standard semantic roles, groups hardcoded values, proposes keep/merge/scope actions, and renders a source-derived target. This structure is deterministic source evidence; candidate ownership and visual hierarchy still require product or runtime confirmation.
 
@@ -82,6 +83,33 @@ The fingerprint uses rule ID, normalized path, normalized evidence, and occurren
 Token definitions include `name`, `normalizedName`, `value`, `kind`, `sourceType`, `role`, `file`, `line`, `selector`, and `ownerId`. `role` separates canonical definitions from adapters and framework-local values.
 
 Relationships include `type`, `id`, `definitionIds`, `ownerIds`, `reason`, `confidence`, and `reviewRequired`.
+
+## Consumer-context semantic diagnosis
+
+Diagnostic Token and direct-style records supporting Product C may carry a `semantic` object:
+
+```json
+{
+  "targetName": "--bg-scrim",
+  "proposedTarget": "--bg-scrim",
+  "fingerprint": {
+    "family": "background",
+    "property": "background",
+    "role": "scrim",
+    "state": "default",
+    "scope": "global"
+  },
+  "confidenceLevel": "source-confirmed | source-suggested | manual-review",
+  "consumerEvidenceCount": 2,
+  "evidence": [],
+  "alternatives": [],
+  "conflicts": []
+}
+```
+
+The diagnosis follows `definition -> alias -> adapter -> consumer -> product location -> property -> layer -> state -> mode -> scope`. CSS properties, local selectors or JSX elements, and product consumers outrank Token names and equal rendered values. Definitions from separate Tailwind namespaces must not resolve across namespace or atomic category. A primitive that feeds incompatible consumer fingerprints remains unresolved. Scrims require translucent mode values and backdrop, mask, overlay, or equivalent layer evidence.
+
+Target contracts use schema version 2. Every target keeps ranked mode candidates and source evidence. Lifecycle rows may use `semantic-review-required`; this means a consumer exists but no safe target was synthesized.
 
 ## Baseline
 

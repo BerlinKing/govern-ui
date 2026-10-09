@@ -1,4 +1,4 @@
 interface:
   display_name: "GovernUI"
-  short_description: "Review, implement, verify, and submit UIKit governance"
-  default_prompt: "Use $govern-ui to extract the atomic library, build and approve the target UIKit, implement safe migrate/merge/delete batches, visually verify the result, and prepare a repository-scoped Draft PR."
+  short_description: "Map UI elements, define Tokens, and govern approved batches"
+  default_prompt: "Use $govern-ui to map modules, subfunctions and UI elements; inventory atomic styles and concrete issues with product locations and opening steps; confirm a shared semantic framework and source bindings; then govern only explicitly approved small batches and verify real page states. Do not modify application code or create a PR without separate authorization."
