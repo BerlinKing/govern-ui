@@ -281,7 +281,8 @@ export async function writeRecon(report, output) {
   if (resolved === report.root || resolved.startsWith(report.root + path.sep)) throw new Error('Recon output must be outside the scanned repository');
   const template = await readFile(new URL('../../assets/element-recon-template.html', import.meta.url), 'utf8');
   const data = JSON.stringify({ ...report, categoryLabels: CATEGORIES }).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
-  const html = template.replace('__RECON_DATA__', () => data);
+  const { applyArtifactTheme, ensureArtifactEntries } = await import('./artifact-theme.mjs');
+  const html = await applyArtifactTheme(template.replace('__RECON_DATA__', () => data), 'A');
   const files = { html: path.join(resolved, 'module-recon.html'), json: path.join(resolved, 'element-recon.json') };
   for (const target of Object.values(files)) {
     try { if (!(await lstat(target)).isFile()) throw new Error('Refusing non-regular report output: ' + target); }
@@ -289,5 +290,6 @@ export async function writeRecon(report, output) {
   }
   await writeFile(files.html, html);
   await writeFile(files.json, JSON.stringify(report, null, 2) + '\n');
+  await ensureArtifactEntries(resolved);
   return files;
 }

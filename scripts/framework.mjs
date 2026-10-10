@@ -2,6 +2,7 @@
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { applyArtifactTheme, ensureArtifactEntries } from './lib/artifact-theme.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const safeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
@@ -70,10 +71,12 @@ export async function generateFramework(input, out) {
   css.push('}', ...dark, '}');
   input = {...input, generatedStyles:generated};
   const template = await readFile(path.join(root, 'assets/framework-template.html'), 'utf8');
-  const html = template.replace('__FRAMEWORK_CATALOG__', () => safeJSON(catalog)).replace('__FRAMEWORK_INPUT__', () => safeJSON(input));
+  const html = await applyArtifactTheme(template.replace('__FRAMEWORK_CATALOG__', () => safeJSON(catalog)).replace('__FRAMEWORK_INPUT__', () => safeJSON(input)), 'B');
   await mkdir(out, { recursive: true });
   const output = path.join(out, 'framework.html');
   await writeFile(output, html);
+  await writeFile(path.join(out,'token-spec.html'), html);
+  await ensureArtifactEntries(out);
   await writeFile(path.join(out,'framework-styles.css'), css.join('\n')+'\n');
   await writeFile(path.join(out,'framework-styles.json'), JSON.stringify({schema:'governui.generated-styles/1',styles:generated},null,2)+'\n');
   await writeFile(path.join(out,'generated-icons.svg'), `<svg xmlns="http://www.w3.org/2000/svg">${Object.entries(paths).map(([id,d])=>`<symbol id="${id}" viewBox="0 0 24 24"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>`).join('')}</svg>`);
