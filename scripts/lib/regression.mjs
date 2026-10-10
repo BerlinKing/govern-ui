@@ -70,6 +70,7 @@ export async function createVisualRegression(before, after, manifest, manifestDi
 }
 
 export async function writeVisualRegression(regression, outputDirectory) {
+  const {applyArtifactTheme, ensureArtifactEntries} = await import('./artifact-theme.mjs');
   const output = path.resolve(outputDirectory);
   await mkdir(output, { recursive: true });
   const templatePath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../assets/visual-regression-template.html");
@@ -83,8 +84,9 @@ export async function writeVisualRegression(regression, outputDirectory) {
     json: path.join(output, "governance-diff.json"),
   };
   await Promise.all([
-    writeFile(files.html, html, "utf8"),
+    writeFile(files.html, await applyArtifactTheme(html, 'D'), "utf8"),
     writeFile(files.json, `${JSON.stringify(regression.sourceDiff, null, 2)}\n`, "utf8"),
   ]);
+  await ensureArtifactEntries(output);
   return files;
 }

@@ -1,0 +1,26 @@
+/* Shared layout bridge; all generated artifacts use the approved preview palette and rhythm. */
+.artifact-header{max-width:none;height:auto;min-height:76px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+.artifact-header nav{flex-wrap:wrap}.artifact-header a{white-space:nowrap}
+body[data-compat]>header:not(.artifact-header){background:var(--surface);padding:12px 28px;border:0;justify-content:flex-end}
+body[data-compat]>header:not(.artifact-header)>.brand,body[data-compat]>header:not(.artifact-header)>nav{display:none}
+body[data-compat] .shell{max-width:1280px;margin:28px auto;gap:24px;padding:0 28px;grid-template-columns:200px minmax(0,1fr);min-height:0}
+body[data-compat] .shell>aside{background:transparent;padding:8px 0}
+body[data-compat] .shell>aside button{border-radius:8px;min-height:44px;margin:3px 0}
+body[data-compat] .shell>aside button.active{background:var(--blue-soft);color:var(--blue)}
+body[data-compat] main{padding:24px;background:var(--surface);border-radius:14px;min-width:0}
+body[data-compat] .primary{background:var(--blue);border-color:var(--blue);color:white}
+body[data-compat] .primary:hover{background:#184BC1}
+body[data-compat] .notice,body[data-compat] .decision,body[data-compat] .source-picker{background:#F6F7F9;border-radius:12px}
+body[data-compat] .section{margin:28px 0}
+body[data-compat] th{background:#F6F7F9;color:var(--muted)}
+body[data-compat] td{border-color:var(--line);padding:20px 16px}
+body[data-compat] .light{background:#F5F5F5}body[data-compat] .dark{background:#252525;color:#fff}
+body[data-compat] .tablewrap{border-top:0}body[data-compat] .style-preview{background:#F6F7F9;border:0;border-radius:10px}
+body[data-compat] .dark-preview{background:#252525}
+.sample-info{min-width:0}.sample-info details p,.sample-info code{overflow-wrap:anywhere}
+.sample-visual img{max-width:85%;max-height:88px;object-fit:contain}.sample-visual{overflow:hidden}
+.sample-card .sample-visual code{padding:12px;max-width:100%}
+.artifact-foot{margin-top:32px;color:var(--muted);font-size:12px}
+.artifact-empty{padding:40px;background:white;border-radius:14px;margin-top:24px}
+.module-card.active{border-color:var(--blue);background:var(--blue-soft)}
+@media(max-width:680px){.artifact-header nav a{font-size:12px;padding:8px 5px}.artifact-header{padding:14px 16px}.artifact-header nav{gap:2px}body[data-compat] .shell{display:block;padding:0 16px;margin:16px auto}body[data-compat] .shell>aside{display:flex;overflow:auto}body[data-compat] .shell>aside button{width:auto;flex:none}body[data-compat] main{padding:18px}.sample-grid{grid-template-columns:1fr}.artifact-header .letter{display:none}}

@@ -87,6 +87,12 @@ async function main() {
     const output = option(args, "--out");
     if (!output) throw new Error(`${command} requires --out <directory>`);
     const library = await extractStyleLibrary(subcommand);
+    const moduleMapFile = option(args, '--module-map');
+    if (moduleMapFile) {
+      const map = await readJson(path.resolve(moduleMapFile));
+      if (map.schema !== 'governui.module-map/1' || map.project !== library.project.name || !Array.isArray(map.modules) || map.modules.some(m => typeof m.name !== 'string' || !Array.isArray(m.sourceBoundaries) || m.sourceBoundaries.some(p => typeof p !== 'string' || !p))) throw new Error('Invalid module map or project mismatch');
+      library.moduleMap = map;
+    }
     const files = await writeStyleLibrary(library, output);
     process.stdout.write(`${librarySummary(library)}\n`);
     printJson(files);

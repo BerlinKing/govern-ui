@@ -330,7 +330,10 @@ try {
 
   const libraryDir = path.join(temp, "library");
   const libraryFiles = await writeStyleLibrary(styleLibrary, libraryDir);
-  const libraryHtml = await readFile(libraryFiles.html, "utf8");
+  const scanHtml = await readFile(libraryFiles.html, "utf8");
+  assert.ok(scanHtml.includes('governui.artifacts/1.0.0'));
+  assert.ok(scanHtml.includes('artifact-data'));
+  const libraryHtml = await readFile(libraryFiles.detail, "utf8");
   assert.ok(libraryHtml.includes("原子样式库"));
   assert.ok(libraryHtml.includes("Atomic style library"));
   assert.ok(libraryHtml.includes("背景色"));

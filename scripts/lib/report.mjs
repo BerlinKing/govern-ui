@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizeReviewBrief } from "./brief.mjs";
 import { buildUIKitBlueprint } from "./uikit-blueprint.mjs";
+import { applyArtifactTheme, ensureArtifactEntries } from './artifact-theme.mjs';
 
 function countBy(items, selector) {
   const counts = {};
@@ -172,8 +173,9 @@ export async function writeReportArtifacts(report, outputDirectory, options = {}
   await Promise.all([
     writeFile(files.json, `${JSON.stringify(report, null, 2)}\n`, "utf8"),
     writeFile(files.markdown, markdownReport(report), "utf8"),
-    writeFile(files.html, html, "utf8"),
+    writeFile(files.html, await applyArtifactTheme(html, 'C'), "utf8"),
     ...(options.tokenContract ? [writeFile(files.tokenContract, `${JSON.stringify(options.tokenContract, null, 2)}\n`, "utf8")] : []),
   ]);
+  await ensureArtifactEntries(output);
   return files;
 }

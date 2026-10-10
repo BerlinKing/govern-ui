@@ -23,6 +23,8 @@ Update C after every round, keeping decision, authorization, source application 
 
 ## Fixed templates and handoff
 
+Implementation and renderer contracts: [fixed-html.md](fixed-html.md). The primary entrypoints are now shipped; legacy diagnostics remain supporting evidence and must not be presented as completed B/C/D.
+
 Reuse maintained offline HTML templates; populate versioned data rather than redesigning each run. Four navigation entries identify artifacts, not app administration or execution buttons. Show only real local operations: edit, confirm, filter, inspect, export/import. An absent PR may offer a copyable request for Codex, not a fake create-PR action. Link a real PR only after verified creation.
 
 Exports identify project, scan/source baseline, schema, framework and binding revisions, stable IDs and decisions. Validate import compatibility; source facts remain immutable. Browser autosave is a draft cache, not the durable record. Explicit chat confirmation/export handoff is required; no automatic browser-to-agent bridge is assumed. Keep demo data separate and non-executable.
