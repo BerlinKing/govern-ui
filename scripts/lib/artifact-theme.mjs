@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const assets = new URL('../../assets/artifacts/', import.meta.url);
-export const ARTIFACT_VERSION = 'governui.artifacts/1.1.0';
+export const ARTIFACT_VERSION = 'governui.artifacts/1.1.1';
 export const ARTIFACTS = [
   ['A', 'scan.html', '扫描报告'], ['B', 'token-spec.html', '设计 Token 规范'],
   ['C', 'governance-audit.html', '治理审计'], ['D', 'governance-report.html', '治理报告'],
