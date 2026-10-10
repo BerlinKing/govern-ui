@@ -241,6 +241,8 @@ After verification, run `submit` without `--create` to prepare a repository-scop
 
 ## Extraction and evidence rules
 
+For real icon extraction, read [icon-resolution.md](references/icon-resolution.md). Resolve actual package geometry and consumer sizes before calling the directory complete; import-name detection alone is insufficient. Validate on a real scanned repository, including browser image decoding, not only pre-seeded fixtures.
+
 - Preserve source values exactly as written in evidence. Proposed target Token names must be justified by consumer semantics and confirmed in the framework; never fabricate a source value or an unevidenced light/dark appearance.
 - Show every definition independently when the same Token changes by file, selector, theme, brand, or local scope.
 - Resolve CSS `var()` aliases recursively while preserving the written value and alias chain.

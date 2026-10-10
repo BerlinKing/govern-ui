@@ -19,10 +19,23 @@ try{
  const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  for(const file of ['scan.html','token-spec.html','governance-audit.html','governance-report.html']){
   await page.goto(`http://127.0.0.1:${server.address().port}/${file}`);
-  assert.equal(await page.locator('.artifact-header nav a').count(),4);
+  assert.equal(await page.locator('.artifact-header nav a').count(),0);
+  assert.equal(await page.locator('.artifact-steps a').count(),4);
   assert.equal(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor),'rgb(246, 247, 249)');
   for(const width of [1440,1024,768,390]){await page.setViewportSize({width,height:1000});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${file}: ${width}`);if(width===1440||width===390)await page.screenshot({path:path.join(out,file.replace('.html',`-${width}.png`)),fullPage:false})}
  }
+ await page.goto(`http://127.0.0.1:${server.address().port}/scan.html`);
+ assert.equal(await page.locator('details').filter({hasText:'展开全部归属'}).count(),0);
+ assert.ok(await page.locator('.module-card').count()>6);
+ await page.goto(`http://127.0.0.1:${server.address().port}/token-spec.html`);await page.locator('[data-atom="icons"]').click();
+ const inventory=JSON.parse(await readFile(path.join(reportDir,'scan-data.json'),'utf8'));
+ const expected=inventory.icons.filter(i=>!['brand-mark','illustration','logo'].includes(i.kind)&&i.preview).length;
+ assert.equal(await page.locator('tbody img').count(),expected);
+ assert.equal(await page.locator('tbody img').evaluateAll(images=>images.filter(i=>!i.complete||i.naturalWidth===0).length),0);
+ assert.ok((await page.locator('tbody').innerText()).includes('0.875rem'));
+ await page.evaluate(()=>{const key=JSON.parse(document.querySelector('#framework-input').textContent).storageKey||'governui-framework-shadcn-admin-v2';const saved=JSON.parse(localStorage.getItem(key));const row=saved.categories.find(c=>c.id==='icons').rows[0];row.name='User renamed arrow';row.asset.preview=null;row.binding.values.size='';localStorage.setItem(key,JSON.stringify(saved))});
+ await page.reload();await page.locator('[data-atom="icons"]').click();assert.ok((await page.locator('tbody').innerText()).includes('User renamed arrow'));assert.ok((await page.locator('tbody tr').first().innerText()).includes('0.875rem'));assert.equal(await page.locator('tbody tr').first().locator('img').count(),1);
+ await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(out,'real-icons.png')});
  await page.goto(`http://127.0.0.1:${server.address().port}/scan.html`);
  for(const cat of ['color','typography','icons','shadow','stroke','radius','spacing','opacity','blur','layer','motion','other']){await page.locator(`[data-cat="${cat}"]`).click();await page.locator('[data-source="hard"]').click();await page.locator('[data-source="tokens"]').click()}
  await page.locator('[data-cat="color"]').click();await page.locator('#search').fill('unlikely-no-results');assert.equal(await page.locator('.sample-card').count(),0);await page.locator('#search').fill('');

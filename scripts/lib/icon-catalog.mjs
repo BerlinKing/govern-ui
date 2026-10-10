@@ -12,7 +12,7 @@ export function iconCatalog(items = []) {
     const preview = typeof item.preview === 'string' && /^data:image\/(?:svg\+xml|png|webp);base64,[A-Za-z0-9+/=]+$/.test(item.preview) ? item.preview : null;
     const row = groups.get(key) || {id:item.id,name:item.name,source:item.source,preview,sizes:[],stroke:item.strokeWidth == null ? '' : String(item.strokeWidth),evidence:[],kind:'ui-icon'};
     row.sizes = [...new Set([...row.sizes,...sizes])];
-    row.evidence.push(...(item.evidence || item.references || []));
+    row.evidence.push(...(item.sizeEvidence?.length ? item.sizeEvidence : item.evidence || item.references || []));
     groups.set(key,row);
   }
   return [...groups.values()];

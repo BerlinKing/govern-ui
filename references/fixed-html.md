@@ -2,6 +2,8 @@
 
 The shipped presentation source is `assets/artifacts/`, not a generated output or the old local preview folder. `styles.css` is the approved preview stylesheet; `compat.css` adapts existing tested editors and supporting evidence pages. `template-lock.json` pins the shared style hash. Never rewrite CSS, layout, icons or navigation for a new repository. Change only evidence and proposal data. A deliberate visual update must update the lock and pass browser checks.
 
+Version 1.1 places A/B/C/D as prominent page-top steps below the brand header, not inside the brand navigation. Product A displays every module card immediately; do not collapse excess modules behind a disclosure. Keep detailed evidence collapsible. This layout applies to all repositories through the shared renderer.
+
 ## Real generation paths
 
 - `govern.mjs library <repo> --out <dir> [--module-map <module-map.json>]` produces A `scan.html` and compatible `style-library.html` with real library data. `style-library-detail.html` retains the full old inventory tools/alias mapping. No example counts or package-icon substitute geometry. Without an explicit module map, cards are source-attribution labels, not confirmed business modules. Cross-module groups are overlapping associations, not additive module totals.

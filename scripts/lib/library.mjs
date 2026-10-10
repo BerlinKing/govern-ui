@@ -5,6 +5,7 @@ import { auditRepository } from "./audit.mjs";
 import { generatedAt, sha } from "./utils.mjs";
 import { buildTokenUsage, inferProductLocation, usageForRawValue } from "./usage.mjs";
 import { inferDirectStyleSemantic, inferTokenSemanticFingerprint } from "./semantic-context.mjs";
+import {iconPackageRoot, radixPreview, iconUsage} from './icon-evidence.mjs';
 
 const CATEGORY_ORDER = [
   "color",
@@ -629,13 +630,10 @@ function lucideSvgData(content) {
 }
 
 async function packageIconPreview(repoRoot, asset, importedName) {
-  if (asset.source !== "lucide-react" || !importedName) return null;
+  if (!["lucide-react", "@radix-ui/react-icons"].includes(asset.source) || !importedName) return null;
   try {
-    const resolver = createRequire(path.resolve(repoRoot, asset.file));
-    const entry = resolver.resolve(asset.source);
-    const packageRoot = entry.includes(`${path.sep}dist${path.sep}`)
-      ? entry.slice(0, entry.indexOf(`${path.sep}dist${path.sep}`))
-      : path.dirname(entry);
+    const packageRoot = await iconPackageRoot(repoRoot, asset);
+    if(asset.source === '@radix-ui/react-icons') return radixPreview(await readFile(path.join(packageRoot,'dist/react-icons.esm.js'),'utf8'),importedName);
     const exportsFile = path.join(packageRoot, "dist", "esm", "lucide-react.js");
     let moduleName = kebabIconName(importedName);
     try {
@@ -679,6 +677,7 @@ async function buildIcons(report, repoRoot) {
         type: asset.type,
         file: asset.file,
         line: asset.line,
+        ...await iconUsage(repoRoot,asset,symbol),
         preview: await packageIconPreview(repoRoot, asset, symbol.imported),
         previewStatus: "resolved",
         viewBox: null,
@@ -742,6 +741,8 @@ async function buildIcons(report, repoRoot) {
     const key = `${item.type}:${item.source}:${item.importedName ?? item.name}`;
     if (!merged.has(key)) merged.set(key, { ...item, occurrences: 0, files: new Set() });
     const target = merged.get(key);
+    target.sizes = unique([...(target.sizes||[]),...(item.sizes||[])]);
+    target.sizeEvidence = [...(target.sizeEvidence||[]),...(item.sizeEvidence||[])].filter((e,i,a)=>a.findIndex(x=>x.file===e.file&&x.line===e.line)===i);
     target.occurrences += 1;
     target.files.add(item.file);
     if (!target.preview && item.preview) target.preview = item.preview;
