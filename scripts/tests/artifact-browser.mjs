@@ -21,6 +21,11 @@ try{
   await page.goto(`http://127.0.0.1:${server.address().port}/${file}`);
   assert.equal(await page.locator('.artifact-header nav a').count(),0);
   assert.equal(await page.locator('.artifact-steps a').count(),4);
+  if(file==='token-spec.html'){
+   assert.equal(await page.locator('body>header:not(.artifact-header)').evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+   assert.equal(await page.locator('#manual').isVisible(),true);
+   assert.equal(await page.locator('#export').isVisible(),true);
+  }
   assert.equal(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor),'rgb(246, 247, 249)');
   for(const width of [1440,1024,768,390]){await page.setViewportSize({width,height:1000});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${file}: ${width}`);if(width===1440||width===390)await page.screenshot({path:path.join(out,file.replace('.html',`-${width}.png`)),fullPage:false})}
  }

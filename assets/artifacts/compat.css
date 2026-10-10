@@ -14,7 +14,8 @@
 @media(max-width:480px){.semantic-editor .typed-fields{grid-template-columns:1fr}.binding-dialog:has(.semantic-editor){padding:16px}.semantic-editor .binding-footer{bottom:-16px}}
 .artifact-header{max-width:none;height:auto;min-height:76px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
 .artifact-header nav{flex-wrap:wrap}.artifact-header a{white-space:nowrap}
-body[data-compat]>header:not(.artifact-header){background:var(--surface);padding:12px 28px;border:0;justify-content:flex-end}
+body[data-compat]>header:not(.artifact-header){background:transparent;max-width:1280px;margin:16px auto 0;padding:0 28px;border:0;justify-content:flex-end}
+@media(max-width:680px){body[data-compat]>header:not(.artifact-header){padding:0 16px}}
 body[data-compat]>header:not(.artifact-header)>.brand,body[data-compat]>header:not(.artifact-header)>nav{display:none}
 body[data-compat] .shell{max-width:1280px;margin:28px auto;gap:24px;padding:0 28px;grid-template-columns:200px minmax(0,1fr);min-height:0}
 body[data-compat] .shell>aside{background:transparent;padding:8px 0}

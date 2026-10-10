@@ -1,6 +1,6 @@
 {
-  "version": "governui.artifacts/1.1.0",
-  "styleHash": "f7f372424cf518d1af77c516bdf41a5a3222d7ce13e14d7ae7ff6ad9f30dabe9",
+  "version": "governui.artifacts/1.1.1",
+  "styleHash": "69291877a8347177f778dbc734126b24144bf41a7a1bdd378b59a1dfac96e28a",
   "origin": "User-approved govern-ui-artifacts-preview; four-artifact navigation",
   "policy": "Change data per project, not presentation. Template changes require explicit UI work and browser verification."
 }
