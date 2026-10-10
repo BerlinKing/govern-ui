@@ -1,4 +1,11 @@
 /* Shared layout bridge; all generated artifacts use the approved preview palette and rhythm. */
+.binding-dialog:has(.semantic-editor){width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 32px);padding:24px;box-sizing:border-box;border-radius:14px;overflow:auto}
+.semantic-editor .typed-fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.semantic-editor .field{min-width:0;margin:16px 0}.semantic-editor input,.semantic-editor select,.semantic-editor textarea{min-width:0;width:100%;box-sizing:border-box}
+.semantic-editor textarea{min-height:80px;resize:vertical}.semantic-editor .style-preview{min-height:96px;padding:16px}
+.semantic-editor .error:empty{display:none}.semantic-editor .field small{display:none}.semantic-editor input[type=color]{height:44px}
+.semantic-editor .binding-footer{position:sticky;bottom:-24px;background:white;padding:16px 0;margin-top:16px}
+@media(max-width:480px){.semantic-editor .typed-fields{grid-template-columns:1fr}.binding-dialog:has(.semantic-editor){padding:16px}.semantic-editor .binding-footer{bottom:-16px}}
 .artifact-header{max-width:none;height:auto;min-height:76px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
 .artifact-header nav{flex-wrap:wrap}.artifact-header a{white-space:nowrap}
 body[data-compat]>header:not(.artifact-header){background:var(--surface);padding:12px 28px;border:0;justify-content:flex-end}
