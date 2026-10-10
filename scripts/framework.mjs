@@ -3,6 +3,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { applyArtifactTheme, ensureArtifactEntries } from './lib/artifact-theme.mjs';
+import { iconCatalog } from './lib/icon-catalog.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const safeJSON = value => JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
@@ -11,6 +12,10 @@ export async function generateFramework(input, out) {
   if (input?.schema !== 'governui.framework-input/1') throw new Error('Expected governui.framework-input/1');
   for (const key of ['project', 'scope', 'baseline']) if (typeof input[key] !== 'string' || !input[key].trim()) throw new Error(`${key} is required`);
   const catalog = JSON.parse(await readFile(path.join(root, 'assets/atomic-framework-catalog.json'), 'utf8'));
+  const icons = iconCatalog(input.iconCatalog || []);
+  const iconCategory = catalog.categories.find(c => c.id === 'icons');
+  iconCategory.roles = [];
+  iconCategory.description = ['实际图形、名称与使用尺寸；颜色引用颜色规范。', 'Concrete graphics, names and usage sizes; colors reference the color specification.'];
   const ids = new Set([...catalog.categories.map(c => c.id), 'unclassified']);
   for (const [id, observation] of Object.entries(input.observations || {})) {
     if (!ids.has(id)) throw new Error(`Unknown observation category: ${id}`);
@@ -47,7 +52,6 @@ export async function generateFramework(input, out) {
   }
   const defaults = JSON.parse(await readFile(path.join(root, 'assets/framework-defaults.json'), 'utf8'));
   const generated = [], css = [':root {'], dark = ['.dark {'];
-  const paths = {navigation:'M5 12h14 M12 5l7 7-7 7',action:'M12 5v14 M5 12h14',status:'M5 12l4 4L19 6'};
   for (const category of catalog.categories) {
     const roles = [...category.roles];
     if (category.id === 'color') for (const row of input.colorSeed || []) if (!roles.some(r => r.name === row.name)) roles.push(row);
@@ -64,12 +68,11 @@ export async function generateFramework(input, out) {
       }
       const source = {id:'generated:'+role.name, category:category.id, name:role.name, roleName:role.name, owner:'framework-styles.css', values, displayValues:{...values}, generated:true,
         evidence:[{file:'framework-styles.css',line,expression:JSON.stringify(values)}], notes:['生成的默认样式，可直接调整。','Generated defaults, ready to edit.']};
-      if (category.id === 'icons') source.iconGeometry = {viewBox:'0 0 24 24',paths:[{d:paths[role.id],fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'}]};
       generated.push(source);
     }
   }
   css.push('}', ...dark, '}');
-  input = {...input, generatedStyles:generated};
+  input = {...input, iconCatalog:icons, generatedStyles:generated};
   const template = await readFile(path.join(root, 'assets/framework-template.html'), 'utf8');
   const html = await applyArtifactTheme(template.replace('__FRAMEWORK_CATALOG__', () => safeJSON(catalog)).replace('__FRAMEWORK_INPUT__', () => safeJSON(input)), 'B');
   await mkdir(out, { recursive: true });
@@ -79,7 +82,6 @@ export async function generateFramework(input, out) {
   await ensureArtifactEntries(out);
   await writeFile(path.join(out,'framework-styles.css'), css.join('\n')+'\n');
   await writeFile(path.join(out,'framework-styles.json'), JSON.stringify({schema:'governui.generated-styles/1',styles:generated},null,2)+'\n');
-  await writeFile(path.join(out,'generated-icons.svg'), `<svg xmlns="http://www.w3.org/2000/svg">${Object.entries(paths).map(([id,d])=>`<symbol id="${id}" viewBox="0 0 24 24"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>`).join('')}</svg>`);
 
   return { output, categories: catalog.categories.length, roles: catalog.categories.reduce((n, c) => n + c.roles.length, 0) };
 }
@@ -90,7 +92,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.error('Usage: node scripts/framework.mjs --input <framework-input.json> --out <directory>');
     process.exitCode = 1;
   } else {
-    try { console.log(JSON.stringify(await generateFramework(JSON.parse(await readFile(inputPath, 'utf8')), path.resolve(out)))); }
+    try {
+      const input = JSON.parse(await readFile(inputPath, 'utf8'));
+      if (args.includes('--library')) {
+        const library = JSON.parse(await readFile(args[args.indexOf('--library') + 1], 'utf8'));
+        if (library.project?.name !== input.project) throw new Error('Icon inventory project must match framework project');
+        input.iconCatalog = library.icons || [];
+      }
+      console.log(JSON.stringify(await generateFramework(input, path.resolve(out))));
+    }
     catch (error) { console.error(error.message); process.exitCode = 1; }
   }
 }
