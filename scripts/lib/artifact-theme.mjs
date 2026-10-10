@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const assets = new URL('../../assets/artifacts/', import.meta.url);
-export const ARTIFACT_VERSION = 'governui.artifacts/1.0.0';
+export const ARTIFACT_VERSION = 'governui.artifacts/1.1.0';
 export const ARTIFACTS = [
   ['A', 'scan.html', '扫描报告'], ['B', 'token-spec.html', '设计 Token 规范'],
   ['C', 'governance-audit.html', '治理审计'], ['D', 'governance-report.html', '治理报告'],
@@ -19,7 +19,7 @@ export async function theme() {
   return { css: css + '\n' + bridge, hash };
 }
 export function navigation(active) {
-  return `<header class="header artifact-header"><a class="brand" href="scan.html">GovernUI</a><nav aria-label="产物导航">${ARTIFACTS.map(([id,file,label]) => `<a href="${file}" ${id===active?'aria-current="page"':''}><span class="letter">${id}</span>${label}</a>`).join('')}</nav></header>`;
+  return `<header class="header artifact-header"><a class="brand" href="scan.html">GovernUI</a></header><nav class="artifact-steps" aria-label="产物导航">${ARTIFACTS.map(([id,file,label]) => `<a href="${file}" ${id===active?'aria-current="page"':''}><span class="letter">${id}</span><strong>${label}</strong></a>`).join('')}</nav>`;
 }
 // Compatibility renderers keep their tested editors/evidence, but may not own a second visual shell.
 export async function applyArtifactTheme(html, active) {

@@ -29,6 +29,12 @@ if(iconCategory.directoryVersion!==1){
  iconCategory.rows=(input.iconCatalog||[]).map(i=>({id:i.id,name:i.name,meaning:['',''],asset:clone(i),binding:{values:{source:i.source,size:i.sizes.join(', '),stroke:i.stroke},sourceEvidence:clone(i.evidence)},custom:false}));
  iconCategory.directoryVersion=1;iconCategory.locked=false;iconCategory.version++;
 }
+// Enrich unresolved evidence without overwriting edits or reintroducing deleted rows.
+for(const row of iconCategory.rows){const fresh=(input.iconCatalog||[]).find(i=>i.id===row.asset?.id&&i.source===row.asset?.source);if(!fresh)continue;
+ if(!row.asset.preview&&fresh.preview)row.asset.preview=fresh.preview;
+ row.asset.evidence=clone(fresh.evidence);
+ if(!row.binding.values.size&&fresh.sizes.length){row.binding.values.size=fresh.sizes.join(', ');if(iconCategory.locked){iconCategory.locked=false;iconCategory.version++}if(state.confirmation){state.confirmationHistory.push(clone(state.confirmation));state.confirmation=null}state.requiresMappingReview=true;}
+}
 let atom='color',restoreFocus;
 if(new URL(location.href).searchParams.get('step')==='binding'&&!['unused','defer'].includes(state.categories.find(c=>c.id===atom).adoption))state.categories.find(c=>c.id===atom).stage='bind';
 const tr=x=>Array.isArray(x)?x[state.lang==='zh'?0:1]:x,t=k=>tr(labels[k]||[k,k]);
